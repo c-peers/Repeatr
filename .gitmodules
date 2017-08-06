@@ -1,0 +1,3 @@
+[submodule "JTAppleCalendar"]
+	path = JTAppleCalendar
+	url = https://github.com/patchthecode/JTAppleCalendar.git

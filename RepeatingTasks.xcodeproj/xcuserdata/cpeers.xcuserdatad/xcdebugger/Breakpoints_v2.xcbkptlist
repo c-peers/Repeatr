@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "RepeatingTasks/RepeatingTasksCollectionCell.swift"
+            timestampString = "519126792.713537"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "14"
+            endingLineNumber = "14"
+            landmarkName = "RepeatingTasksCollectionCell"
+            landmarkType = "3">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "RepeatingTasks.RepeatingTasksCollectionCell.taskNameField.getter : weak Swift.ImplicitlyUnwrappedOptional&lt;__ObjC.UITextField&gt;"
+                  moduleName = "RepeatingTasks"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cpeers/Documents/Swift/RepeatingTasks/RepeatingTasks/RepeatingTasksCollectionCell.swift"
+                  timestampString = "519126793.511223"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "14"
+                  endingLineNumber = "14"
+                  offsetFromSymbolStart = "27">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "RepeatingTasks.RepeatingTasksCollectionCell.taskNameField.setter : weak Swift.ImplicitlyUnwrappedOptional&lt;__ObjC.UITextField&gt;"
+                  moduleName = "RepeatingTasks"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cpeers/Documents/Swift/RepeatingTasks/RepeatingTasks/RepeatingTasksCollectionCell.swift"
+                  timestampString = "519126793.516516"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "14"
+                  endingLineNumber = "14"
+                  offsetFromSymbolStart = "42">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "RepeatingTasks.RepeatingTasksCollectionCell.init (frame : __C.CGRect) -&gt; RepeatingTasks.RepeatingTasksCollectionCell"
+                  moduleName = "RepeatingTasks"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cpeers/Documents/Swift/RepeatingTasks/RepeatingTasks/RepeatingTasksCollectionCell.swift"
+                  timestampString = "519126793.519489"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "14"
+                  endingLineNumber = "14"
+                  offsetFromSymbolStart = "155">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "RepeatingTasks.RepeatingTasksCollectionCell.init (coder : __ObjC.NSCoder) -&gt; Swift.Optional&lt;RepeatingTasks.RepeatingTasksCollectionCell&gt;"
+                  moduleName = "RepeatingTasks"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cpeers/Documents/Swift/RepeatingTasks/RepeatingTasks/RepeatingTasksCollectionCell.swift"
+                  timestampString = "519126793.521936"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "14"
+                  endingLineNumber = "14"
+                  offsetFromSymbolStart = "88">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "RepeatingTasks/NewTasksViewController.swift"
+            timestampString = "522746619.71326"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "24"
+            endingLineNumber = "24"
+            landmarkName = "NewTasksViewController"
+            landmarkType = "3">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "RepeatingTasks.NewTasksViewController.init (nibName : Swift.Optional&lt;Swift.String&gt;, bundle : Swift.Optional&lt;__ObjC.Bundle&gt;) -&gt; RepeatingTasks.NewTasksViewController"
+                  moduleName = "RepeatingTasks"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cpeers/Documents/Swift/RepeatingTasks/RepeatingTasks/NewTasksViewController.swift"
+                  timestampString = "522746620.108047"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "24"
+                  endingLineNumber = "24"
+                  offsetFromSymbolStart = "219">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "function signature specialization &lt;Arg[0] = Owned To Guaranteed&gt; of RepeatingTasks.NewTasksViewController.init (coder : __ObjC.NSCoder) -&gt; Swift.Optional&lt;RepeatingTasks.NewTasksViewController&gt;"
+                  moduleName = "RepeatingTasks"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cpeers/Documents/Swift/RepeatingTasks/RepeatingTasks/NewTasksViewController.swift"
+                  timestampString = "522746620.114537"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "24"
+                  endingLineNumber = "24"
+                  offsetFromSymbolStart = "200">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "RepeatingTasks/TaskDataStruct.swift"
+            timestampString = "523349370.363154"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "49"
+            endingLineNumber = "49"
+            landmarkName = "save()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "RepeatingTasks/TaskDataStruct.swift"
+            timestampString = "523349370.363154"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "91"
+            endingLineNumber = "91"
+            landmarkName = "taskDaysAsArray(from:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "RepeatingTasks/ViewController.swift"
+            timestampString = "523520719.52095"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "45"
+            endingLineNumber = "45"
+            landmarkName = "collectionView(_:cellForItemAt:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "RepeatingTasks/ViewController.swift"
+            timestampString = "523377745.344232"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "12"
+            endingLineNumber = "12"
+            landmarkName = "ViewController"
+            landmarkType = "3">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "RepeatingTasks.ViewController.__deallocating_deinit"
+                  moduleName = "RepeatingTasks"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cpeers/Documents/Swift/RepeatingTasks/RepeatingTasks/ViewController.swift"
+                  timestampString = "523377745.849483"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0"
+                  offsetFromSymbolStart = "12">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "RepeatingTasks.ViewController.init (nibName : Swift.Optional&lt;Swift.String&gt;, bundle : Swift.Optional&lt;__ObjC.Bundle&gt;) -&gt; RepeatingTasks.ViewController"
+                  moduleName = "RepeatingTasks"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cpeers/Documents/Swift/RepeatingTasks/RepeatingTasks/ViewController.swift"
+                  timestampString = "523377745.853192"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "12"
+                  endingLineNumber = "12"
+                  offsetFromSymbolStart = "312">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "RepeatingTasks.ViewController.__allocating_init (nibName : Swift.Optional&lt;Swift.String&gt;, bundle : Swift.Optional&lt;__ObjC.Bundle&gt;) -&gt; RepeatingTasks.ViewController"
+                  moduleName = "RepeatingTasks"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cpeers/Documents/Swift/RepeatingTasks/RepeatingTasks/ViewController.swift"
+                  timestampString = "523377745.855634"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0"
+                  offsetFromSymbolStart = "30">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "RepeatingTasks.ViewController.__allocating_init (coder : __ObjC.NSCoder) -&gt; Swift.Optional&lt;RepeatingTasks.ViewController&gt;"
+                  moduleName = "RepeatingTasks"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cpeers/Documents/Swift/RepeatingTasks/RepeatingTasks/ViewController.swift"
+                  timestampString = "523377745.857726"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0"
+                  offsetFromSymbolStart = "10">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "RepeatingTasks/ViewController.swift"
+            timestampString = "523522992.072147"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "241"
+            endingLineNumber = "241"
+            landmarkName = "taskStartStopButtonPressed(_:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "RepeatingTasks/NewTasksViewController.swift"
+            timestampString = "523524037.51499"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "283"
+            endingLineNumber = "283"
+            landmarkName = "prepare(for:sender:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>
