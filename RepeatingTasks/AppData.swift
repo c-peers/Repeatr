@@ -9,74 +9,112 @@
 import Foundation
 
 class AppData: NSObject, NSCoding {
+
+    //MARK: - Object
+
+    //MARK: - Coding
     
     // Basic task information
-    var taskResetTime: Date?
+    var taskResetTime = Date()
+    var taskLastTime = Date()
+    var taskCurrentTime = Date()
     var colorScheme: [String : Bool]?
     
+    // App settings
     var isNightMode = false
     var usesCircularProgress = false
     
     // Vars that holds all task data
     // Used for saving
     var appSettings = [String : Bool]()
+    var timeSettings = [String : Date]()
     
     //MARK: Archiving Paths
     static let documentsDirectory = FileManager().urls(for: .documentDirectory, in: .userDomainMask).first!
     static let archiveAppSettings = documentsDirectory.appendingPathComponent("appSettings")
+    static let archiveTimeSettings = documentsDirectory.appendingPathComponent("timeSettings")
     
     func save() {
         let appSettingsSaveSuccessful = NSKeyedArchiver.archiveRootObject(appSettings, toFile: AppData.archiveAppSettings.path)
+        let timeSettingsSaveSuccessful = NSKeyedArchiver.archiveRootObject(timeSettings, toFile: AppData.archiveTimeSettings.path)
         
         print("Saved app settings: \(appSettingsSaveSuccessful)")
+        print("Saved time settings: \(timeSettingsSaveSuccessful)")
         
     }
     
     func load() {
         
-        if let loadTasks = NSKeyedUnarchiver.unarchiveObject(withFile: AppData.archiveAppSettings.path) as? [String : Bool] {
-            appSettings = loadTasks
+        if let loadAppSettings = NSKeyedUnarchiver.unarchiveObject(withFile: AppData.archiveAppSettings.path) as? [String : Bool] {
+            appSettings = loadAppSettings
+        }
+        if let loadTimeSettings = NSKeyedUnarchiver.unarchiveObject(withFile: AppData.archiveTimeSettings.path) as? [String : Date] {
+            timeSettings = loadTimeSettings
         }
         
     }
     
-    func saveToDictionary(name taskName: String, time taskTime: Int,
-                          completed completedTime: Int = 0,
-                          days taskDaysArray: [String], frequency taskFrequency: Int) {
+    func setAppValues() {
         
-        taskDictionary[taskName] = ["taskTime": taskTime,
-                                    "completedTime": completedTime,
-                                    "taskDays": taskDays,
-                                    "taskFrequency": taskFrequency,
-                                    "leftoverMultiplier": leftoverMultiplier,
-                                    "leftoverTime": leftoverTime]
+        var defaultReset = DateComponents()
+        defaultReset.year = Calendar.current.component(.year, from: Date())
+        defaultReset.month = Calendar.current.component(.month, from: Date())
+        defaultReset.day = Calendar.current.component(.day, from: Date())
+        defaultReset.hour = 2
+        defaultReset.minute = 0
+        defaultReset.second = 0
+        
+        //taskResetTime = timeSettings["taskResetTime"]!
+        taskResetTime = Calendar.current.date(from: defaultReset)!
+        taskLastTime = timeSettings["taskLastTime"]!
+        taskCurrentTime = timeSettings["taskCurrentTime"]!
+        
+        isNightMode = appSettings["isNightMode"]!
+        usesCircularProgress = appSettings["usesCircularProgress"]!
         
     }
     
-    func saveToStatsDictionary(name taskName: String, stats taskStats: [String: [String:Int]]) {
-        taskStatsDictionary[taskName] = taskStats[taskName]
+    
+    func saveAppSettingsToDictionary(){
+        
+        appSettings["isNightMode"] = isNightMode
+        appSettings["usesCircularProgress"] = usesCircularProgress
+        
     }
     
+    func saveTimeSettingsToDictionary(){
+        
+        timeSettings["taskResetTime"] = taskResetTime
+        timeSettings["taskLastTime"] = taskLastTime
+        timeSettings["taskCurrentTime"] = taskCurrentTime
+        
+    }
+
     //MARK: NSCoding
     
     func encode(with aCoder: NSCoder) {
-        aCoder.encode(taskNameList, forKey: "taskNameList")
+        aCoder.encode(appSettings, forKey: "appSettings")
+        aCoder.encode(timeSettings, forKey: "timeSettings")
     }
     
     required convenience init?(coder aDecoder: NSCoder) {
         
-        guard let taskNameList = aDecoder.decodeObject(forKey: "taskNameList") as? [String : Bool] else {
+        guard let appSettings = aDecoder.decodeObject(forKey: "appSettings") as? [String : Bool] else {
+            return nil
+        }
+        guard let timeSettings = aDecoder.decodeObject(forKey: "timeSettings") as? [String : Date] else {
             return nil
         }
         
         // Must call designated initializer.
-        self.init(name: taskNameList, taskSettings: taskDictionary, statistics: taskStatsDictionary)
+        self.init(appSettings: appSettings,  timeSettings: timeSettings)
         
     }
     
-    init(name: [String], taskSettings: [String:[String:Int]], statistics: [String:[String:Int]]) {
+    init(appSettings: [String : Bool], timeSettings: [String : Date]) {
         
-        self.taskNameList = name
+        self.appSettings = appSettings
+        self.timeSettings = timeSettings
         
     }
     

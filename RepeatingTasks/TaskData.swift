@@ -9,6 +9,10 @@
 import Foundation
 
 class TaskData: NSObject, NSCoding {
+
+    //MARK: - Object
+
+    //MARK: - Coding
     
     // Basic task information
     var taskName = String()
@@ -78,9 +82,13 @@ class TaskData: NSObject, NSCoding {
     
     func setTask(as taskName: String) {
         
-        if let index =  taskNameList.index(of: taskName) {
+        self.taskName = taskName
+        
+        if let index = taskNameList.index(of: taskName) {
             taskNameIndex = index
         }
+        
+        print("Task index is \(taskNameIndex)")
         
         if let currentTask = taskDictionary[taskName] {
             taskTime = currentTask["taskTime"] ?? 3600
@@ -253,10 +261,7 @@ class TaskData: NSObject, NSCoding {
         taskStatsDictionary[taskName] = taskStats[taskName]
     }
 
-    func removeTask(name taskName: String, time taskTime: Int,
-                          days taskDays: [String], frequency taskFrequency: Int) {
-        self.taskName = taskName
-        self.taskTime = taskTime
+    func removeTask(name taskName: String) {
         
         taskNameList = taskNameList.filter { $0 != taskName }
         

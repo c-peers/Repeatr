@@ -7,9 +7,15 @@
 //
 
 import UIKit
-import JTAppleCalendar
+import Chameleon
 
 class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource {
+
+    //MARK: - View Controller
+
+    //MARK: - Collection View Delegate
+
+    //MARK: - Collection View Data Source
 
     @IBOutlet weak var taskList: UICollectionView!
         
@@ -19,6 +25,8 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     //var taskStatistics: [String : [String : Int]] = [:]
     
     var taskData = TaskData()
+    var appData = AppData()
+    var countdownTimer = CountdownTimer()
     
     var taskTimer = Timer()
     var timerEnabled = false
@@ -43,7 +51,24 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         cell.progressView.setProgress(0.0, animated: false)
         cell.taskNameField.text = task
         
-        _ = formatTimer(for: cell, decrement: false)
+        //_ = formatTimer(for: cell, decrement: false)
+        //(_, _) = Task.instance.timer.formatTimer(for: task, from: cell, decrement: false)
+        (_, _) = countdownTimer.formatTimer(for: task, from: cell, decrement: false)
+        
+        //Task.timer.timer.
+        
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.hour, .minute, .second]
+        formatter.unitsStyle = .positional
+        
+        //cell.taskTimeRemaining.text = formatter.string(from: TimeInterval(Task.instance.timer.remainingTime))!
+        cell.taskTimeRemaining.text = formatter.string(from: TimeInterval(countdownTimer.remainingTime))!
+        
+        if cell.taskTimeRemaining.text == "Complete" {
+            cell.playStopButton.isEnabled = false
+        } else {
+            cell.playStopButton.isEnabled = true
+        }
         
         let gradient = CAGradientLayer()
         
@@ -99,6 +124,17 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         //
+//        let reuseIdentifier = "taskCollectionCell"
+//        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath as IndexPath) as! RepeatingTasksCollectionCell
+        
+        let task = tasks[indexPath.row]
+        
+        Task.instance.data.setTask(as: task)
+        
+        print("taskData taskName \(Task.instance.data.taskName)")
+        
+        performSegue(withIdentifier: "taskDetailSegue", sender: self)
+        
     }
     
     override func viewDidLoad() {
@@ -117,6 +153,10 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         let addBarButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addTask))
         navigationItem.rightBarButtonItems = [addBarButton]
         
+        let settingsButton = UIBarButtonItem(image: #imageLiteral(resourceName: "Settings"), style: .plain, target: self, action: #selector(settingsButtonTapped))
+        toolbarItems = [settingsButton]
+        navigationController?.isToolbarHidden = false
+        
         // Check current time
         // Determine the time interval between now and when the timers will reset
         // Set a timer to go off at that time
@@ -124,67 +164,117 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         let now = Date()
         let calendar = Calendar.current
         
-        var today = DateComponents()
-        today.year = calendar.component(.year, from: now)
-        today.month = calendar.component(.month, from: now)
-        today.day = calendar.component(.day, from: now)
-        today.hour = calendar.component(.hour, from: now)
-        today.minute = calendar.component(.minute, from: now)
+        var reset = DateComponents()
+        reset.hour = calendar.component(.hour, from: Task.instance.settings.taskResetTime)
+        reset.minute = calendar.component(.minute, from: Task.instance.settings.taskResetTime)
         
-        print(today.year)
-        print(today.month)
-        print(today.day)
-        print(today.hour)
-        print(today.minute)
+        var currentTime = DateComponents()
+        currentTime.year = calendar.component(.year, from: now)
+        currentTime.month = calendar.component(.month, from: now)
+        currentTime.day = calendar.component(.day, from: now)
+        currentTime.hour = calendar.component(.hour, from: now)
+        currentTime.minute = calendar.component(.minute, from: now)
         
+//        print(currentTime.year)
+//        print(currentTime.month)
+//        print(currentTime.day)
+//        print(currentTime.hour)
+//        print(currentTime.minute)
         
-        var tomorrow = DateComponents()
-        tomorrow.year = today.year
-        tomorrow.month = today.month
-        if today.hour! < 2 { // check if it's actually late at night
-            tomorrow.day = today.day!
-            
-        } else {
-            tomorrow.day = today.day! + 1
-            
-        }
-        tomorrow.hour = 2 // load hour and minutes here
-        tomorrow.minute = 0
+        let then = Task.instance.settings.taskLastTime
+        var lastAppTime = DateComponents()
+        lastAppTime.year = calendar.component(.year, from: then)
+        lastAppTime.month = calendar.component(.month, from: then)
+        lastAppTime.day = calendar.component(.day, from: then)
+        lastAppTime.hour = calendar.component(.hour, from: then)
+        lastAppTime.minute = calendar.component(.minute, from: then)
 
-        print(tomorrow.year)
-        print(tomorrow.month)
-        print(tomorrow.day)
-        print(tomorrow.hour)
-        print(tomorrow.minute)
+        reset.year = currentTime.year
+        reset.month = currentTime.month
         
-        let tomorrowDate = calendar.date(from: tomorrow)
+        if (lastAppTime.year != currentTime.year) || (lastAppTime.month != currentTime.month) {
+            reset.day = currentTime.day
+        } else if lastAppTime.day != currentTime.day {
+            reset.day = currentTime.day
+        } else {
+            reset.day = currentTime.day! + 1
+        }
         
-        let differenceComponents = calendar.dateComponents([.hour, .minute, .second], from: Date(), to: tomorrowDate!)
+        let resetTime = calendar.date(from: reset)
         
-        let timeDifference = TimeInterval((differenceComponents.hour! * 3600) + (differenceComponents.minute! * 60) + differenceComponents.second!)
+        if now < resetTime! {
+            
+            let differenceComponents = calendar.dateComponents([.hour, .minute, .second], from: Date(), to: resetTime!)
+            let timeDifference = TimeInterval((differenceComponents.hour! * 3600) + (differenceComponents.minute! * 60) + differenceComponents.second!)
+            
+            let timeToResetTime = Date().addingTimeInterval(timeDifference)
+            let resetTimer = Timer(fireAt: timeToResetTime, interval: 0, target: self, selector: #selector(resetTaskTimers), userInfo: nil, repeats: false)
+            RunLoop.main.add(resetTimer, forMode: RunLoopMode.commonModes)
+
+        } else {
+
+            //if !Task.instance.timer.isEnabled {
+            if !countdownTimer.isEnabled {
+                resetTaskTimers()
+            } else {
+                willResetTimer = true
+            }
+
+        }
         
-        print("now is \(now)")
-        print("tomorrow is \(String(describing: tomorrowDate))")
-        print("Time difference between now and 2am tomorrow is \(timeDifference) seconds")        
+
+        
+//        var tomorrow = DateComponents()
+//        tomorrow.year = currentTime.year
+//        tomorrow.month = currentTime.month
+//        if today.hour! < 2 { // check if it's actually late at night
+//            tomorrow.day = currentTime.day!
+//            
+//        } else {
+//            tomorrow.day = currentTime.day! + 1
+//            
+//        }
+//        tomorrow.hour = 2 // load hour and minutes here
+//        tomorrow.minute = 0
+//
+//        print(tomorrow.year)
+//        print(tomorrow.month)
+//        print(tomorrow.day)
+//        print(tomorrow.hour)
+//        print(tomorrow.minute)
+//        
+//        let tomorrowDate = calendar.date(from: tomorrow)
+        
+//        let differenceComponents = calendar.dateComponents([.hour, .minute, .second], from: Date(), to: tomorrowDate!)
+//        
+//        let timeDifference = TimeInterval((differenceComponents.hour! * 3600) + (differenceComponents.minute! * 60) + differenceComponents.second!)
+//        
+//        print("now is \(now)")
+//        print("tomorrow is \(String(describing: tomorrowDate))")
+//        print("Time difference between now and 2am tomorrow is \(timeDifference) seconds")        
         //let tomorrow = Date(timeIntervalSinceNow: 1)
         //let currentTime = date.timeIntervalSince1970
 
         // If the current time is later than the reset time then reset now
         // Otherwise set task to reset at presribed time
-        if timeDifference < 0 {
-            
-            if !timerEnabled {
-                resetTaskTimers()
-            } else {
-                willResetTimer = true
-            }
-            
-        } else {
-            let resetTime = Date().addingTimeInterval(timeDifference)
-            let resetTimer = Timer(fireAt: resetTime, interval: 0, target: self, selector: #selector(resetTaskTimers), userInfo: nil, repeats: false)
-            RunLoop.main.add(resetTimer, forMode: RunLoopMode.commonModes)
-        }
+//        if timeDifference < 0 {
+//            
+//            if !timerEnabled {
+//                resetTaskTimers()
+//            } else {
+//                willResetTimer = true
+//            }
+//            
+//        } else {
+//            let resetTime = Date().addingTimeInterval(timeDifference)
+//            let resetTimer = Timer(fireAt: resetTime, interval: 0, target: self, selector: #selector(resetTaskTimers), userInfo: nil, repeats: false)
+//            RunLoop.main.add(resetTimer, forMode: RunLoopMode.commonModes)
+//        }
     
+    }
+    
+    func settingsButtonTapped() {
+        performSegue(withIdentifier: "appSettingsSegue", sender: self)
     }
     
     func resetTaskTimers() {
@@ -197,17 +287,17 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         for x in 0...(tasks.count - 1) {
             let task = tasks[x]
             
-            taskData.setTask(as: task)
+            Task.instance.data.setTask(as: task)
             
             let (_, weightedTaskTime) = getWeightedTime(for: task)
 
-            let completedTime = taskData.completedTime
+            let completedTime = Task.instance.data.completedTime
             
             let leftoverFromYesterday = weightedTaskTime - completedTime
             
-            taskData.taskDictionary[task]?["completedTime"] = 0
+            Task.instance.data.taskDictionary[task]?["completedTime"] = 0
             
-            taskData.taskDictionary[task]?["leftoverTime"] = leftoverFromYesterday
+            Task.instance.data.taskDictionary[task]?["leftoverTime"] = leftoverFromYesterday
             
         }
         
@@ -231,25 +321,53 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         
         print("indexPath is \(cellIndexPath.row)")
         
-        if cell.playStopButton.currentTitle == "Start" {
-            timerEnabled = true
-            cell.playStopButton.setTitle("Stop", for: .normal)
-
-            taskTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self,
-                                             selector: #selector(timerRunning), userInfo: cell, repeats: true)
+//        if !Task.instance.timer.isEnabled {
+//            Task.instance.timer.isEnabled = true
+//            cell.playStopButton.setTitle("Stop", for: .normal)
+//            
+//            Task.instance.timer.startTimer(for: cell)
+//            
+//        } else {
+//            Task.instance.timer.isEnabled = false
+//            cell.playStopButton.setTitle("Start", for: .normal)
+//            
+//            Task.instance.timer.stopTimer(for: cell)
+//            
+//        }
         
+        if !countdownTimer.isEnabled {
+            countdownTimer.isEnabled = true
+            cell.playStopButton.setTitle("Stop", for: .normal)
+            
+            countdownTimer.startTimer(for: cell)
+            
         } else {
-            timerEnabled = false
+            countdownTimer.isEnabled = false
             cell.playStopButton.setTitle("Start", for: .normal)
-
-            taskTimer.invalidate()
             
-            if willResetTimer {
-                resetTaskTimers()
-            }
+            countdownTimer.stopTimer(for: cell)
             
-            saveData()
         }
+        
+//        if cell.playStopButton.currentTitle == "Start" {
+//            timerEnabled = true
+//            cell.playStopButton.setTitle("Stop", for: .normal)
+//
+//            taskTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self,
+//                                             selector: #selector(timerRunning), userInfo: cell, repeats: true)
+//        
+//        } else {
+//            timerEnabled = false
+//            cell.playStopButton.setTitle("Start", for: .normal)
+//
+//            taskTimer.invalidate()
+//            
+//            if willResetTimer {
+//                resetTaskTimers()
+//            }
+//            
+//            saveData()
+//        }
         
     }
     
@@ -262,14 +380,24 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         
         print("Time remaining is \(timeRemaining)")
         
-        // ?????????????????????????????????
-        // Shoud I be doing this now ??????????
-        // ?????????????????????????????????
+        Task.instance.data.setTask(as: taskName)
         
-        taskData.setTask(as: taskName)
+        Task.instance.data.taskDictionary[taskName]?["completedTime"]! += 1
         
-        taskData.taskDictionary[taskName]?["completedTime"]! += 1
+        if timeRemaining == 0 || (Task.instance.data.completedTime == Task.instance.data.taskTime) {
+            taskTimer.invalidate()
+            
+            //Task.instance.timer.isEnabled = false
+            countdownTimer.isEnabled = false
 
+            cell.taskTimeRemaining.text = "Complete"
+            cell.playStopButton.setTitle("Start", for: .normal)
+            cell.playStopButton.isEnabled = false
+            
+            saveData()
+            
+        }
+        
 //        if (taskData.completedTime != nil) {
 //            print("Incrementing task time")
 //            taskSettings[taskName]!["completedTime"]! += 1
@@ -292,10 +420,10 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         // Used for initialization and when the task timer is updated
         
         let task = cell.taskNameField.text!
-        taskData.setTask(as: task)
+        Task.instance.data.setTask(as: task)
         
         let (taskTime, weightedTaskTime) = getWeightedTime(for: task)
-        let completedTime = taskData.completedTime
+        let completedTime = Task.instance.data.completedTime
         
         var remainingTaskTime = weightedTaskTime - completedTime
         
@@ -317,7 +445,11 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         
         let remainingTimeAsString = formatter.string(from: TimeInterval(remainingTaskTime))!
         
-        cell.taskTimeRemaining.text = remainingTimeAsString
+        if remainingTaskTime != 0 {
+            cell.taskTimeRemaining.text = remainingTimeAsString
+        } else {
+            cell.taskTimeRemaining.text = "Complete"
+        }
         
         return remainingTaskTime
 
@@ -325,9 +457,9 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     func getWeightedTime(for task: String) -> (Int, Int) {
         
-        let taskTime = taskData.taskTime
-        let leftoverMultiplier = taskData.leftoverMultiplier
-        let leftoverTime = taskData.leftoverTime
+        let taskTime = Task.instance.data.taskTime
+        let leftoverMultiplier = Task.instance.data.leftoverMultiplier
+        let leftoverTime = Task.instance.data.leftoverTime
         
         return (taskTime, taskTime + (leftoverTime * leftoverMultiplier))
         
@@ -344,6 +476,10 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         print("Is this being run?")
         print(tasks)
         
+        print(Task.instance.data.taskNameList)
+        print(Task.instance.data.taskDictionary)
+        print(Task.instance.data.taskStatsDictionary)
+        
         saveData()
         
         DispatchQueue.main.async {
@@ -351,20 +487,55 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         }
         
     }
+    
+    @IBAction func taskDeletedUnwind(segue: UIStoryboardSegue) {
+        
+        print("Baleted")
+        print(tasks)
+        
+        //loadData()
+        saveData()
+        
+        DispatchQueue.main.async {
+            self.taskList.reloadData()
+        }
+        
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        if segue.identifier == "taskDetailSegue" {
+            let taskVC = segue.destination as! TaskDetailViewController
+            
+            taskVC.task = Task.instance.data.taskName
+            taskVC.taskTime = Task.instance.data.taskTime
+            taskVC.completedTime = Task.instance.data.completedTime
+            taskVC.taskDays = Task.instance.data.taskDays
+            taskVC.taskFrequency = Task.instance.data.taskFrequency
+            taskVC.leftoverTime = Task.instance.data.leftoverTime
+            taskVC.leftoverMultiplier = Task.instance.data.leftoverMultiplier
+            taskVC.countdownTimer = countdownTimer
+            //taskVC.timerEnabled = timerEnabled
+            
+        }
+        
+    }
 
     func loadData() {
         
-        taskData.load()
+        Task.instance.settings.load()
+        Task.instance.data.load()
         
-        tasks = taskData.taskNameList
+        tasks = Task.instance.data.taskNameList
         
     }
     
     func saveData() {
         
-        taskData.save()
+        Task.instance.settings.save()
+        Task.instance.data.save()
         
-        tasks = taskData.taskNameList
+        tasks = Task.instance.data.taskNameList
         
     }
     
@@ -381,31 +552,4 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
 
 }
-
-//extension ViewController:JTAppleCalendarViewDelegate, JTAppleCalendarViewDataSource {
-//    
-//    func configureCalendar(_ calendar: JTAppleCalendarView) -> ConfigurationParameters {
-//        
-//        formatter.dateFormat = "yyyy MM dd"
-//        formatter.locale = Calendar.current.locale
-//        formatter.timeZone = Calendar.current.timeZone
-//        
-//        let startDate = formatter.date(from: "2017 07 01")
-//        let endDate = formatter.date(from: "2017 08 31")
-//        
-//        
-//        let parameters = ConfigurationParameters(startDate: startDate!, endDate: endDate!)
-//        return parameters
-//        
-//    }
-//    
-//    func calendar(_ calendar: JTAppleCalendarView, cellForItemAt date: Date, cellState: CellState, indexPath: IndexPath) -> JTAppleCell {
-//        let cell = calendar.dequeueReusableJTAppleCell(withReuseIdentifier: "CalendarCelReuse", for: indexPath) as! CalendarTEST
-//        cell.calendarTestLabel.text = cellState.text
-//        return cell
-//        
-//        
-//    }
-//    
-//}
 

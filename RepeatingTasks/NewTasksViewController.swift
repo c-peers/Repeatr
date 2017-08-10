@@ -250,8 +250,8 @@ class NewTasksViewController: ViewController {
             let vc = segue.destination as! ViewController
             
             let taskName = taskNameTextField.text!
-            let completedTime = 0
-            let taskDaysBinary = TaskData().taskDaysAsBinary(from: taskDays)
+            //let completedTime = 0
+            //let taskDaysBinary = TaskData().taskDaysAsBinary(from: taskDays)
             var taskFrequency = 0
             if let frequencyValue = Int(occurrenceRateTextField.text!) {
                 taskFrequency = frequencyValue
@@ -274,8 +274,8 @@ class NewTasksViewController: ViewController {
                 taskTime = minutesAsInt! * 60
             }
             
-            taskData.newTask(name: taskName, time: taskTime, days: taskDays, frequency: taskFrequency)
-            taskData.newStatsDictionaryEntry(name: taskName)
+            Task.instance.data.newTask(name: taskName, time: taskTime, days: taskDays, frequency: taskFrequency)
+            Task.instance.data.newStatsDictionaryEntry(name: taskName)
             
             vc.tasks.append(taskName)
 //            vc.taskSettings[taskName] = ["taskTime": taskTime,
@@ -379,6 +379,10 @@ class NewTasksViewController: ViewController {
 //UIPickerView functions
 //******************************
 extension NewTasksViewController: UIPickerViewDelegate, UIPickerViewDataSource {
+
+    //MARK: - Picker View Delegate
+
+    //MARK: - Picker View Data Source
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return pickerData[component].count
@@ -417,6 +421,7 @@ extension NewTasksViewController: UIPickerViewDelegate, UIPickerViewDataSource {
 //UITextField functions
 //******************************
 
+//MARK: - Text Field Delegate
 extension NewTasksViewController: UITextFieldDelegate {
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {

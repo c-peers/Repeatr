@@ -104,22 +104,12 @@
                                     <outlet property="delegate" destination="BYZ-38-t0r" id="Ead-27-alB"/>
                                 </connections>
                             </collectionView>
-                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="stj-Vg-P9n">
-                                <rect key="frame" x="0.0" y="623" width="375" height="44"/>
-                                <items>
-                                    <barButtonItem title="Item" id="Ewq-0B-PNr"/>
-                                </items>
-                            </toolbar>
                         </subviews>
                         <color key="backgroundColor" red="0.59999999999999998" green="0.59999999999999998" blue="0.59999999999999998" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
-                            <constraint firstItem="stj-Vg-P9n" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="559" id="9nK-7G-GJc"/>
-                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="stj-Vg-P9n" secondAttribute="bottom" id="Z1V-Qp-39b"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="stj-Vg-P9n" secondAttribute="trailing" constant="-16" id="glf-Zj-z8h"/>
-                            <constraint firstItem="stj-Vg-P9n" firstAttribute="top" secondItem="Dht-Nb-tnO" secondAttribute="bottom" constant="5" id="lz7-Sl-5Ns"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="Dht-Nb-tnO" secondAttribute="bottom" constant="49" id="31v-7C-RxF"/>
                             <constraint firstItem="Dht-Nb-tnO" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="108" id="nik-Se-Aec"/>
                             <constraint firstItem="Dht-Nb-tnO" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="-16" id="pfE-P4-nRL"/>
-                            <constraint firstItem="stj-Vg-P9n" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="-16" id="rJx-lE-xw5"/>
                             <constraint firstAttribute="trailingMargin" secondItem="Dht-Nb-tnO" secondAttribute="trailing" constant="-16" id="zjP-vD-1Y4"/>
                         </constraints>
                     </view>
@@ -127,11 +117,94 @@
                     <connections>
                         <outlet property="taskList" destination="Dht-Nb-tnO" id="BOh-qe-aUJ"/>
                         <segue destination="3Rq-Qc-HJy" kind="presentation" identifier="addTaskSegue" id="67E-EO-V2w"/>
+                        <segue destination="7eH-F0-hBU" kind="show" identifier="taskDetailSegue" id="MfM-S5-K88"/>
+                        <segue destination="PVb-x6-ZHW" kind="show" identifier="appSettingsSegue" id="Vl7-fF-Lcq"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="792.79999999999995" y="136.28185907046478"/>
+        </scene>
+        <!--Task Detail View Controller-->
+        <scene sceneID="1Bi-bN-cG1">
+            <objects>
+                <viewController id="7eH-F0-hBU" customClass="TaskDetailViewController" customModule="RepeatingTasks" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="0QP-kS-ekk"/>
+                        <viewControllerLayoutGuide type="bottom" id="nva-ge-okF"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="ySm-pY-put">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hi4-ID-NXk">
+                                <rect key="frame" x="112" y="98" width="150" height="71"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="71" id="cKd-Ax-zbv"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="22"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="H0s-Mk-Y02" customClass="BarChartView" customModule="Charts">
+                                <rect key="frame" x="55" y="369" width="265" height="139"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="j5Z-ne-lTq">
+                                <rect key="frame" x="129" y="211" width="117" height="75"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="117" id="4wZ-Zc-nHB"/>
+                                    <constraint firstAttribute="height" constant="75" id="emN-bg-mnX"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="22"/>
+                                <state key="normal" title="Button"/>
+                                <connections>
+                                    <action selector="taskButtonTapped:" destination="7eH-F0-hBU" eventType="touchUpInside" id="FcV-pP-Fch"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="H0s-Mk-Y02" firstAttribute="leading" secondItem="ySm-pY-put" secondAttribute="leadingMargin" constant="39" id="6bC-Ln-X0N"/>
+                            <constraint firstItem="hi4-ID-NXk" firstAttribute="leading" secondItem="ySm-pY-put" secondAttribute="leadingMargin" constant="96" id="EZB-pf-aWi"/>
+                            <constraint firstItem="H0s-Mk-Y02" firstAttribute="centerX" secondItem="ySm-pY-put" secondAttribute="centerX" id="FYJ-N9-lTk"/>
+                            <constraint firstItem="H0s-Mk-Y02" firstAttribute="top" secondItem="j5Z-ne-lTq" secondAttribute="bottom" constant="83" id="GRr-Cr-en0"/>
+                            <constraint firstItem="hi4-ID-NXk" firstAttribute="top" secondItem="0QP-kS-ekk" secondAttribute="bottom" constant="34" id="QrB-qo-plc"/>
+                            <constraint firstItem="j5Z-ne-lTq" firstAttribute="centerX" secondItem="ySm-pY-put" secondAttribute="centerX" id="Vz3-5l-038"/>
+                            <constraint firstItem="j5Z-ne-lTq" firstAttribute="top" secondItem="hi4-ID-NXk" secondAttribute="bottom" constant="42" id="jqa-c9-1FK"/>
+                            <constraint firstAttribute="bottom" secondItem="H0s-Mk-Y02" secondAttribute="bottom" constant="159" id="mkL-Ea-tr9"/>
+                            <constraint firstItem="hi4-ID-NXk" firstAttribute="centerX" secondItem="ySm-pY-put" secondAttribute="centerX" id="rvj-E1-Rek"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="recentTaskHistory" destination="H0s-Mk-Y02" id="fIc-B4-lsx"/>
+                        <outlet property="taskStartButton" destination="j5Z-ne-lTq" id="hqC-58-Y8k"/>
+                        <outlet property="taskTimeLabel" destination="hi4-ID-NXk" id="AQM-pa-ogL"/>
+                        <segue destination="c2h-l3-3Ra" kind="unwind" identifier="taskDeletedUnwindSegue" unwindAction="taskDeletedUnwindWithSegue:" id="QoN-g9-PR4"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="5bg-UC-3Xy" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <exit id="c2h-l3-3Ra" userLabel="Exit" sceneMemberID="exit"/>
+            </objects>
+            <point key="canvasLocation" x="1592.8" y="136.28185907046478"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="ZGi-xc-mg7">
+            <objects>
+                <viewController id="PVb-x6-ZHW" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="10C-PB-21E"/>
+                        <viewControllerLayoutGuide type="bottom" id="bhQ-iy-dPE"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="waZ-kv-hpu">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="xLC-wy-EdK" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="793" y="844"/>
         </scene>
         <!--New Tasks View Controller-->
         <scene sceneID="QAY-b2-EUF">
@@ -410,7 +483,7 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="wPy-Jl-9si" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="bkK-94-f3j" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="1564" y="135.38230884557723"/>
+            <point key="canvasLocation" x="1593" y="-627"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="UwV-ci-eSR">
