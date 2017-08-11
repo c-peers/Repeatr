@@ -9,7 +9,7 @@
 import UIKit
 import Chameleon
 
-class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource {
+class TaskViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource {
 
     //MARK: - View Controller
 
@@ -45,7 +45,6 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         
         let task = tasks[indexPath.row]
         
-        //cell.playStopButton.setTitle("U000025B6", for: .normal)
         cell.playStopButton.setTitle("Start", for: .normal)
         cell.progressView.progress = 0.0
         cell.progressView.setProgress(0.0, animated: false)
@@ -53,16 +52,14 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         
         //_ = formatTimer(for: cell, decrement: false)
         //(_, _) = Task.instance.timer.formatTimer(for: task, from: cell, decrement: false)
-        (_, _) = countdownTimer.formatTimer(for: task, from: cell, decrement: false)
-        
-        //Task.timer.timer.
+        (_, _) = formatTimer(for: task, from: cell, decrement: false)
         
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.hour, .minute, .second]
         formatter.unitsStyle = .positional
         
         //cell.taskTimeRemaining.text = formatter.string(from: TimeInterval(Task.instance.timer.remainingTime))!
-        cell.taskTimeRemaining.text = formatter.string(from: TimeInterval(countdownTimer.remainingTime))!
+        //cell.taskTimeRemaining.text = formatter.string(from: TimeInterval(countdownTimer.remainingTime))!
         
         if cell.taskTimeRemaining.text == "Complete" {
             cell.playStopButton.isEnabled = false
@@ -129,9 +126,9 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         
         let task = tasks[indexPath.row]
         
-        Task.instance.data.setTask(as: task)
+        taskData.setTask(as: task)
         
-        print("taskData taskName \(Task.instance.data.taskName)")
+        print("taskData taskName \(taskData.taskName)")
         
         performSegue(withIdentifier: "taskDetailSegue", sender: self)
         
@@ -165,8 +162,8 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         let calendar = Calendar.current
         
         var reset = DateComponents()
-        reset.hour = calendar.component(.hour, from: Task.instance.settings.taskResetTime)
-        reset.minute = calendar.component(.minute, from: Task.instance.settings.taskResetTime)
+        reset.hour = calendar.component(.hour, from: appData.taskResetTime)
+        reset.minute = calendar.component(.minute, from: appData.taskResetTime)
         
         var currentTime = DateComponents()
         currentTime.year = calendar.component(.year, from: now)
@@ -181,7 +178,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
 //        print(currentTime.hour)
 //        print(currentTime.minute)
         
-        let then = Task.instance.settings.taskLastTime
+        let then = appData.taskLastTime
         var lastAppTime = DateComponents()
         lastAppTime.year = calendar.component(.year, from: then)
         lastAppTime.month = calendar.component(.month, from: then)
@@ -287,17 +284,17 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         for x in 0...(tasks.count - 1) {
             let task = tasks[x]
             
-            Task.instance.data.setTask(as: task)
+            taskData.setTask(as: task)
             
             let (_, weightedTaskTime) = getWeightedTime(for: task)
 
-            let completedTime = Task.instance.data.completedTime
+            let completedTime = taskData.completedTime
             
             let leftoverFromYesterday = weightedTaskTime - completedTime
             
-            Task.instance.data.taskDictionary[task]?["completedTime"] = 0
+            taskData.taskDictionary[task]?["completedTime"] = 0
             
-            Task.instance.data.taskDictionary[task]?["leftoverTime"] = leftoverFromYesterday
+            taskData.taskDictionary[task]?["leftoverTime"] = leftoverFromYesterday
             
         }
         
@@ -339,13 +336,23 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             countdownTimer.isEnabled = true
             cell.playStopButton.setTitle("Stop", for: .normal)
             
-            countdownTimer.startTimer(for: cell)
+            //countdownTimer.startTimer(for: cell)
+            taskTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self,
+                                             selector: #selector(timerRunning), userInfo: cell,
+                                             repeats: true)
+
             
         } else {
             countdownTimer.isEnabled = false
             cell.playStopButton.setTitle("Start", for: .normal)
             
-            countdownTimer.stopTimer(for: cell)
+            //countdownTimer.stopTimer(for: cell)
+            
+                        taskTimer.invalidate()
+            
+                        if willResetTimer {
+                            resetTaskTimers()
+                        }
             
         }
         
@@ -376,15 +383,15 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         let cell = taskTimer.userInfo as! RepeatingTasksCollectionCell
         let taskName = cell.taskNameField.text!
         
-        let timeRemaining = formatTimer(for: cell, decrement: true)
+        let (_, timeRemaining) = formatTimer(for: taskName, from: cell, decrement: true)
         
         print("Time remaining is \(timeRemaining)")
         
-        Task.instance.data.setTask(as: taskName)
+        taskData.setTask(as: taskName)
         
-        Task.instance.data.taskDictionary[taskName]?["completedTime"]! += 1
+        taskData.taskDictionary[taskName]?["completedTime"]! += 1
         
-        if timeRemaining == 0 || (Task.instance.data.completedTime == Task.instance.data.taskTime) {
+        if timeRemaining == 0 || (taskData.completedTime == taskData.taskTime) {
             taskTimer.invalidate()
             
             //Task.instance.timer.isEnabled = false
@@ -416,14 +423,13 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         
     }
     
-    func formatTimer(for cell: RepeatingTasksCollectionCell, decrement: Bool) -> Int {
+    func formatTimer(for task: String, from cell: RepeatingTasksCollectionCell? = nil, decrement: Bool) -> (String, Int) {
         // Used for initialization and when the task timer is updated
         
-        let task = cell.taskNameField.text!
-        Task.instance.data.setTask(as: task)
+        taskData.setTask(as: task)
         
         let (taskTime, weightedTaskTime) = getWeightedTime(for: task)
-        let completedTime = Task.instance.data.completedTime
+        let completedTime = taskData.completedTime
         
         var remainingTaskTime = weightedTaskTime - completedTime
         
@@ -433,33 +439,37 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             remainingTaskTime -= 1
         }
         
-        let currentProgress = 1 - Float(remainingTaskTime)/Float(taskTime)
-        
-        cell.progressView.setProgress(currentProgress, animated: true)
-        
-        print("Current progress is \(currentProgress)")
-        
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.hour, .minute, .second]
         formatter.unitsStyle = .positional
         
-        let remainingTimeAsString = formatter.string(from: TimeInterval(remainingTaskTime))!
+        var remainingTimeAsString = formatter.string(from: TimeInterval(remainingTaskTime))!
         
-        if remainingTaskTime != 0 {
-            cell.taskTimeRemaining.text = remainingTimeAsString
-        } else {
-            cell.taskTimeRemaining.text = "Complete"
+        if remainingTaskTime == 0 {
+            remainingTimeAsString = "Complete"
         }
         
-        return remainingTaskTime
+        if (cell != nil) {
+            
+            let currentProgress = 1 - Float(remainingTaskTime)/Float(taskTime)
+            
+            cell!.progressView.setProgress(currentProgress, animated: true)
+            
+            print("Current progress is \(currentProgress)")
+            
+            cell!.taskTimeRemaining.text = remainingTimeAsString
+            
+        }
+        
+        return (remainingTimeAsString, remainingTaskTime)
 
     }
     
     func getWeightedTime(for task: String) -> (Int, Int) {
         
-        let taskTime = Task.instance.data.taskTime
-        let leftoverMultiplier = Task.instance.data.leftoverMultiplier
-        let leftoverTime = Task.instance.data.leftoverTime
+        let taskTime = taskData.taskTime
+        let leftoverMultiplier = taskData.leftoverMultiplier
+        let leftoverTime = taskData.leftoverTime
         
         return (taskTime, taskTime + (leftoverTime * leftoverMultiplier))
         
@@ -476,9 +486,9 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         print("Is this being run?")
         print(tasks)
         
-        print(Task.instance.data.taskNameList)
-        print(Task.instance.data.taskDictionary)
-        print(Task.instance.data.taskStatsDictionary)
+        print(taskData.taskNameList)
+        print(taskData.taskDictionary)
+        print(taskData.taskStatsDictionary)
         
         saveData()
         
@@ -507,15 +517,15 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         if segue.identifier == "taskDetailSegue" {
             let taskVC = segue.destination as! TaskDetailViewController
             
-            taskVC.task = Task.instance.data.taskName
-            taskVC.taskTime = Task.instance.data.taskTime
-            taskVC.completedTime = Task.instance.data.completedTime
-            taskVC.taskDays = Task.instance.data.taskDays
-            taskVC.taskFrequency = Task.instance.data.taskFrequency
-            taskVC.leftoverTime = Task.instance.data.leftoverTime
-            taskVC.leftoverMultiplier = Task.instance.data.leftoverMultiplier
+            taskVC.task = taskData.taskName
+            taskVC.taskTime = taskData.taskTime
+            taskVC.completedTime = taskData.completedTime
+            taskVC.taskDays = taskData.taskDays
+            taskVC.taskFrequency = taskData.taskFrequency
+            taskVC.leftoverTime = taskData.leftoverTime
+            taskVC.leftoverMultiplier = taskData.leftoverMultiplier
             taskVC.countdownTimer = countdownTimer
-            //taskVC.timerEnabled = timerEnabled
+            taskVC.timerEnabled = timerEnabled
             
         }
         
@@ -523,19 +533,19 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
 
     func loadData() {
         
-        Task.instance.settings.load()
-        Task.instance.data.load()
+        appData.load()
+        taskData.load()
         
-        tasks = Task.instance.data.taskNameList
+        tasks = taskData.taskNameList
         
     }
     
     func saveData() {
         
-        Task.instance.settings.save()
-        Task.instance.data.save()
+        appData.save()
+        taskData.save()
         
-        tasks = Task.instance.data.taskNameList
+        tasks = taskData.taskNameList
         
     }
     

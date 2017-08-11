@@ -23,6 +23,9 @@ class TaskData: NSObject, NSCoding {
     var leftoverMultiplier = 100
     var leftoverTime = 0
     
+    var startTime = Date()
+    var endTime = Date()
+    
     // Task statistics
     var totalTaskTime = 0
     var missedTaskTime = 0

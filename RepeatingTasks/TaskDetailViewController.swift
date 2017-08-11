@@ -34,7 +34,7 @@ class TaskDetailViewController: UIViewController {
     
     var taskData = TaskData()
     var appData = AppData()
-    var countdownTimer = CountdownTimer()
+    var countdownTimer: CountdownTimer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,12 +52,19 @@ class TaskDetailViewController: UIViewController {
         formatter.allowedUnits = [.hour, .minute, .second]
         formatter.unitsStyle = .positional
         
-        (_, _) = countdownTimer.formatTimer(for: task, decrement: false)
+        formatTimer(decrement: false)
         
-        let x = countdownTimer.remainingTime
+        //(_, _) = countdownTimer.formatTimer(for: task, decrement: false)
         
-        addObserver(self, forKeyPath: #keyPath(Task.instance.timer.remainingTime), options: [.old, .new], context: nil)
+        //let x = countdownTimer.remainingTime
+        
+        //Task.instance.timer.addObserver(self, forKeyPath: #keyPath(Task.instance.timer.remainingTime), options: [.old, .new], context: nil)
+        //Task.instance.addObserver(self, forKeyPath: #keyPath(Task.instance.timer.remainingTime), options: [.old, .new], context: nil)
+        //addObserver(self, forKeyPath: #keyPath(Task.instance.timer.remainingTime), options: [.old, .new], context: nil)
         //kvoController.observe(self, keyPath: "countdownTimer.remainingTime", options: [.old, .new], action: nil)
+        addObserver(self, forKeyPath: #keyPath(CountdownTimer.remainingTime), options: [.old, .new], context: nil)
+        CountdownTimer.addObserver(self, forKeyPath: #keyPath(CountdownTimer.remainingTime), options: [.old, .new], context: nil)
+        addObserver(self, forKeyPath: #keyPath(countdownTimer.remainingTime), options: [.old, .new], context: nil)
         
         //kvoController.observe(viewModel,
         //                      keyPath: "listsDidChange",
@@ -71,7 +78,7 @@ class TaskDetailViewController: UIViewController {
         //kvoController.observe(kvoControl, keyPath: "countdownTimer.remainingTime", options: [.old, .new], action: #selector(updateTimer))
         
         
-        taskTimeLabel.text = formatter.string(from: TimeInterval(countdownTimer.remainingTime))!
+        //taskTimeLabel.text = formatter.string(from: TimeInterval(countdownTimer.remainingTime))!
 
         
         
@@ -164,15 +171,18 @@ class TaskDetailViewController: UIViewController {
     }
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+
+        print("Keypath is \(keyPath)")
+        
         if keyPath == #keyPath(countdownTimer.remainingTime) {
             // Update Time Label
-            (timeString, _) = countdownTimer.formatTimer(for: task, decrement: false)
+            (timeString, _) = formatTimer(decrement: false)
             taskTimeLabel.text = timeString
         }
     }
     
 
-    func formatTimer(decrement: Bool) -> Int {
+    func formatTimer(decrement: Bool) -> (String, Int) {
         // Used for initialization and when the task timer is updated
         
         let weightedTaskTime = taskTime + (leftoverTime * leftoverMultiplier)
@@ -199,7 +209,7 @@ class TaskDetailViewController: UIViewController {
             taskStartButton.isEnabled = false
         }
         
-        return remainingTaskTime
+        return (remainingTimeAsString, remainingTaskTime)
         
     }
 
@@ -229,7 +239,7 @@ class TaskDetailViewController: UIViewController {
     
     func timerRunning() {
         
-        let timeRemaining = formatTimer(decrement: true)
+        let (_, timeRemaining) = formatTimer(decrement: true)
         
         print("Time remaining is \(timeRemaining)")
         
@@ -285,7 +295,7 @@ class TaskDetailViewController: UIViewController {
             
             print(task)
             
-            let vc = segue.destination as! ViewController
+            let vc = segue.destination as! TaskViewController
             vc.tasks = vc.tasks.filter { $0 != task }
             print(vc.tasks)
             
@@ -310,7 +320,14 @@ class TaskDetailViewController: UIViewController {
     }
     
     deinit {
-        removeObserver(self, forKeyPath: #keyPath(Task.instance.timer.remainingTime))
+        //Task.instance.removeObserver(self, forKeyPath: #keyPath(Task.instance.timer.remainingTime))
+        //Task.instance.timer.removeObserver(self, forKeyPath: #keyPath(Task.instance.timer.remainingTime))
+        //removeObserver(self, forKeyPath: #keyPath(Task.instance.timer.remainingTime))
+        removeObserver(self, forKeyPath: #keyPath(CountdownTimer.remainingTime))
+        CountdownTimer.removeObserver(self, forKeyPath: #keyPath(CountdownTimer.remainingTime))
+        removeObserver(self, forKeyPath: #keyPath(countdownTimer.remainingTime))
+        
+
     }
 
 

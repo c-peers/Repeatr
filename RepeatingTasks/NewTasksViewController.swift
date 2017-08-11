@@ -8,7 +8,7 @@
 
 import UIKit
 
-class NewTasksViewController: ViewController {
+class NewTasksViewController: UIViewController {
 
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var newTaskView: UIView!
@@ -247,7 +247,7 @@ class NewTasksViewController: ViewController {
         
         if segue.identifier == "createdTaskUnwindSegue" {
             
-            let vc = segue.destination as! ViewController
+            let vc = segue.destination as! TaskViewController
             
             let taskName = taskNameTextField.text!
             //let completedTime = 0
@@ -274,8 +274,8 @@ class NewTasksViewController: ViewController {
                 taskTime = minutesAsInt! * 60
             }
             
-            Task.instance.data.newTask(name: taskName, time: taskTime, days: taskDays, frequency: taskFrequency)
-            Task.instance.data.newStatsDictionaryEntry(name: taskName)
+            vc.taskData.newTask(name: taskName, time: taskTime, days: taskDays, frequency: taskFrequency)
+            vc.taskData.newStatsDictionaryEntry(name: taskName)
             
             vc.tasks.append(taskName)
 //            vc.taskSettings[taskName] = ["taskTime": taskTime,
