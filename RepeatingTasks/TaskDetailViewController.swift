@@ -36,6 +36,9 @@ class TaskDetailViewController: UIViewController {
     var appData = AppData()
     var countdownTimer: CountdownTimer?
     
+    var startTime = Date()
+    var endTime = Date()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -52,46 +55,26 @@ class TaskDetailViewController: UIViewController {
         formatter.allowedUnits = [.hour, .minute, .second]
         formatter.unitsStyle = .positional
         
-        formatTimer(decrement: false)
+        _ = formatTimer()
         
+        self.addObserver(self, forKeyPath: #keyPath(taskData.completedTime), options: .new, context: nil)
+        
+
         //(_, _) = countdownTimer.formatTimer(for: task, decrement: false)
         
         //let x = countdownTimer.remainingTime
         
-        //Task.instance.timer.addObserver(self, forKeyPath: #keyPath(Task.instance.timer.remainingTime), options: [.old, .new], context: nil)
-        //Task.instance.addObserver(self, forKeyPath: #keyPath(Task.instance.timer.remainingTime), options: [.old, .new], context: nil)
-        //addObserver(self, forKeyPath: #keyPath(Task.instance.timer.remainingTime), options: [.old, .new], context: nil)
-        //kvoController.observe(self, keyPath: "countdownTimer.remainingTime", options: [.old, .new], action: nil)
-        addObserver(self, forKeyPath: #keyPath(CountdownTimer.remainingTime), options: [.old, .new], context: nil)
-        CountdownTimer.addObserver(self, forKeyPath: #keyPath(CountdownTimer.remainingTime), options: [.old, .new], context: nil)
-        addObserver(self, forKeyPath: #keyPath(countdownTimer.remainingTime), options: [.old, .new], context: nil)
-        
-        //kvoController.observe(viewModel,
-        //                      keyPath: "listsDidChange",
-        //                      options: [.new, .initial]) { (viewController, viewModel, change) in
-        //
-        //                        self.taskListsTableView.reloadData()
-       // }
-
-        let kvoControl = FBKVOController.init(observer: self)
-        //kvoController.observe(kvoControl, keyPath: "completedTime", options: [.new, .old], context: nil)
-        //kvoController.observe(kvoControl, keyPath: "countdownTimer.remainingTime", options: [.old, .new], action: #selector(updateTimer))
-        
-        
         //taskTimeLabel.text = formatter.string(from: TimeInterval(countdownTimer.remainingTime))!
 
-        
-        
-//        if timerEnabled {
-//
-//            taskStartButton.setTitle("Stop", for: .normal)
-//            
-//            taskTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self,
-//                                             selector: #selector(timerRunning), userInfo: nil, repeats: true)
-//
-//        } else {
-//            _ = formatTimer(decrement: false)
-//        }
+        if timerEnabled {
+
+            taskStartButton.setTitle("Stop", for: .normal)
+            
+            //taskTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self,
+            //                                 selector: #selector(timerRunning), userInfo: nil,
+            //                                 repeats: true)
+            
+        }
 
         
         recentTaskHistory.chartDescription?.enabled = false
@@ -164,36 +147,55 @@ class TaskDetailViewController: UIViewController {
     
     }
     
-    func updateTimer() {
+    func completedTimeCheck() {
         
-        print("Updated mutha fuckaaaaaaaa")
+        print("Completed time is \(taskData.completedTime)")
         
     }
     
+
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
 
-        print("Keypath is \(keyPath)")
-        
-        if keyPath == #keyPath(countdownTimer.remainingTime) {
+        //if keyPath == #keyPath(taskData.completedTime) {
             // Update Time Label
-            (timeString, _) = formatTimer(decrement: false)
-            taskTimeLabel.text = timeString
-        }
+        _ = synchedTimer(for: change![NSKeyValueChangeKey.newKey] as! Int)
+        //}
     }
     
+    func synchedTimer(for completedTime: Int) -> String {
+        
+        let weightedTaskTime = taskTime + (leftoverTime * leftoverMultiplier)
 
-    func formatTimer(decrement: Bool) -> (String, Int) {
+        let remainingTaskTime = weightedTaskTime - completedTime
+        
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.hour, .minute, .second]
+        formatter.unitsStyle = .positional
+        
+        let remainingTimeAsString = formatter.string(from: TimeInterval(remainingTaskTime))!
+        
+        if remainingTaskTime != 0 {
+            taskTimeLabel.text = remainingTimeAsString
+            taskStartButton.isEnabled = true
+        } else {
+            taskTimeLabel.text = "Complete"
+            taskStartButton.isEnabled = false
+        }
+        
+        return remainingTimeAsString
+
+        
+        
+    }
+    
+    func formatTimer() -> (String, Int) {
         // Used for initialization and when the task timer is updated
         
         let weightedTaskTime = taskTime + (leftoverTime * leftoverMultiplier)
 
-        var remainingTaskTime = weightedTaskTime - completedTime
+        let remainingTaskTime = weightedTaskTime - taskData.completedTime
         
-        print("Completed time is \(completedTime)")
-        
-        if decrement {
-            remainingTaskTime -= 1
-        }
+        print("Completed time is \(taskData.completedTime)")
         
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.hour, .minute, .second]
@@ -239,16 +241,12 @@ class TaskDetailViewController: UIViewController {
     
     func timerRunning() {
         
-        let (_, timeRemaining) = formatTimer(decrement: true)
+        let (_, timeRemaining) = formatTimer()
         
         print("Time remaining is \(timeRemaining)")
         
-        completedTime += 1
-        
         if timeRemaining == 0 || (completedTime == taskTime) {
             taskTimer.invalidate()
-            
-            taskTimeLabel.text = "Complete"
             taskStartButton.setTitle("Start", for: .normal)
             
         }
@@ -320,16 +318,14 @@ class TaskDetailViewController: UIViewController {
     }
     
     deinit {
-        //Task.instance.removeObserver(self, forKeyPath: #keyPath(Task.instance.timer.remainingTime))
-        //Task.instance.timer.removeObserver(self, forKeyPath: #keyPath(Task.instance.timer.remainingTime))
-        //removeObserver(self, forKeyPath: #keyPath(Task.instance.timer.remainingTime))
-        removeObserver(self, forKeyPath: #keyPath(CountdownTimer.remainingTime))
-        CountdownTimer.removeObserver(self, forKeyPath: #keyPath(CountdownTimer.remainingTime))
-        removeObserver(self, forKeyPath: #keyPath(countdownTimer.remainingTime))
-        
-
+        self.removeObserver(self, forKeyPath: #keyPath(taskData.completedTime))
     }
 
+    override func viewDidDisappear(_ animated: Bool) {
+        
+        taskTimer.invalidate()
+        
+    }
 
     /*
     // MARK: - Navigation

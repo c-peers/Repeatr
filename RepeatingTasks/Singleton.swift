@@ -15,6 +15,9 @@ class CountdownTimer: NSObject {
     dynamic var remainingTime = 0
     private var countdownTimer = Timer()
     
+    var startTime = Date()
+    var endTime = Date()
+    
     func startTimer(for view: Any?) {
         
         var test = [view]

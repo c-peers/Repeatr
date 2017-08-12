@@ -17,14 +17,11 @@ class TaskData: NSObject, NSCoding {
     // Basic task information
     var taskName = String()
     var taskTime = 0
-    var completedTime = 0
+    dynamic var completedTime = 0
     var taskDays = [String]()
     var taskFrequency = 1
     var leftoverMultiplier = 100
     var leftoverTime = 0
-    
-    var startTime = Date()
-    var endTime = Date()
     
     // Task statistics
     var totalTaskTime = 0
