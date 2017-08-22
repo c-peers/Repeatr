@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Chameleon
 
 class NewTasksViewController: UIViewController {
 
@@ -49,7 +50,31 @@ class NewTasksViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWasShown), name: NSNotification.Name.UIKeyboardDidShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillBeHidden), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
 
+        //******************************
+        // Notification Bar start
+        //******************************
         
+        let navBar: UINavigationBar = UINavigationBar(frame: CGRect(x: 0, y: 20, width: view.frame.width, height: 44))
+        self.view.addSubview(navBar);
+        let navItem = UINavigationItem(title: "Add Task");
+        
+        let cancelBarButton = UIBarButtonItem(title: "Cancel", style: .done, target: self, action: #selector(cancelTask))
+        navItem.leftBarButtonItems = [cancelBarButton]
+        
+        navBar.setItems([navItem], animated: false);
+        
+        //******************************
+        // Notification Bar finished
+        //******************************
+        
+        //let navBarColor = navBar.color
+        //UIApplication.shared.statusBarStyle = .default
+        let statusBarView = UIView(frame: UIApplication.shared.statusBarFrame)
+        statusBarView.backgroundColor = UIColor(hexString: "52A7DF")
+        view.addSubview(statusBarView)
+        
+
+    
         //******************************
         // Occurrence rate start
         //******************************
@@ -104,23 +129,6 @@ class NewTasksViewController: UIViewController {
         
         //******************************
         // Pickerview initialization finished
-        //******************************
-
-        //******************************
-        // Notification Bar start
-        //******************************
-        
-        let navBar: UINavigationBar = UINavigationBar(frame: CGRect(x: 0, y: 20, width: view.frame.width, height: 44))
-        self.view.addSubview(navBar);
-        let navItem = UINavigationItem(title: "Add Task");
-        
-        let cancelBarButton = UIBarButtonItem(title: "Cancel", style: .done, target: self, action: #selector(cancelTask))
-        navItem.leftBarButtonItems = [cancelBarButton]
-        
-        navBar.setItems([navItem], animated: false);
-        
-        //******************************
-        // Notification Bar finished
         //******************************
 
         //******************************
@@ -252,12 +260,12 @@ class NewTasksViewController: UIViewController {
             let taskName = taskNameTextField.text!
             //let completedTime = 0
             //let taskDaysBinary = TaskData().taskDaysAsBinary(from: taskDays)
-            var taskFrequency = 0
-            if let frequencyValue = Int(occurrenceRateTextField.text!) {
+            var taskFrequency = 0.0
+            if let frequencyValue = Double(occurrenceRateTextField.text!) {
                 taskFrequency = frequencyValue
             }
             
-            var taskTime = 0
+            var taskTime = 0.0
             
             if selectedHours != "0" {
                 
@@ -265,13 +273,13 @@ class NewTasksViewController: UIViewController {
                 
                 if selectedMinutes != "0" {
                     let minutesAsInt = Int(selectedMinutes)
-                    taskTime = hoursAsInt! * 3600 + minutesAsInt! * 60
+                    taskTime = Double(hoursAsInt! * 3600 + minutesAsInt! * 60)
                 } else {
-                    taskTime = hoursAsInt! * 3600
+                    taskTime = Double(hoursAsInt! * 3600)
                 }
             } else if selectedMinutes != "0" {
                 let minutesAsInt = Int(selectedMinutes)
-                taskTime = minutesAsInt! * 60
+                taskTime = Double(minutesAsInt! * 60)
             }
             
             vc.taskData.newTask(name: taskName, time: taskTime, days: taskDays, frequency: taskFrequency)
@@ -368,10 +376,6 @@ class NewTasksViewController: UIViewController {
         self.scrollView.isScrollEnabled = false
         
     }
-    
-    
-    
-    
     
 }
 

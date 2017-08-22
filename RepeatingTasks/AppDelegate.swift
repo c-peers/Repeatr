@@ -8,7 +8,8 @@
 
 import UIKit
 import CoreData
-
+import Chameleon
+    
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
@@ -19,6 +20,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        Chameleon.setGlobalThemeUsingPrimaryColor(FlatSkyBlue(), with: .contrast)
+        
+        func setStatusBarBackgroundColor(color: UIColor) {
+            
+            guard let statusBar = UIApplication.shared.value(forKeyPath: "statusBarWindow.statusBar") as? UIView else { return }
+            
+            statusBar.backgroundColor = FlatSkyBlue()
+        }
+        
         return true
     }
 

@@ -21,12 +21,12 @@ class TaskDetailViewController: UIViewController {
     var timerEnabled = false
     
     var task = "*"
-    var taskTime = 0
-    var completedTime = 0
+    var taskTime = 0.0
+    var completedTime = 0.0
     var taskDays = [String]()
-    var taskFrequency = 1
-    var leftoverMultiplier = 100
-    var leftoverTime = 0
+    var taskFrequency = 1.0
+    var leftoverMultiplier = 100.0
+    var leftoverTime = 0.0
     
     let taskHistory = [600, 0, 1200]
     
@@ -34,7 +34,7 @@ class TaskDetailViewController: UIViewController {
     
     var taskData = TaskData()
     var appData = AppData()
-    var countdownTimer: CountdownTimer?
+    var countdownTimer = CountdownTimer()
     
     var startTime = Date()
     var endTime = Date()
@@ -49,8 +49,20 @@ class TaskDetailViewController: UIViewController {
         
         toolbarItems = [space, trashButton]
         
-        taskStartButton.setTitle("Start", for: .normal)
+        taskStartButton.layer.cornerRadius = 10.0
+        taskStartButton.layer.masksToBounds = true
         
+        taskStartButton.layer.shadowColor = UIColor.lightGray.cgColor
+        taskStartButton.layer.shadowOffset = CGSize.zero
+        taskStartButton.layer.shadowRadius = 2.0
+        taskStartButton.layer.shadowOpacity = 2.0
+        taskStartButton.layer.shadowPath = UIBezierPath(roundedRect: taskStartButton.layer.bounds, cornerRadius: taskStartButton.layer.cornerRadius).cgPath
+        
+        //taskStartButton.setImage(#imageLiteral(resourceName: "Play"), for: .normal)
+        let stencil = #imageLiteral(resourceName: "Play").withRenderingMode(.alwaysTemplate)
+        taskStartButton.setImage(stencil, for: .normal)
+        taskStartButton.tintColor = UIColor.white
+
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.hour, .minute, .second]
         formatter.unitsStyle = .positional
@@ -66,10 +78,14 @@ class TaskDetailViewController: UIViewController {
         
         //taskTimeLabel.text = formatter.string(from: TimeInterval(countdownTimer.remainingTime))!
 
-        if timerEnabled {
+        if taskData.timerEnabled {
 
-            taskStartButton.setTitle("Stop", for: .normal)
-            
+            taskStartButton.setImage(#imageLiteral(resourceName: "Pause"), for: .normal)
+            let stencil = #imageLiteral(resourceName: "Pause").withRenderingMode(.alwaysTemplate)
+            taskStartButton.setImage(stencil, for: .normal)
+            taskStartButton.tintColor = UIColor.white
+
+
             //taskTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self,
             //                                 selector: #selector(timerRunning), userInfo: nil,
             //                                 repeats: true)
@@ -118,21 +134,13 @@ class TaskDetailViewController: UIViewController {
 //        // scaling can now only be done on x- and y-axis separately
 //        _chartView.pinchZoomEnabled = NO;
 //        
-//        _chartView.drawGridBackgroundEnabled = NO;
-//        
-//        ChartXAxis *xAxis = _chartView.xAxis;
 //        xAxis.labelPosition = XAxisLabelPositionBottom;
 //        xAxis.labelFont = [UIFont systemFontOfSize:13.f];
-//        xAxis.drawGridLinesEnabled = NO;
-//        xAxis.drawAxisLineEnabled = NO;
 //        xAxis.labelTextColor = [UIColor lightGrayColor];
 //        xAxis.labelCount = 5;
-//        xAxis.centerAxisLabelsEnabled = YES;
-//        xAxis.granularity = 1.0;
 //        xAxis.valueFormatter = self;
 //        
 //        ChartYAxis *leftAxis = _chartView.leftAxis;
-//        leftAxis.drawLabelsEnabled = NO;
 //        leftAxis.spaceTop = 0.25;
 //        leftAxis.spaceBottom = 0.25;
 //        leftAxis.drawAxisLineEnabled = NO;
@@ -158,11 +166,11 @@ class TaskDetailViewController: UIViewController {
 
         //if keyPath == #keyPath(taskData.completedTime) {
             // Update Time Label
-        _ = synchedTimer(for: change![NSKeyValueChangeKey.newKey] as! Int)
+        _ = synchedTimer(for: change![NSKeyValueChangeKey.newKey] as! Double)
         //}
     }
     
-    func synchedTimer(for completedTime: Int) -> String {
+    func synchedTimer(for completedTime: Double) -> String {
         
         let weightedTaskTime = taskTime + (leftoverTime * leftoverMultiplier)
 
@@ -184,11 +192,9 @@ class TaskDetailViewController: UIViewController {
         
         return remainingTimeAsString
 
-        
-        
     }
     
-    func formatTimer() -> (String, Int) {
+    func formatTimer() -> (String, Double) {
         // Used for initialization and when the task timer is updated
         
         let weightedTaskTime = taskTime + (leftoverTime * leftoverMultiplier)
@@ -217,16 +223,29 @@ class TaskDetailViewController: UIViewController {
 
     @IBAction func taskButtonTapped(_ sender: UIButton) {
         
-        if taskStartButton.currentTitle == "Start" {
-            timerEnabled = true
-            taskStartButton.setTitle("Stop", for: .normal)
+        if taskData.timerEnabled != true {
+            taskData.timerEnabled = true
+            
+            let stencil = #imageLiteral(resourceName: "Pause").withRenderingMode(.alwaysTemplate)
+            taskStartButton.setImage(stencil, for: .normal)
+            taskStartButton.tintColor = UIColor.white
+            
+            //taskStartButton.setImage(#imageLiteral(resourceName: "Pause"), for: .normal)
+            
+            countdownTimer.startTime = Date().timeIntervalSince1970
             
             taskTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self,
                                              selector: #selector(timerRunning), userInfo: nil, repeats: true)
             
         } else {
-            timerEnabled = false
-            taskStartButton.setTitle("Start", for: .normal)
+            taskData.timerEnabled = false
+            
+            let stencil = #imageLiteral(resourceName: "Play").withRenderingMode(.alwaysTemplate)
+            taskStartButton.setImage(stencil, for: .normal)
+            taskStartButton.tintColor = UIColor.white
+            //taskStartButton.setImage(#imageLiteral(resourceName: "Play"), for: .normal)
+            
+            NotificationCenter.default.post(name: Notification.Name("StopTimerNotification"), object: nil)
             
             taskTimer.invalidate()
             
@@ -245,9 +264,16 @@ class TaskDetailViewController: UIViewController {
         
         print("Time remaining is \(timeRemaining)")
         
+        taskData.completedTime += 1
+        
         if timeRemaining == 0 || (completedTime == taskTime) {
             taskTimer.invalidate()
-            taskStartButton.setTitle("Start", for: .normal)
+            
+            let stencil = #imageLiteral(resourceName: "Play").withRenderingMode(.alwaysTemplate)
+            taskStartButton.setImage(stencil, for: .normal)
+            taskStartButton.tintColor = UIColor.white
+
+            //taskStartButton.setImage(#imageLiteral(resourceName: "Play"), for: .normal)
             
         }
     }
@@ -319,6 +345,17 @@ class TaskDetailViewController: UIViewController {
     
     deinit {
         self.removeObserver(self, forKeyPath: #keyPath(taskData.completedTime))
+        taskTimer.invalidate()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        
+        taskTimer.invalidate()
+        
+        let vc = self.navigationController?.viewControllers.first as! TaskViewController
+        
+        //vc.taskData.taskDictionary[task]?["completedTime"] = completedTime
+        vc.runningCompletionTime = taskData.completedTime
     }
 
     override func viewDidDisappear(_ animated: Bool) {
@@ -326,7 +363,7 @@ class TaskDetailViewController: UIViewController {
         taskTimer.invalidate()
         
     }
-
+    
     /*
     // MARK: - Navigation
 

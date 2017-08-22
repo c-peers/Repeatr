@@ -11,24 +11,27 @@ import Foundation
 class CountdownTimer: NSObject {
     
     var isEnabled = false
+    var firedFromMainVC = false
 
     dynamic var remainingTime = 0
-    private var countdownTimer = Timer()
+    var timer = Timer()
     
-    var startTime = Date()
-    var endTime = Date()
+    var cell: RepeatingTasksCollectionCell? = nil
+    
+    var startTime = Date().timeIntervalSince1970
+    var endTime = Date().timeIntervalSince1970
     
     func startTimer(for view: Any?) {
         
         var test = [view]
         test.append("name")
-        countdownTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self,
+        timer = Timer.scheduledTimer(timeInterval: 1.0, target: self,
                                               selector: #selector(timerRunning), userInfo: view, repeats: true)
         
     }
     
     func stopTimer(for view: Any?) {
-        countdownTimer.invalidate()
+        timer.invalidate()
         
         //Task.instance.data.save()
     }

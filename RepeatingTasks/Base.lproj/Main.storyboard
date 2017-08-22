@@ -24,7 +24,7 @@
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Dht-Nb-tnO">
                                 <rect key="frame" x="0.0" y="172" width="375" height="446"/>
-                                <color key="backgroundColor" red="0.59999999999999998" green="0.59999999999999998" blue="0.59999999999999998" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="LJV-3g-fJl">
                                     <size key="itemSize" width="333" height="106"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -41,12 +41,11 @@
                                             <subviews>
                                                 <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2af-oK-GqR">
                                                     <rect key="frame" x="0.0" y="0.0" width="333" height="106"/>
-                                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                                 </view>
                                                 <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="O6Z-ZW-pdo">
                                                     <rect key="frame" x="20" y="89" width="239" height="2"/>
                                                 </progressView>
-                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eZN-Nk-49N">
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eZN-Nk-49N">
                                                     <rect key="frame" x="199" y="20" width="60" height="60"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="60" id="b8v-mm-ETO"/>
@@ -105,7 +104,7 @@
                                 </connections>
                             </collectionView>
                         </subviews>
-                        <color key="backgroundColor" red="0.59999999999999998" green="0.59999999999999998" blue="0.59999999999999998" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="Dht-Nb-tnO" secondAttribute="bottom" constant="49" id="31v-7C-RxF"/>
                             <constraint firstItem="Dht-Nb-tnO" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="108" id="nik-Se-Aec"/>
@@ -150,14 +149,12 @@
                                 <rect key="frame" x="55" y="369" width="265" height="139"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </view>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="j5Z-ne-lTq">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="j5Z-ne-lTq">
                                 <rect key="frame" x="129" y="211" width="117" height="75"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="117" id="4wZ-Zc-nHB"/>
                                     <constraint firstAttribute="height" constant="75" id="emN-bg-mnX"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="22"/>
-                                <state key="normal" title="Button"/>
                                 <connections>
                                     <action selector="taskButtonTapped:" destination="7eH-F0-hBU" eventType="touchUpInside" id="FcV-pP-Fch"/>
                                 </connections>
@@ -181,12 +178,31 @@
                         <outlet property="taskStartButton" destination="j5Z-ne-lTq" id="hqC-58-Y8k"/>
                         <outlet property="taskTimeLabel" destination="hi4-ID-NXk" id="AQM-pa-ogL"/>
                         <segue destination="c2h-l3-3Ra" kind="unwind" identifier="taskDeletedUnwindSegue" unwindAction="taskDeletedUnwindWithSegue:" id="QoN-g9-PR4"/>
+                        <segue destination="pN5-Wi-uSc" kind="show" identifier="TaskSettingsSegue" id="Lgn-69-VsP"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5bg-UC-3Xy" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="c2h-l3-3Ra" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="1592.8" y="136.28185907046478"/>
+        </scene>
+        <!--Task Settings View Controller-->
+        <scene sceneID="wWm-2t-HDt">
+            <objects>
+                <viewController id="pN5-Wi-uSc" customClass="TaskSettingsViewController" customModule="RepeatingTasks" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="cTJ-Jb-WtJ"/>
+                        <viewControllerLayoutGuide type="bottom" id="COX-bl-vIq"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Dat-eL-Qbc">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="5YW-nu-okE" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2337" y="137"/>
         </scene>
         <!--View Controller-->
         <scene sceneID="ZGi-xc-mg7">
@@ -218,12 +234,6 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kMu-DO-kB4">
-                                <rect key="frame" x="0.0" y="20" width="375" height="44"/>
-                                <items>
-                                    <navigationItem title="Title" id="U8d-OO-6N6"/>
-                                </items>
-                            </navigationBar>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QaI-oG-X54">
                                 <rect key="frame" x="16" y="64" width="343" height="603"/>
                                 <subviews>
@@ -454,13 +464,10 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="kMu-DO-kB4" firstAttribute="leading" secondItem="WYa-tu-aHR" secondAttribute="leadingMargin" constant="-16" id="2sq-mm-T9y"/>
                             <constraint firstItem="QaI-oG-X54" firstAttribute="top" secondItem="MB0-tu-6Nh" secondAttribute="bottom" constant="44" id="4db-DV-TQ7"/>
-                            <constraint firstItem="kMu-DO-kB4" firstAttribute="top" secondItem="MB0-tu-6Nh" secondAttribute="bottom" id="Ezn-uJ-kdi"/>
                             <constraint firstItem="J2A-my-N31" firstAttribute="top" secondItem="QaI-oG-X54" secondAttribute="bottom" id="YGu-WW-St3"/>
                             <constraint firstAttribute="trailingMargin" secondItem="QaI-oG-X54" secondAttribute="trailing" id="Yf0-gB-ymH"/>
                             <constraint firstItem="QaI-oG-X54" firstAttribute="leading" secondItem="WYa-tu-aHR" secondAttribute="leadingMargin" id="ZsZ-EJ-MZv"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="kMu-DO-kB4" secondAttribute="trailing" constant="-16" id="cpf-JM-0PT"/>
                             <constraint firstItem="GZM-2t-zVR" firstAttribute="width" secondItem="WYa-tu-aHR" secondAttribute="width" id="zoQ-zp-K9s"/>
                         </constraints>
                     </view>

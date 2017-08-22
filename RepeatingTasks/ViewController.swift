@@ -20,21 +20,21 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
     @IBOutlet weak var taskList: UICollectionView!
     
     var tasks = [String]()
-    //var taskSettings: [String : [String : Int]] = [:]
-    //var taskStatistics: [String : [String : Int]] = [:]
     
     dynamic var taskData = TaskData()
     var appData = AppData()
     var countdownTimer = CountdownTimer()
     
     var taskTimer = Timer()
-    var timerEnabled = false
-    var cellIndexPath: IndexPath = []
+    
+    //var timerEnabled = false
+    var timerFiringFromTaskVC = false
+    
+    var selectedTask = ""
+    var selectedCell: RepeatingTasksCollectionCell?
+    var runningCompletionTime = 0.0
     
     var willResetTimer = false
-    
-    var startTime = Date()
-    var endTime = Date()
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return tasks.count
@@ -47,7 +47,15 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
         let task = tasks[indexPath.row]
         
-        cell.playStopButton.setTitle("Start", for: .normal)
+        if taskData.timerEnabled && task == selectedTask {
+            cell.playStopButton.setImage(#imageLiteral(resourceName: "Pause"), for: .normal)
+        } else {
+            cell.playStopButton.setImage(#imageLiteral(resourceName: "Play"), for: .normal)
+        }
+        
+        cell.playStopButton.backgroundColor = UIColor.clear
+        
+        
         cell.progressView.progress = 0.0
         cell.progressView.setProgress(0.0, animated: false)
         cell.taskNameField.text = task
@@ -69,38 +77,48 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
             cell.playStopButton.isEnabled = true
         }
         
-        let gradient = CAGradientLayer()
+        let colorArray = ColorSchemeOf(.analogous, color: .flatSkyBlue, isFlatScheme: true)
         
-        gradient.frame = cell.layer.bounds
+        print(indexPath)
         
-        let gradientColor2 = UIColor.clear
-        let gradientColor1 = UIColor.white.cgColor
+        //let gradientBackground = GradientColor(.leftToRight, frame: cell.frame, colors: [UIColor.flatSkyBlue, UIColor.flatSkyBlueDark])
         
-        gradient.colors = [gradientColor1,gradientColor2]
+        //cell.backgroundColor = gradientBackground
         
-        gradient.locations = [0.0, 0.75]
-        gradient.startPoint = CGPoint(x: 1, y: 0)
-        gradient.endPoint = CGPoint(x: 0, y: 1)
+        cell.backgroundColor = colorArray[indexPath.row % 4]
         
-        cell.layer.addSublayer(gradient)
-        
-        switch (indexPath.row % 4) {
-        case 0:
-            cell.bgView.backgroundColor = UIColor(hue: 200/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
-            cell.backgroundColor = UIColor(hue: 200/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
-            
-        case 1:
-            cell.bgView.backgroundColor = UIColor(hue: 60/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
-            cell.backgroundColor = UIColor(hue: 60/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
-        case 2:
-            cell.bgView.backgroundColor = UIColor(hue: 280/360, saturation: 0.35, brightness: 1.0, alpha: 1.0)
-            cell.backgroundColor = UIColor(hue: 280/360, saturation: 0.35, brightness: 1.0, alpha: 1.0)
-        case 3:
-            cell.bgView.backgroundColor = UIColor(hue: 359/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
-            cell.backgroundColor = UIColor(hue: 359/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
-        default:
-            break
-        }
+//        let gradient = CAGradientLayer()
+//        
+//        gradient.frame = cell.layer.bounds
+//        
+//        let gradientColor2 = UIColor.clear
+//        let gradientColor1 = UIColor.white.cgColor
+//        
+//        gradient.colors = [gradientColor1,gradientColor2]
+//        
+//        gradient.locations = [0.0, 0.75]
+//        gradient.startPoint = CGPoint(x: 1, y: 0)
+//        gradient.endPoint = CGPoint(x: 0, y: 1)
+//        
+//        cell.layer.addSublayer(gradient)
+//        
+//        switch (indexPath.row % 4) {
+//        case 0:
+//            cell.bgView.backgroundColor = UIColor(hue: 200/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
+//            cell.backgroundColor = UIColor(hue: 200/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
+//            
+//        case 1:
+//            cell.bgView.backgroundColor = UIColor(hue: 60/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
+//            cell.backgroundColor = UIColor(hue: 60/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
+//        case 2:
+//            cell.bgView.backgroundColor = UIColor(hue: 280/360, saturation: 0.35, brightness: 1.0, alpha: 1.0)
+//            cell.backgroundColor = UIColor(hue: 280/360, saturation: 0.35, brightness: 1.0, alpha: 1.0)
+//        case 3:
+//            cell.bgView.backgroundColor = UIColor(hue: 359/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
+//            cell.backgroundColor = UIColor(hue: 359/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
+//        default:
+//            break
+//        }
         
         
         cell.layer.cornerRadius = 10.0
@@ -122,13 +140,12 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        //
-//        let reuseIdentifier = "taskCollectionCell"
-//        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath as IndexPath) as! RepeatingTasksCollectionCell
         
         let task = tasks[indexPath.row]
         
         taskData.setTask(as: task)
+        
+        selectedTask = taskData.taskName
         
         print("taskData taskName \(taskData.taskName)")
         
@@ -138,7 +155,7 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         // Load any saved data
         loadData()
         
@@ -148,6 +165,8 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
         print("loaded Values")
         print(tasks)
+        
+        NotificationCenter.default.addObserver(forName: Notification.Name("StopTimerNotification"), object: nil, queue: nil, using: catchNotification)
         
         let addBarButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addTask))
         navigationItem.rightBarButtonItems = [addBarButton]
@@ -213,7 +232,7 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
         } else {
 
             //if !Task.instance.timer.isEnabled {
-            if !timerEnabled {
+            if !taskData.timerEnabled {
                 resetTaskTimers()
             } else {
                 willResetTimer = true
@@ -310,45 +329,37 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
 
     @IBAction func taskStartStopButtonPressed(_ sender: UIButton) {
         
-        print("test")
-        
         guard let cell = sender.superview?.superview as? RepeatingTasksCollectionCell else {
             return // or fatalError() or whatever
         }
         
-        cellIndexPath = taskList.indexPath(for: cell)!
-        
-        print("indexPath is \(cellIndexPath.row)")
-        
-//        if !Task.instance.timer.isEnabled {
-//            Task.instance.timer.isEnabled = true
-//            cell.playStopButton.setTitle("Stop", for: .normal)
-//            
-//            Task.instance.timer.startTimer(for: cell)
-//            
-//        } else {
-//            Task.instance.timer.isEnabled = false
-//            cell.playStopButton.setTitle("Start", for: .normal)
-//            
-//            Task.instance.timer.stopTimer(for: cell)
-//            
-//        }
-        
-        if !timerEnabled {
-            timerEnabled = true
-            cell.playStopButton.setTitle("Stop", for: .normal)
+        if !taskData.timerEnabled {
+            taskData.timerEnabled = true
+            timerFiringFromTaskVC = true
             
-            startTime = Date()
+            let stencil = #imageLiteral(resourceName: "Pause").withRenderingMode(.alwaysTemplate)
+            cell.playStopButton.setImage(stencil, for: .normal)
+            //cell.playStopButton.setTitle("Stop", for: .normal)
+            
+            //cell.playStopButton.tintColor = UIColor.white
+            
+            countdownTimer.startTime = Date().timeIntervalSince1970
             
             //countdownTimer.startTimer(for: cell)
+            
+            selectedCell = cell
+            
             taskTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self,
-                                             selector: #selector(timerRunning), userInfo: cell,
+                                             selector: #selector(timerRunning), userInfo: nil,
                                              repeats: true)
 
             
         } else {
-            timerEnabled = false
-            cell.playStopButton.setTitle("Start", for: .normal)
+            taskData.timerEnabled = false
+            timerFiringFromTaskVC = false
+            
+            cell.playStopButton.setImage(#imageLiteral(resourceName: "Play"), for: .normal)
+            //cell.playStopButton.setTitle("Start", for: .normal)
             
             //countdownTimer.stopTimer(for: cell)
             
@@ -384,7 +395,8 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     func timerRunning() {
         
-        let cell = taskTimer.userInfo as! RepeatingTasksCollectionCell
+        //let cell = taskTimer.userInfo as! RepeatingTasksCollectionCell
+        let cell = selectedCell!
         let taskName = cell.taskNameField.text!
         
         let (_, timeRemaining) = formatTimer(for: taskName, from: cell)
@@ -399,10 +411,12 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
             taskTimer.invalidate()
             
             //Task.instance.timer.isEnabled = false
-            timerEnabled = false
+            taskData.timerEnabled = false
+            timerFiringFromTaskVC = false
 
             cell.taskTimeRemaining.text = "Complete"
-            cell.playStopButton.setTitle("Start", for: .normal)
+            cell.playStopButton.setImage(#imageLiteral(resourceName: "Play"), for: .normal)
+            //cell.playStopButton.setTitle("Start", for: .normal)
             cell.playStopButton.isEnabled = false
             
             saveData()
@@ -427,13 +441,20 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
     }
     
-    func formatTimer(for task: String, from cell: RepeatingTasksCollectionCell? = nil) -> (String, Int) {
+    func formatTimer(for task: String, from cell: RepeatingTasksCollectionCell? = nil) -> (String, Double) {
         // Used for initialization and when the task timer is updated
         
         taskData.setTask(as: task)
         
         let (taskTime, weightedTaskTime) = getWeightedTime(for: task)
-        let completedTime = taskData.completedTime
+        
+        var completedTime = 0.0
+        
+        if runningCompletionTime == 0.0 {
+            completedTime = taskData.completedTime
+        } else if task == selectedTask {
+            completedTime = runningCompletionTime
+        }
         
         var remainingTaskTime = weightedTaskTime - completedTime
         
@@ -449,7 +470,7 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
         var remainingTimeAsString = formatter.string(from: TimeInterval(remainingTaskTime))!
         
-        if remainingTaskTime == 0 {
+        if remainingTaskTime <= 0 {
             remainingTimeAsString = "Complete"
         }
         
@@ -469,7 +490,7 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
 
     }
     
-    func getWeightedTime(for task: String) -> (Int, Int) {
+    func getWeightedTime(for task: String) -> (Double, Double) {
         
         let taskTime = taskData.taskTime
         let leftoverMultiplier = taskData.leftoverMultiplier
@@ -479,6 +500,12 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
     }
     
+    func catchNotification(notification:Notification) -> Void {
+        print("Catch notification")
+        
+        taskTimer.invalidate()
+        
+    }
     func addTask() {
         print("Do stuff")
         performSegue(withIdentifier: "addTaskSegue", sender: nil)
@@ -521,7 +548,10 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
         if segue.identifier == "taskDetailSegue" {
             let taskVC = segue.destination as! TaskDetailViewController
             
+            taskVC.appData = appData
+
             taskVC.taskData = taskData
+            
             taskVC.task = taskData.taskName
             taskVC.taskTime = taskData.taskTime
             taskVC.completedTime = taskData.completedTime
@@ -529,9 +559,8 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
             taskVC.taskFrequency = taskData.taskFrequency
             taskVC.leftoverTime = taskData.leftoverTime
             taskVC.leftoverMultiplier = taskData.leftoverMultiplier
-            //taskVC.countdownTimer = countdownTimer
-            taskVC.timerEnabled = timerEnabled
-            taskVC.startTime = startTime
+            
+            taskVC.countdownTimer = countdownTimer
             
         }
         
@@ -552,6 +581,57 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
         taskData.save()
         
         tasks = taskData.taskNameList
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        
+        if selectedTask != "" && runningCompletionTime > 0 {
+            
+            taskData.taskDictionary[selectedTask]!["competedTime"] = runningCompletionTime
+            
+        }
+
+        DispatchQueue.main.async {
+            self.taskList.reloadData()
+        }
+        
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        
+        if taskData.timerEnabled && !timerFiringFromTaskVC {
+            
+            let currentTime = Date().timeIntervalSince1970
+            let timeElapsed = currentTime - countdownTimer.startTime
+            print("time elapsed \(timeElapsed)")
+            
+            let wholeNumbers = floor(timeElapsed)
+            let milliseconds = Int((timeElapsed - wholeNumbers) * 1000)
+            
+            DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + .milliseconds(milliseconds)) {
+
+                print("Wait until next second begins")
+            
+            }
+            
+            let indexPathRow = tasks.index(of: selectedTask)
+            let indexPath = IndexPath(row: indexPathRow!, section: 0)
+            selectedCell = taskList.cellForItem(at: indexPath) as? RepeatingTasksCollectionCell
+            
+            _ = formatTimer(for: selectedTask, from: selectedCell)
+
+            let runningTaskTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self,
+                                                  selector: #selector(timerRunning), userInfo: nil,
+                                                  repeats: true)
+            
+            
+            
+            
+            
+        }
+        
+
         
     }
     

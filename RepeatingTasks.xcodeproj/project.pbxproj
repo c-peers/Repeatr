@@ -17,6 +17,7 @@
 		C403E3381EF034E5001EE78D /* RepeatingTasksUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C403E3371EF034E5001EE78D /* RepeatingTasksUITests.swift */; };
 		C403E3461EF139ED001EE78D /* RepeatingTasksCollectionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C403E3451EF139ED001EE78D /* RepeatingTasksCollectionCell.swift */; };
 		C40AABE21F2B07270061BFE3 /* TaskData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40AABE11F2B07270061BFE3 /* TaskData.swift */; };
+		C4257AE81F4A97B200AA03B5 /* TaskSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4257AE71F4A97B200AA03B5 /* TaskSettingsViewController.swift */; };
 		C43A507E1F3964BA00BEAA97 /* Chameleon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C43A50771F3964A200BEAA97 /* Chameleon.framework */; };
 		C43A507F1F3964BA00BEAA97 /* Chameleon.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C43A50771F3964A200BEAA97 /* Chameleon.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C43A508B1F39679700BEAA97 /* Charts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C43A50881F39678A00BEAA97 /* Charts.framework */; };
@@ -185,6 +186,7 @@
 		C403E3391EF034E5001EE78D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C403E3451EF139ED001EE78D /* RepeatingTasksCollectionCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RepeatingTasksCollectionCell.swift; sourceTree = "<group>"; };
 		C40AABE11F2B07270061BFE3 /* TaskData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskData.swift; sourceTree = "<group>"; };
+		C4257AE71F4A97B200AA03B5 /* TaskSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskSettingsViewController.swift; sourceTree = "<group>"; };
 		C43A50451F39641400BEAA97 /* RepeatingTasks-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RepeatingTasks-Bridging-Header.h"; sourceTree = "<group>"; };
 		C43A506F1F3964A200BEAA97 /* Chameleon.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Chameleon.xcodeproj; path = ../../../../Downloads/Chameleon/Chameleon.xcodeproj; sourceTree = "<group>"; };
 		C43A50821F39678A00BEAA97 /* Charts.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Charts.xcodeproj; path = "../../../../Downloads/Charts-master/Charts.xcodeproj"; sourceTree = "<group>"; };
@@ -256,6 +258,7 @@
 				C43A50BF1F3E67E700BEAA97 /* Holding FIle.swift */,
 				C43A509C1F3BFB0600BEAA97 /* Singleton.swift */,
 				C4D64E011F383AA600844404 /* TaskDetailViewController.swift */,
+				C4257AE71F4A97B200AA03B5 /* TaskSettingsViewController.swift */,
 				C40AABE11F2B07270061BFE3 /* TaskData.swift */,
 				C4A28F4E1F34583400B9D79A /* AppData.swift */,
 				C403E3181EF034E5001EE78D /* Main.storyboard */,
@@ -569,6 +572,7 @@
 				C403E3151EF034E5001EE78D /* AppDelegate.swift in Sources */,
 				C40AABE21F2B07270061BFE3 /* TaskData.swift in Sources */,
 				C4D64E021F383AA600844404 /* TaskDetailViewController.swift in Sources */,
+				C4257AE81F4A97B200AA03B5 /* TaskSettingsViewController.swift in Sources */,
 				C4A28F4F1F34583400B9D79A /* AppData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -16,29 +16,31 @@ class TaskData: NSObject, NSCoding {
     
     // Basic task information
     var taskName = String()
-    var taskTime = 0
-    dynamic var completedTime = 0
+    var taskTime = 0.0
+    dynamic var completedTime = 0.0
     var taskDays = [String]()
-    var taskFrequency = 1
-    var leftoverMultiplier = 100
-    var leftoverTime = 0
+    var taskFrequency = 1.0
+    var leftoverMultiplier = 100.0
+    var leftoverTime = 0.0
     
     // Task statistics
-    var totalTaskTime = 0
-    var missedTaskTime = 0
-    var completedTaskTime = 0
-    var totalTaskDays = 0
-    var fullTaskDays = 0
-    var partialTaskDays = 0
-    var missedTaskDays = 0
-    var currentStreak = 0
-    var bestStreak = 0
+    var totalTaskTime = 0.0
+    var missedTaskTime = 0.0
+    var completedTaskTime = 0.0
+    var totalTaskDays = 0.0
+    var fullTaskDays = 0.0
+    var partialTaskDays = 0.0
+    var missedTaskDays = 0.0
+    var currentStreak = 0.0
+    var bestStreak = 0.0
+    
+    var timerEnabled = false
     
     // Vars that holds all task data
     // Used for saving
     var taskNameList = [String]()
-    var taskDictionary = [String : [String : Int]]()
-    var taskStatsDictionary = [String : [String : Int]]()
+    var taskDictionary = [String : [String : Double]]()
+    var taskStatsDictionary = [String : [String : Double]]()
     
     var taskNameIndex = 0
     
@@ -70,11 +72,11 @@ class TaskData: NSObject, NSCoding {
             taskNameList = loadTasks
         }
         
-        if let loadTaskSettings = NSKeyedUnarchiver.unarchiveObject(withFile: TaskData.archiveTaskSettingsURL.path) as? [String : [String : Int]] {
+        if let loadTaskSettings = NSKeyedUnarchiver.unarchiveObject(withFile: TaskData.archiveTaskSettingsURL.path) as? [String : [String : Double]] {
             taskDictionary = loadTaskSettings
         }
         
-        if let loadTaskStatistics = NSKeyedUnarchiver.unarchiveObject(withFile: TaskData.archiveTaskStatsURL.path) as? [String : [String : Int]] {
+        if let loadTaskStatistics = NSKeyedUnarchiver.unarchiveObject(withFile: TaskData.archiveTaskStatsURL.path) as? [String : [String : Double]] {
             taskStatsDictionary = loadTaskStatistics
         }
         
@@ -123,9 +125,9 @@ class TaskData: NSObject, NSCoding {
         
     }
     
-    func taskDaysAsArray(from taskDaysAsBinary: Int) -> [String] {
+    func taskDaysAsArray(from taskDaysAsBinary: Double) -> [String] {
         
-        var taskDaysBinaryString = String(taskDaysAsBinary)
+        var taskDaysBinaryString = String(Int(taskDaysAsBinary))
         var taskDaysBinaryArray = taskDaysBinaryString.characters.flatMap{Int(String($0))}
         
         while taskDaysBinaryArray.count != 7 {
@@ -169,7 +171,7 @@ class TaskData: NSObject, NSCoding {
         
     }
     
-    func taskDaysAsBinary(from taskDaysArray: [String]) -> Int {
+    func taskDaysAsBinary(from taskDaysArray: [String]) -> Double {
         
         var taskDays: Int = 0
         
@@ -196,7 +198,7 @@ class TaskData: NSObject, NSCoding {
             
         }
 
-        return taskDays
+        return Double(taskDays)
         
     }
     
@@ -214,8 +216,8 @@ class TaskData: NSObject, NSCoding {
 //    }
 
     
-    func newTask(name taskName: String, time taskTime: Int,
-                          days taskDays: [String], frequency taskFrequency: Int) {
+    func newTask(name taskName: String, time taskTime: Double,
+                          days taskDays: [String], frequency taskFrequency: Double) {
         self.taskName = taskName
         self.taskTime = taskTime
         
@@ -226,9 +228,9 @@ class TaskData: NSObject, NSCoding {
         
     }
     
-    func saveToDictionary(name taskName: String, time taskTime: Int,
-                                       completed completedTime: Int = 0,
-                                       days taskDaysArray: [String], frequency taskFrequency: Int) {
+    func saveToDictionary(name taskName: String, time taskTime: Double,
+                                       completed completedTime: Double = 0.0,
+                                       days taskDaysArray: [String], frequency taskFrequency: Double) {
         
         // Saving this array as "binary" so I don't have to handle multiple datatypes
         
@@ -245,19 +247,19 @@ class TaskData: NSObject, NSCoding {
     
     func newStatsDictionaryEntry(name taskName: String) {
         
-        taskStatsDictionary[taskName] = ["totalTaskTime": 0,
-                                    "missedTaskTime": 0,
-                                    "completedTaskTime": 0,
-                                    "totalTaskDays": 0,
-                                    "fullTaskDays": 0,
-                                    "partialTaskDays": 0,
-                                    "missedTaskDays": 0,
-                                    "currentStreak": 0,
-                                    "bestStreak": 0 ]
+        taskStatsDictionary[taskName] = ["totalTaskTime": 0.0,
+                                    "missedTaskTime": 0.0,
+                                    "completedTaskTime": 0.0,
+                                    "totalTaskDays": 0.0,
+                                    "fullTaskDays": 0.0,
+                                    "partialTaskDays": 0.0,
+                                    "missedTaskDays": 0.0,
+                                    "currentStreak": 0.0,
+                                    "bestStreak": 0.0 ]
         
     }
     
-    func saveToStatsDictionary(name taskName: String, stats taskStats: [String: [String:Int]]) {
+    func saveToStatsDictionary(name taskName: String, stats taskStats: [String: [String:Double]]) {
         taskStatsDictionary[taskName] = taskStats[taskName]
     }
 
@@ -284,11 +286,11 @@ class TaskData: NSObject, NSCoding {
             return nil
         }
         
-        guard let taskDictionary = aDecoder.decodeObject(forKey: "taskDictionary") as? [String:[String:Int]] else {
+        guard let taskDictionary = aDecoder.decodeObject(forKey: "taskDictionary") as? [String:[String:Double]] else {
             return nil
         }
 
-        guard let taskStatsDictionary = aDecoder.decodeObject(forKey: "taskStatsDictionary") as? [String:[String:Int]] else {
+        guard let taskStatsDictionary = aDecoder.decodeObject(forKey: "taskStatsDictionary") as? [String:[String:Double]] else {
             return nil
         }
 
@@ -297,7 +299,7 @@ class TaskData: NSObject, NSCoding {
         
     }
     
-    init(name: [String], taskSettings: [String:[String:Int]], statistics: [String:[String:Int]]) {
+    init(name: [String], taskSettings: [String:[String:Double]], statistics: [String:[String:Double]]) {
         
         self.taskNameList = name
         self.taskDictionary = taskSettings
