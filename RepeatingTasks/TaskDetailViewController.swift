@@ -17,7 +17,7 @@ class TaskDetailViewController: UIViewController {
     @IBOutlet weak var taskStartButton: UIButton!
     @IBOutlet weak var recentTaskHistory: BarChartView!
     
-    var taskTimer = Timer()
+    var timer = Timer()
     var timerEnabled = false
     
     var task = "*"
@@ -25,8 +25,10 @@ class TaskDetailViewController: UIViewController {
     var completedTime = 0.0
     var taskDays = [String]()
     var taskFrequency = 1.0
-    var leftoverMultiplier = 100.0
-    var leftoverTime = 0.0
+    var rolloverMultiplier = 1.0
+    var rolloverTime = 0.0
+    
+    var elapsedTime = 0.0
     
     let taskHistory = [600, 0, 1200]
     
@@ -34,7 +36,7 @@ class TaskDetailViewController: UIViewController {
     
     var taskData = TaskData()
     var appData = AppData()
-    var countdownTimer = CountdownTimer()
+    var taskTimer = CountdownTimer()
     
     var startTime = Date()
     var endTime = Date()
@@ -44,10 +46,11 @@ class TaskDetailViewController: UIViewController {
         
         self.title = task
         
+        let settings = UIBarButtonItem(image: #imageLiteral(resourceName: "Settings"), style: .plain, target: self, action: #selector(settingsTapped))
         let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        let trashButton = UIBarButtonItem(barButtonSystemItem: .trash, target: nil, action: #selector(trashTaskTapped))
-        
-        toolbarItems = [space, trashButton]
+        let trashButton = UIBarButtonItem(barButtonSystemItem: .trash, target: self, action: #selector(trashTapped))
+
+        toolbarItems = [settings, space, trashButton]
         
         taskStartButton.layer.cornerRadius = 10.0
         taskStartButton.layer.masksToBounds = true
@@ -69,7 +72,7 @@ class TaskDetailViewController: UIViewController {
         
         _ = formatTimer()
         
-        self.addObserver(self, forKeyPath: #keyPath(taskData.completedTime), options: .new, context: nil)
+        self.addObserver(self, forKeyPath: #keyPath(taskTimer.elapsedTime), options: .new, context: nil)
         
 
         //(_, _) = countdownTimer.formatTimer(for: task, decrement: false)
@@ -78,7 +81,7 @@ class TaskDetailViewController: UIViewController {
         
         //taskTimeLabel.text = formatter.string(from: TimeInterval(countdownTimer.remainingTime))!
 
-        if taskData.timerEnabled {
+        if taskTimer.isEnabled {
 
             taskStartButton.setImage(#imageLiteral(resourceName: "Pause"), for: .normal)
             let stencil = #imageLiteral(resourceName: "Pause").withRenderingMode(.alwaysTemplate)
@@ -166,13 +169,14 @@ class TaskDetailViewController: UIViewController {
 
         //if keyPath == #keyPath(taskData.completedTime) {
             // Update Time Label
-        _ = synchedTimer(for: change![NSKeyValueChangeKey.newKey] as! Double)
+        //_ = synchedTimer(for: change![NSKeyValueChangeKey.newKey] as! Double)
+        _ = formatTimer()
         //}
     }
     
     func synchedTimer(for completedTime: Double) -> String {
         
-        let weightedTaskTime = taskTime + (leftoverTime * leftoverMultiplier)
+        let weightedTaskTime = taskTime + (rolloverTime * rolloverMultiplier)
 
         let remainingTaskTime = weightedTaskTime - completedTime
         
@@ -197,11 +201,21 @@ class TaskDetailViewController: UIViewController {
     func formatTimer() -> (String, Double) {
         // Used for initialization and when the task timer is updated
         
-        let weightedTaskTime = taskTime + (leftoverTime * leftoverMultiplier)
-
-        let remainingTaskTime = weightedTaskTime - taskData.completedTime
+        //let (remainingTimeAsString, remainingTaskTime) = taskTimer.formatTimer(name: task, dataset: taskData)
         
-        print("Completed time is \(taskData.completedTime)")
+        taskData.setTask(as: task)
+        
+        let currentTime = Date().timeIntervalSince1970
+
+        let weightedTaskTime = taskTime + (rolloverTime * rolloverMultiplier)
+
+        elapsedTime = completedTime
+        
+        if taskTimer.isEnabled {
+            elapsedTime += (currentTime - taskTimer.startTime)
+        }
+        
+        let remainingTaskTime = weightedTaskTime - elapsedTime
         
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.hour, .minute, .second]
@@ -209,7 +223,11 @@ class TaskDetailViewController: UIViewController {
         
         let remainingTimeAsString = formatter.string(from: TimeInterval(remainingTaskTime))!
         
-        if remainingTaskTime != 0 {
+//        let remainingTaskTime = weightedTaskTime - taskData.completedTime
+//        
+//        print("Completed time is \(taskData.completedTime)")
+//        
+        if remainingTaskTime > 0 {
             taskTimeLabel.text = remainingTimeAsString
             taskStartButton.isEnabled = true
         } else {
@@ -223,8 +241,8 @@ class TaskDetailViewController: UIViewController {
 
     @IBAction func taskButtonTapped(_ sender: UIButton) {
         
-        if taskData.timerEnabled != true {
-            taskData.timerEnabled = true
+        if taskTimer.isEnabled != true {
+            taskTimer.isEnabled = true
             
             let stencil = #imageLiteral(resourceName: "Pause").withRenderingMode(.alwaysTemplate)
             taskStartButton.setImage(stencil, for: .normal)
@@ -232,13 +250,14 @@ class TaskDetailViewController: UIViewController {
             
             //taskStartButton.setImage(#imageLiteral(resourceName: "Pause"), for: .normal)
             
-            countdownTimer.startTime = Date().timeIntervalSince1970
+            taskTimer.startTime = Date().timeIntervalSince1970
             
-            taskTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self,
+            taskTimer.run = Timer.scheduledTimer(timeInterval: 1.0, target: self,
                                              selector: #selector(timerRunning), userInfo: nil, repeats: true)
             
         } else {
-            taskData.timerEnabled = false
+            
+            timerStopped(for: task)
             
             let stencil = #imageLiteral(resourceName: "Play").withRenderingMode(.alwaysTemplate)
             taskStartButton.setImage(stencil, for: .normal)
@@ -247,13 +266,10 @@ class TaskDetailViewController: UIViewController {
             
             NotificationCenter.default.post(name: Notification.Name("StopTimerNotification"), object: nil)
             
-            taskTimer.invalidate()
-            
 //            if willResetTimer {
 //                resetTaskTimers()
 //            }
             
-            saveData()
         }
         
     }
@@ -264,10 +280,9 @@ class TaskDetailViewController: UIViewController {
         
         print("Time remaining is \(timeRemaining)")
         
-        taskData.completedTime += 1
-        
-        if timeRemaining == 0 || (completedTime == taskTime) {
-            taskTimer.invalidate()
+        if timeRemaining <= 0 || (completedTime == taskTime) {
+            
+            timerStopped(for: task)
             
             let stencil = #imageLiteral(resourceName: "Play").withRenderingMode(.alwaysTemplate)
             taskStartButton.setImage(stencil, for: .normal)
@@ -276,6 +291,25 @@ class TaskDetailViewController: UIViewController {
             //taskStartButton.setImage(#imageLiteral(resourceName: "Play"), for: .normal)
             
         }
+    }
+    
+    func timerStopped(for task: String) {
+        
+        taskTimer.run.invalidate()
+        
+        taskData.setTask(as: task)
+        
+        taskTimer.endTime = Date().timeIntervalSince1970
+        
+        let elapsedTime = taskTimer.endTime - taskTimer.startTime
+        
+        taskData.taskDictionary[task]?["completedTime"]! += elapsedTime
+        
+        taskTimer.isEnabled = false
+        taskTimer.firedFromMainVC = false
+        
+        saveData()
+        
     }
     
     func updateCompletionChart() {
@@ -307,23 +341,41 @@ class TaskDetailViewController: UIViewController {
     
     }
     
-    func trashTaskTapped() {
+    func trashTapped() {
         
+        print("Erase Task")
         performSegue(withIdentifier: "taskDeletedUnwindSegue", sender: self)
         
+    }
+    
+    func settingsTapped() {
+        
+        print("Go to Settings")
+        performSegue(withIdentifier: "taskSettingsSegue", sender: self)
+
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
         if segue.identifier == "taskDeletedUnwindSegue" {
             
-            print(task)
-            
             let vc = segue.destination as! TaskViewController
             vc.tasks = vc.tasks.filter { $0 != task }
             print(vc.tasks)
             
             vc.taskData.removeTask(name: task)
+            
+        } else if segue.identifier == "taskSettingsSegue" {
+            
+            let vc = segue.destination as! TaskSettingsViewController
+            
+            vc.task = task
+            vc.taskTime = taskTime
+            vc.taskDays = taskDays
+            vc.occurranceRate = taskFrequency
+            vc.rolloverMultiplier = rolloverMultiplier
+            
+            vc.taskData = taskData
             
         }
         
@@ -344,13 +396,13 @@ class TaskDetailViewController: UIViewController {
     }
     
     deinit {
-        self.removeObserver(self, forKeyPath: #keyPath(taskData.completedTime))
-        taskTimer.invalidate()
+        self.removeObserver(self, forKeyPath: #keyPath(taskTimer.elapsedTime))
+        timer.invalidate()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         
-        taskTimer.invalidate()
+        timer.invalidate()
         
         let vc = self.navigationController?.viewControllers.first as! TaskViewController
         
@@ -360,7 +412,7 @@ class TaskDetailViewController: UIViewController {
 
     override func viewDidDisappear(_ animated: Bool) {
         
-        taskTimer.invalidate()
+        timer.invalidate()
         
     }
     

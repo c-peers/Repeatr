@@ -23,9 +23,11 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     dynamic var taskData = TaskData()
     var appData = AppData()
-    var countdownTimer = CountdownTimer()
+    //var countdownTimer = CountdownTimer()
     
-    var taskTimer = Timer()
+    var taskTimer = CountdownTimer()
+    
+    //var taskTimer = Timer()
     
     //var timerEnabled = false
     var timerFiringFromTaskVC = false
@@ -47,7 +49,7 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
         let task = tasks[indexPath.row]
         
-        if taskData.timerEnabled && task == selectedTask {
+        if taskTimer.isEnabled && task == selectedTask {
             cell.playStopButton.setImage(#imageLiteral(resourceName: "Pause"), for: .normal)
         } else {
             cell.playStopButton.setImage(#imageLiteral(resourceName: "Play"), for: .normal)
@@ -62,7 +64,8 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
         //_ = formatTimer(for: cell, decrement: false)
         //(_, _) = Task.instance.timer.formatTimer(for: task, from: cell, decrement: false)
-        (_, _) = formatTimer(for: task, from: cell)
+        //(_, _) = formatTimer(for: task, from: cell)
+        (_, _) = taskTimer.formatTimer(name: task, from: cell, dataset: taskData)
         
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.hour, .minute, .second]
@@ -159,9 +162,9 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
         // Load any saved data
         loadData()
         
-        if tasks.isEmpty {
-            tasks = ["Test1", "Test2", "Test3", "Test4", "Test5"]
-        }
+        //if tasks.isEmpty {
+        //    tasks = ["Test1", "Test2", "Test3", "Test4", "Test5"]
+        //}
         
         print("loaded Values")
         print(tasks)
@@ -232,7 +235,7 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
         } else {
 
             //if !Task.instance.timer.isEnabled {
-            if !taskData.timerEnabled {
+            if !taskTimer.isEnabled {
                 resetTaskTimers()
             } else {
                 willResetTimer = true
@@ -300,7 +303,7 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
         // Iterate through all tasks and do the following
         // 1. Reset completed time
-        // 2. Calculate leftover time
+        // 2. Calculate rollover time
         // 3. Refresh screen
         for x in 0...(tasks.count - 1) {
             let task = tasks[x]
@@ -311,11 +314,11 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
 
             let completedTime = taskData.completedTime
             
-            let leftoverFromYesterday = weightedTaskTime - completedTime
+            let rolloverFromYesterday = weightedTaskTime - completedTime
             
             taskData.taskDictionary[task]?["completedTime"] = 0
             
-            taskData.taskDictionary[task]?["leftoverTime"] = leftoverFromYesterday
+            taskData.taskDictionary[task]?["rolloverTime"] = rolloverFromYesterday
             
         }
         
@@ -333,41 +336,36 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
             return // or fatalError() or whatever
         }
         
-        if !taskData.timerEnabled {
-            taskData.timerEnabled = true
-            timerFiringFromTaskVC = true
+        if !taskTimer.isEnabled {
             
-            let stencil = #imageLiteral(resourceName: "Pause").withRenderingMode(.alwaysTemplate)
-            cell.playStopButton.setImage(stencil, for: .normal)
-            //cell.playStopButton.setTitle("Stop", for: .normal)
+            taskTimer.isEnabled = true
+            taskTimer.firedFromMainVC = true
+
+            //taskData.timerEnabled = true
+            //timerFiringFromTaskVC = true
+            
+            //let stencil = #imageLiteral(resourceName: "Pause").withRenderingMode(.alwaysTemplate)
+            cell.playStopButton.setImage(#imageLiteral(resourceName: "Pause"), for: .normal)
             
             //cell.playStopButton.tintColor = UIColor.white
             
-            countdownTimer.startTime = Date().timeIntervalSince1970
-            
-            //countdownTimer.startTimer(for: cell)
+            taskTimer.startTime = Date().timeIntervalSince1970
             
             selectedCell = cell
             
-            taskTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self,
+            taskTimer.run = Timer.scheduledTimer(timeInterval: 1.0, target: self,
                                              selector: #selector(timerRunning), userInfo: nil,
                                              repeats: true)
 
             
         } else {
-            taskData.timerEnabled = false
-            timerFiringFromTaskVC = false
-            
             cell.playStopButton.setImage(#imageLiteral(resourceName: "Play"), for: .normal)
-            //cell.playStopButton.setTitle("Start", for: .normal)
             
-            //countdownTimer.stopTimer(for: cell)
+            timerStopped(for: cell.taskNameField.text!)
             
-                        taskTimer.invalidate()
-            
-                        if willResetTimer {
-                            resetTaskTimers()
-                        }
+            if willResetTimer {
+                resetTaskTimers()
+            }
             
         }
         
@@ -399,27 +397,18 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
         let cell = selectedCell!
         let taskName = cell.taskNameField.text!
         
-        let (_, timeRemaining) = formatTimer(for: taskName, from: cell)
+        let (_, timeRemaining) = taskTimer.formatTimer(name: taskName, from: cell, dataset: taskData)
+        
+        //let (_, timeRemaining) = formatTimer(for: taskName, from: cell)
         
         print("Time remaining is \(timeRemaining)")
         
-        taskData.setTask(as: taskName)
-        
-        taskData.taskDictionary[taskName]?["completedTime"]! += 1
-        
-        if timeRemaining == 0 || (taskData.completedTime == taskData.taskTime) {
-            taskTimer.invalidate()
+        if timeRemaining <= 0 {
+            timerStopped(for: taskName)
             
-            //Task.instance.timer.isEnabled = false
-            taskData.timerEnabled = false
-            timerFiringFromTaskVC = false
-
             cell.taskTimeRemaining.text = "Complete"
             cell.playStopButton.setImage(#imageLiteral(resourceName: "Play"), for: .normal)
-            //cell.playStopButton.setTitle("Start", for: .normal)
             cell.playStopButton.isEnabled = false
-            
-            saveData()
             
         }
         
@@ -441,6 +430,29 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
     }
     
+    func timerStopped(for task: String) {
+        
+        taskTimer.run.invalidate()
+        
+        taskData.setTask(as: task)
+        
+        taskTimer.endTime = Date().timeIntervalSince1970
+        
+        let elapsedTime = taskTimer.endTime - taskTimer.startTime
+        //let previousCompletedTime = taskData.taskDictionary[task]?["completedTime"]!
+        
+        taskData.taskDictionary[task]?["completedTime"]! += elapsedTime
+        
+        //Task.instance.timer.isEnabled = false
+        //taskData.timerEnabled = false
+        //timerFiringFromTaskVC = false
+        taskTimer.isEnabled = false
+        taskTimer.firedFromMainVC = false
+
+        saveData()
+        
+    }
+    
     func formatTimer(for task: String, from cell: RepeatingTasksCollectionCell? = nil) -> (String, Double) {
         // Used for initialization and when the task timer is updated
         
@@ -458,7 +470,7 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
         var remainingTaskTime = weightedTaskTime - completedTime
         
-        if taskTimer.isValid {
+        if taskTimer.run.isValid {
             remainingTaskTime -= 1
         }
         
@@ -493,17 +505,17 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
     func getWeightedTime(for task: String) -> (Double, Double) {
         
         let taskTime = taskData.taskTime
-        let leftoverMultiplier = taskData.leftoverMultiplier
-        let leftoverTime = taskData.leftoverTime
+        let rolloverMultiplier = taskData.rolloverMultiplier
+        let rolloverTime = taskData.rolloverTime
         
-        return (taskTime, taskTime + (leftoverTime * leftoverMultiplier))
+        return (taskTime, taskTime + (rolloverTime * rolloverMultiplier))
         
     }
     
     func catchNotification(notification:Notification) -> Void {
         print("Catch notification")
         
-        taskTimer.invalidate()
+        taskTimer.run.invalidate()
         
     }
     func addTask() {
@@ -549,7 +561,6 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
             let taskVC = segue.destination as! TaskDetailViewController
             
             taskVC.appData = appData
-
             taskVC.taskData = taskData
             
             taskVC.task = taskData.taskName
@@ -557,10 +568,10 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
             taskVC.completedTime = taskData.completedTime
             taskVC.taskDays = taskData.taskDays
             taskVC.taskFrequency = taskData.taskFrequency
-            taskVC.leftoverTime = taskData.leftoverTime
-            taskVC.leftoverMultiplier = taskData.leftoverMultiplier
+            taskVC.rolloverTime = taskData.rolloverTime
+            taskVC.rolloverMultiplier = taskData.rolloverMultiplier
             
-            taskVC.countdownTimer = countdownTimer
+            taskVC.taskTimer = taskTimer
             
         }
         
@@ -593,6 +604,7 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
         }
 
         DispatchQueue.main.async {
+            self.taskList.collectionViewLayout.invalidateLayout()
             self.taskList.reloadData()
         }
         
@@ -600,10 +612,10 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
 
     override func viewDidAppear(_ animated: Bool) {
         
-        if taskData.timerEnabled && !timerFiringFromTaskVC {
+        if taskTimer.isEnabled && !taskTimer.firedFromMainVC {
             
             let currentTime = Date().timeIntervalSince1970
-            let timeElapsed = currentTime - countdownTimer.startTime
+            let timeElapsed = currentTime - taskTimer.startTime
             print("time elapsed \(timeElapsed)")
             
             let wholeNumbers = floor(timeElapsed)
@@ -619,8 +631,9 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
             let indexPath = IndexPath(row: indexPathRow!, section: 0)
             selectedCell = taskList.cellForItem(at: indexPath) as? RepeatingTasksCollectionCell
             
-            _ = formatTimer(for: selectedTask, from: selectedCell)
-
+            //_ = formatTimer(for: selectedTask, from: selectedCell)
+            _ = taskTimer.formatTimer(name: selectedTask, from: selectedCell, dataset: taskData)
+            
             let runningTaskTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self,
                                                   selector: #selector(timerRunning), userInfo: nil,
                                                   repeats: true)

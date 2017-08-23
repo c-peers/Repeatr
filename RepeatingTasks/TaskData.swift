@@ -20,8 +20,8 @@ class TaskData: NSObject, NSCoding {
     dynamic var completedTime = 0.0
     var taskDays = [String]()
     var taskFrequency = 1.0
-    var leftoverMultiplier = 100.0
-    var leftoverTime = 0.0
+    var rolloverMultiplier = 1.0
+    var rolloverTime = 0.0
     
     // Task statistics
     var totalTaskTime = 0.0
@@ -93,12 +93,12 @@ class TaskData: NSObject, NSCoding {
         print("Task index is \(taskNameIndex)")
         
         if let currentTask = taskDictionary[taskName] {
-            taskTime = currentTask["taskTime"] ?? 3600
-            completedTime = currentTask["completedTime"] ?? 0
-            let taskDaysAsBinary = currentTask["taskDays"] ?? 1111111
-            taskFrequency = currentTask["taskFrequency"] ?? 1
-            leftoverMultiplier = currentTask["leftoverMultiplier"] ?? 1
-            leftoverTime = currentTask["leftoverTime"] ?? 0
+            taskTime = currentTask["taskTime"] ?? 3600.0
+            completedTime = currentTask["completedTime"] ?? 0.0
+            let taskDaysAsBinary = currentTask["taskDays"] ?? 1111111.0
+            taskFrequency = currentTask["taskFrequency"] ?? 1.0
+            rolloverMultiplier = currentTask["rolloverMultiplier"] ?? 1.0
+            rolloverTime = currentTask["rolloverTime"] ?? 0.0
             
             taskDays = taskDaysAsArray(from: taskDaysAsBinary)
             
@@ -128,7 +128,13 @@ class TaskData: NSObject, NSCoding {
     func taskDaysAsArray(from taskDaysAsBinary: Double) -> [String] {
         
         var taskDaysBinaryString = String(Int(taskDaysAsBinary))
-        var taskDaysBinaryArray = taskDaysBinaryString.characters.flatMap{Int(String($0))}
+        //let taskDaysBinaryStringArray = taskDaysBinaryString.characters.flatMap{String($0)}
+        var taskDaysBinaryArray = [Int]()
+        for i in taskDaysBinaryString.characters {
+            taskDaysBinaryArray.append(Int(String(i))!)
+        }
+        
+        //var taskDaysBinaryArray = taskDaysBinaryStringArray.flatMap{Int($0)}
         
         while taskDaysBinaryArray.count != 7 {
             taskDaysBinaryArray.insert(0, at: 0)
@@ -228,6 +234,23 @@ class TaskData: NSObject, NSCoding {
         
     }
     
+    func saveTask(_ task: String) {
+        
+        // Saving this array as "binary" so I don't have to handle multiple datatypes
+        
+        setTask(as: task)
+        
+        let taskDaysBinary = taskDaysAsBinary(from: taskDays)
+        
+        taskDictionary[task] = ["taskTime": self.taskTime,
+                                    "completedTime": self.completedTime,
+                                    "taskDays": taskDaysBinary,
+                                    "taskFrequency": self.taskFrequency,
+                                    "rolloverMultiplier": self.rolloverMultiplier,
+                                    "rolloverTime": self.rolloverTime]
+
+    }
+    
     func saveToDictionary(name taskName: String, time taskTime: Double,
                                        completed completedTime: Double = 0.0,
                                        days taskDaysArray: [String], frequency taskFrequency: Double) {
@@ -240,8 +263,8 @@ class TaskData: NSObject, NSCoding {
                                         "completedTime": completedTime,
                                         "taskDays": taskDays,
                                         "taskFrequency": taskFrequency,
-                                        "leftoverMultiplier": leftoverMultiplier,
-                                        "leftoverTime": leftoverTime]
+                                        "rolloverMultiplier": rolloverMultiplier,
+                                        "rolloverTime": rolloverTime]
         
     }
     
