@@ -38,8 +38,9 @@ class NewTasksViewController: UIViewController {
     var selectedHours = "0"
     var selectedMinutes = "0"
     var pickerData: [[String]] = []
-    var timePickerView = UIPickerView()
     
+    var timePickerView = UIPickerView()
+    let pickerViewDatasource = TaskTimePicker()
     
     override func viewDidLoad() {
         
@@ -286,22 +287,6 @@ class NewTasksViewController: UIViewController {
             vc.taskData.newStatsDictionaryEntry(name: taskName)
             
             vc.tasks.append(taskName)
-//            vc.taskSettings[taskName] = ["taskTime": taskTime,
-//                                             "completedTime": completedTime,
-//                                             "taskDays": taskDaysBinary,
-//                                             "taskFrequency": taskFrequency]
-//
-//            vc.taskStatistics[taskName] = ["totalTaskTime": 0,
-//                                             "missedTaskTime": 0,
-//                                             "completedTaskTime": 0,
-//                                             "totalTaskDays": 0,
-//                                             "fullTaskDays": 0,
-//                                             "partialTaskDays": 0,
-//                                             "missedTaskDays": 0,
-//                                             "currentStreak": 0,
-//                                             "bestStreak": 0 ]
-
-
             
             
         }
@@ -382,20 +367,11 @@ class NewTasksViewController: UIViewController {
 //******************************
 //UIPickerView functions
 //******************************
+
+//MARK: - Picker View Delegate
+
 extension NewTasksViewController: UIPickerViewDelegate, UIPickerViewDataSource {
 
-    //MARK: - Picker View Delegate
-
-    //MARK: - Picker View Data Source
-    
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return pickerData[component].count
-    }
-    
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 2
-    }
-    
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         
         selectedHours = pickerData[0][timePickerView.selectedRow(inComponent: 0)]
@@ -409,6 +385,14 @@ extension NewTasksViewController: UIPickerViewDelegate, UIPickerViewDataSource {
             taskLengthTextField.text = selectedHours + " hours " + selectedMinutes + " minutes"
         }
         
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return pickerData[component].count
+    }
+    
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 2
     }
     
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
@@ -426,6 +410,7 @@ extension NewTasksViewController: UIPickerViewDelegate, UIPickerViewDataSource {
 //******************************
 
 //MARK: - Text Field Delegate
+
 extension NewTasksViewController: UITextFieldDelegate {
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {

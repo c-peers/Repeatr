@@ -179,7 +179,7 @@
                         <outlet property="taskStartButton" destination="j5Z-ne-lTq" id="hqC-58-Y8k"/>
                         <outlet property="taskTimeLabel" destination="hi4-ID-NXk" id="AQM-pa-ogL"/>
                         <segue destination="c2h-l3-3Ra" kind="unwind" identifier="taskDeletedUnwindSegue" unwindAction="taskDeletedUnwindWithSegue:" id="QoN-g9-PR4"/>
-                        <segue destination="pN5-Wi-uSc" kind="show" identifier="TaskSettingsSegue" id="Lgn-69-VsP"/>
+                        <segue destination="pN5-Wi-uSc" kind="show" identifier="taskSettingsSegue" id="Lgn-69-VsP"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5bg-UC-3Xy" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -245,6 +245,9 @@
                                                 <state key="normal" title="S">
                                                     <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                                 </state>
+                                                <connections>
+                                                    <action selector="sundayTapped:" destination="pN5-Wi-uSc" eventType="touchUpInside" id="8GZ-ti-YQA"/>
+                                                </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tw4-Gr-UX0">
                                                 <rect key="frame" x="87" y="183" width="40" height="40"/>
@@ -256,6 +259,9 @@
                                                 <state key="normal" title="M">
                                                     <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                                 </state>
+                                                <connections>
+                                                    <action selector="mondayTapped:" destination="pN5-Wi-uSc" eventType="touchUpInside" id="wlA-L4-Iep"/>
+                                                </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jiI-un-Vnp">
                                                 <rect key="frame" x="127" y="183" width="40" height="40"/>
@@ -267,6 +273,9 @@
                                                 <state key="normal" title="T">
                                                     <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                                 </state>
+                                                <connections>
+                                                    <action selector="tuesdayTapped:" destination="pN5-Wi-uSc" eventType="touchUpInside" id="ngU-u3-Dn7"/>
+                                                </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ahQ-P6-Lx4">
                                                 <rect key="frame" x="167" y="183" width="40" height="40"/>
@@ -278,6 +287,9 @@
                                                 <state key="normal" title="W">
                                                     <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                                 </state>
+                                                <connections>
+                                                    <action selector="wednesdayTapped:" destination="pN5-Wi-uSc" eventType="touchUpInside" id="cn9-tj-0rA"/>
+                                                </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P4v-nq-xhy">
                                                 <rect key="frame" x="207" y="183" width="40" height="40"/>
@@ -289,6 +301,9 @@
                                                 <state key="normal" title="Th">
                                                     <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                                 </state>
+                                                <connections>
+                                                    <action selector="thursdayTapped:" destination="pN5-Wi-uSc" eventType="touchUpInside" id="LDa-A2-5Jh"/>
+                                                </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jwp-Vp-rH2">
                                                 <rect key="frame" x="246" y="183" width="40" height="40"/>
@@ -299,6 +314,9 @@
                                                 <state key="normal" title="F">
                                                     <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                                 </state>
+                                                <connections>
+                                                    <action selector="fridayTapped:" destination="pN5-Wi-uSc" eventType="touchUpInside" id="frn-62-IiK"/>
+                                                </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Zr6-4k-dXP">
                                                 <rect key="frame" x="286" y="183" width="40" height="40"/>
@@ -309,6 +327,9 @@
                                                 <state key="normal" title="S">
                                                     <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                                 </state>
+                                                <connections>
+                                                    <action selector="saturdayTapped:" destination="pN5-Wi-uSc" eventType="touchUpInside" id="har-vt-Ybh"/>
+                                                </connections>
                                             </button>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="How often will it ocur?" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tUf-oS-1sL">
                                                 <rect key="frame" x="8" y="249" width="169" height="21"/>

@@ -24,6 +24,7 @@
 		C43A508C1F39679700BEAA97 /* Charts.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C43A50881F39678A00BEAA97 /* Charts.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C43A509D1F3BFB0600BEAA97 /* Singleton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C43A509C1F3BFB0600BEAA97 /* Singleton.swift */; };
 		C43A50C01F3E67E700BEAA97 /* Holding FIle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C43A50BF1F3E67E700BEAA97 /* Holding FIle.swift */; };
+		C4540F381F4E704C00B2D1F3 /* TimePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4540F371F4E704C00B2D1F3 /* TimePicker.swift */; };
 		C49C8D0E1EF35F91007F1069 /* NewTasksViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C49C8D0D1EF35F91007F1069 /* NewTasksViewController.swift */; };
 		C4A28F4F1F34583400B9D79A /* AppData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A28F4E1F34583400B9D79A /* AppData.swift */; };
 		C4D64E021F383AA600844404 /* TaskDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D64E011F383AA600844404 /* TaskDetailViewController.swift */; };
@@ -140,6 +141,7 @@
 		C43A50821F39678A00BEAA97 /* Charts.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Charts.xcodeproj; path = "../../../../Downloads/Charts-master/Charts.xcodeproj"; sourceTree = "<group>"; };
 		C43A509C1F3BFB0600BEAA97 /* Singleton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Singleton.swift; sourceTree = "<group>"; };
 		C43A50BF1F3E67E700BEAA97 /* Holding FIle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Holding FIle.swift"; sourceTree = "<group>"; };
+		C4540F371F4E704C00B2D1F3 /* TimePicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimePicker.swift; sourceTree = "<group>"; };
 		C49C8D0D1EF35F91007F1069 /* NewTasksViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewTasksViewController.swift; sourceTree = "<group>"; };
 		C4A28F4E1F34583400B9D79A /* AppData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppData.swift; sourceTree = "<group>"; };
 		C4D64E011F383AA600844404 /* TaskDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskDetailViewController.swift; sourceTree = "<group>"; };
@@ -204,6 +206,7 @@
 				C43A509C1F3BFB0600BEAA97 /* Singleton.swift */,
 				C4D64E011F383AA600844404 /* TaskDetailViewController.swift */,
 				C4257AE71F4A97B200AA03B5 /* TaskSettingsViewController.swift */,
+				C4540F371F4E704C00B2D1F3 /* TimePicker.swift */,
 				C40AABE11F2B07270061BFE3 /* TaskData.swift */,
 				C4A28F4E1F34583400B9D79A /* AppData.swift */,
 				C403E3181EF034E5001EE78D /* Main.storyboard */,
@@ -448,6 +451,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C4540F381F4E704C00B2D1F3 /* TimePicker.swift in Sources */,
 				C403E3171EF034E5001EE78D /* ViewController.swift in Sources */,
 				C43A509D1F3BFB0600BEAA97 /* Singleton.swift in Sources */,
 				C49C8D0E1EF35F91007F1069 /* NewTasksViewController.swift in Sources */,

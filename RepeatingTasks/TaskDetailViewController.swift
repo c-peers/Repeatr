@@ -41,10 +41,19 @@ class TaskDetailViewController: UIViewController {
     var startTime = Date()
     var endTime = Date()
     
+    override func viewWillAppear(_ animated: Bool) {
+ 
+        
+        
+        self.title = task
+
+        
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.title = task
+        //self.title = task
         
         let settings = UIBarButtonItem(image: #imageLiteral(resourceName: "Settings"), style: .plain, target: self, action: #selector(settingsTapped))
         let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
@@ -406,8 +415,13 @@ class TaskDetailViewController: UIViewController {
         
         let vc = self.navigationController?.viewControllers.first as! TaskViewController
         
-        //vc.taskData.taskDictionary[task]?["completedTime"] = completedTime
-        vc.runningCompletionTime = taskData.completedTime
+        if taskTimer.isEnabled {
+
+            //vc.taskData.taskDictionary[task]?["completedTime"] = completedTime
+            vc.runningCompletionTime = taskData.completedTime
+
+        }
+        
     }
 
     override func viewDidDisappear(_ animated: Bool) {

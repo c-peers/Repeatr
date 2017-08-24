@@ -234,6 +234,18 @@ class TaskData: NSObject, NSCoding {
         
     }
     
+    func changeTaskName(from previousName: String, to newName: String) {
+        
+        let index = taskNameList.index(of: previousName)
+        taskNameList[index!] = newName
+        
+        taskDictionary[newName] = taskDictionary[previousName]
+        taskStatsDictionary[newName] = taskStatsDictionary[previousName]
+        
+        removeTask(name: previousName)
+        
+    }
+    
     func saveTask(_ task: String) {
         
         // Saving this array as "binary" so I don't have to handle multiple datatypes
