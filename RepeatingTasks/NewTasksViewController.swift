@@ -38,6 +38,7 @@ class NewTasksViewController: UIViewController {
     var selectedHours = "0"
     var selectedMinutes = "0"
     var pickerData: [[String]] = []
+    var selectedFromPicker: UILabel!
     
     var timePickerView = UIPickerView()
     let pickerViewDatasource = TaskTimePicker()
@@ -158,86 +159,100 @@ class NewTasksViewController: UIViewController {
     }
     
     @IBAction func sundayTapped(_ sender: UIButton) {
-        if sunday.layer.backgroundColor == UIColor.black.cgColor {
+        if sunday.tag == 0 {
             sunday.layer.backgroundColor = UIColor.white.cgColor
             sunday.setTitleColor(UIColor.black, for: .normal)
+            sunday.tag = 1
             taskDays = taskDays.filter { $0 != "Sunday" }
         } else {
             sunday.layer.backgroundColor = UIColor.black.cgColor
             sunday.setTitleColor(UIColor.white, for: .normal)
+            sunday.tag = 0
             taskDays.append("Sunday")
         }
     }
     
     @IBAction func mondayTapped(_ sender: UIButton) {
-        if monday.layer.backgroundColor == UIColor.black.cgColor {
+        if monday.tag == 0 {
             monday.layer.backgroundColor = UIColor.white.cgColor
             monday.setTitleColor(UIColor.black, for: .normal)
+            monday.tag = 1
             taskDays = taskDays.filter { $0 != "Monday" }
         } else {
             monday.layer.backgroundColor = UIColor.black.cgColor
             monday.setTitleColor(UIColor.white, for: .normal)
+            monday.tag = 0
             taskDays.append("Monday")
-
+            
         }
     }
     
     @IBAction func tuesdayTapped(_ sender: UIButton) {
-        if tuesday.layer.backgroundColor == UIColor.black.cgColor {
+        if tuesday.tag == 0 {
             tuesday.layer.backgroundColor = UIColor.white.cgColor
             tuesday.setTitleColor(UIColor.black, for: .normal)
+            tuesday.tag = 1
             taskDays = taskDays.filter { $0 != "Tuesday" }
         } else {
             tuesday.layer.backgroundColor = UIColor.black.cgColor
             tuesday.setTitleColor(UIColor.white, for: .normal)
+            tuesday.tag = 0
             taskDays.append("Tuesday")
         }
     }
     
     @IBAction func wednesdayTapped(_ sender: UIButton) {
-        if wednesday.layer.backgroundColor == UIColor.black.cgColor {
+        if wednesday.tag == 0 {
             wednesday.layer.backgroundColor = UIColor.white.cgColor
             wednesday.setTitleColor(UIColor.black, for: .normal)
+            wednesday.tag = 1
             taskDays = taskDays.filter { $0 != "Wednesday" }
         } else {
             wednesday.layer.backgroundColor = UIColor.black.cgColor
             wednesday.setTitleColor(UIColor.white, for: .normal)
+            wednesday.tag = 0
             taskDays.append("Wednesday")
         }
     }
     
     @IBAction func thursdayTapped(_ sender: UIButton) {
-        if thursday.layer.backgroundColor == UIColor.black.cgColor {
+        if thursday.tag == 0 {
             thursday.layer.backgroundColor = UIColor.white.cgColor
             thursday.setTitleColor(UIColor.black, for: .normal)
+            thursday.tag = 1
             taskDays = taskDays.filter { $0 != "Thursday" }
         } else {
             thursday.layer.backgroundColor = UIColor.black.cgColor
             thursday.setTitleColor(UIColor.white, for: .normal)
+            thursday.tag = 0
             taskDays.append("Thursday")
         }
     }
     
     @IBAction func fridayTapped(_ sender: UIButton) {
-        if friday.layer.backgroundColor == UIColor.black.cgColor {
+        if friday.tag == 0 {
             friday.layer.backgroundColor = UIColor.white.cgColor
             friday.setTitleColor(UIColor.black, for: .normal)
+            friday.tag = 1
             taskDays = taskDays.filter { $0 != "Friday" }
         } else {
             friday.layer.backgroundColor = UIColor.black.cgColor
             friday.setTitleColor(UIColor.white, for: .normal)
+            friday.tag = 0
             taskDays.append("Friday")
         }
     }
     
     @IBAction func saturdayTapped(_ sender: UIButton) {
-        if saturday.layer.backgroundColor == UIColor.black.cgColor {
+        if saturday.tag == 0 {
             saturday.layer.backgroundColor = UIColor.white.cgColor
             saturday.setTitleColor(UIColor.black, for: .normal)
+            saturday.tag = 1
             taskDays = taskDays.filter { $0 != "Saturday" }
         } else {
             saturday.layer.backgroundColor = UIColor.black.cgColor
             saturday.setTitleColor(UIColor.white, for: .normal)
+            saturday.tag = 0
             taskDays.append("Saturday")
         }
     }
@@ -385,6 +400,10 @@ extension NewTasksViewController: UIPickerViewDelegate, UIPickerViewDataSource {
             taskLengthTextField.text = selectedHours + " hours " + selectedMinutes + " minutes"
         }
         
+        selectedFromPicker = pickerView.view(forRow: row, forComponent: component) as! UILabel
+        
+        pickerView.reloadAllComponents()
+
     }
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
@@ -392,7 +411,7 @@ extension NewTasksViewController: UIPickerViewDelegate, UIPickerViewDataSource {
     }
     
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 2
+        return pickerData.count
     }
     
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
@@ -401,6 +420,34 @@ extension NewTasksViewController: UIPickerViewDelegate, UIPickerViewDataSource {
     
     func pickerView(_ pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
         return CGFloat(100.0)
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
+        
+        let pickerLabel = UILabel()
+        let text = pickerData[component][row]
+        
+        pickerLabel.text = text
+        //pickerLabel.textAlignment = NSTextAlignment.center
+        pickerLabel.frame = CGRect(x: 0, y: 0, width: 100, height: 40)
+        pickerLabel.layer.masksToBounds = true
+        pickerLabel.layer.cornerRadius = 5.0
+        
+        if let lb = pickerView.view(forRow: row, forComponent: component) as? UILabel {
+            
+            selectedFromPicker = lb
+            //selectedFromPicker.backgroundColor = UIColor.orange
+            //selectedFromPicker.textColor = UIColor.white
+            if component == 0 {
+                selectedFromPicker.text = text + " hours"
+            } else if component == 1 {
+                selectedFromPicker.text = text + " minutes"
+            }
+            
+        }
+        
+        return pickerLabel
+        
     }
     
 }

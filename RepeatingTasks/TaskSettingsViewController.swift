@@ -34,6 +34,7 @@ class TaskSettingsViewController: UIViewController {
     var rolloverMultiplier = 1.0
     
     var taskData = TaskData()
+    let timer = CountdownTimer()
     
     // Used to corretly show the keyboard and scroll the view into place
     var activeTextField: UITextField?
@@ -44,6 +45,7 @@ class TaskSettingsViewController: UIViewController {
     var selectedHours = "0"
     var selectedMinutes = "0"
     var pickerData: [[String]] = []
+    var selectedFromPicker: UILabel!
     
     var timePickerView = UIPickerView()
     let pickerViewDatasource = TaskTimePicker()
@@ -122,6 +124,9 @@ class TaskSettingsViewController: UIViewController {
         timeTextField.inputView = timePickerView
         timeTextField.inputAccessoryView = pickerToolBar
         
+        timePickerView.selectRow(0, inComponent: 0, animated: true)
+        timePickerView.selectRow(0, inComponent: 1, animated: true)
+        
         //******************************
         // Pickerview initialization finished
         //******************************
@@ -149,8 +154,7 @@ class TaskSettingsViewController: UIViewController {
     
     func setTaskTime() -> String {
         
-        var timeString = ""
-        
+        let (timeString, _) = timer.formatTimer(name: task, dataset: taskData)
         
         return timeString
         
@@ -439,6 +443,10 @@ extension TaskSettingsViewController: UIPickerViewDataSource, UIPickerViewDelega
             timeTextField.text = selectedHours + " hours " + selectedMinutes + " minutes"
         }
         
+        selectedFromPicker = pickerView.view(forRow: row, forComponent: component) as! UILabel
+        
+        pickerView.reloadAllComponents()
+        
     }
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
@@ -457,5 +465,32 @@ extension TaskSettingsViewController: UIPickerViewDataSource, UIPickerViewDelega
         return CGFloat(100.0)
     }
 
+    func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
+        
+        let pickerLabel = UILabel()
+        let text = pickerData[component][row]
+        
+        pickerLabel.text = text
+        //pickerLabel.textAlignment = NSTextAlignment.center
+        pickerLabel.frame = CGRect(x: 0, y: 0, width: 100, height: 40)
+        pickerLabel.layer.masksToBounds = true
+        pickerLabel.layer.cornerRadius = 5.0
+        
+        if let lb = pickerView.view(forRow: row, forComponent: component) as? UILabel {
+
+            selectedFromPicker = lb
+            //selectedFromPicker.backgroundColor = UIColor.orange
+            //selectedFromPicker.textColor = UIColor.white
+            if component == 0 {
+                selectedFromPicker.text = text + " hours"
+            } else if component == 1 {
+                selectedFromPicker.text = text + " minutes"
+            }
+            
+        }
+        
+        return pickerLabel
+        
+    }
     
 }
