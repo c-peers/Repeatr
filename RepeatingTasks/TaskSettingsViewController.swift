@@ -26,7 +26,7 @@ class TaskSettingsViewController: UIViewController {
     @IBOutlet weak var thursday: UIButton!
     @IBOutlet weak var friday: UIButton!
     @IBOutlet weak var saturday: UIButton!
-
+    
     var task = ""
     var taskTime = 0.0
     var taskDays = [""]

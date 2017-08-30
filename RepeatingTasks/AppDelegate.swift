@@ -1,4 +1,4 @@
-    //
+//
 //  AppDelegate.swift
 //  RepeatingTasks
 //
@@ -15,22 +15,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    var appSettings: [String : Bool] = [:]
-    var appTimeSettings: [String : Int] = [:]
+    var appData = AppData()
+    //var appSettings: [String : Bool] = [:]
+    //var appTimeSettings: [String : Int] = [:]
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
-        Chameleon.setGlobalThemeUsingPrimaryColor(FlatSkyBlue(), with: .contrast)
+        appData.load()
+        appData.loadColors()
+
+        //setTheme(as: appData.appColor)
         
-        func setStatusBarBackgroundColor(color: UIColor) {
-            
-            guard let statusBar = UIApplication.shared.value(forKeyPath: "statusBarWindow.statusBar") as? UIView else { return }
-            
-            statusBar.backgroundColor = FlatSkyBlue()
-        }
+        print("appData color in Appdelegate is \(appData.appColor)")
         
         return true
+    }
+    
+    func setTheme(as color: UIColor) {
+        
+        //Chameleon.setGlobalThemeUsingPrimaryColor(appData.appColor, withSecondaryColor: UIColor.clear, andContentStyle: .contrast)
+        
+//        func setStatusBarBackgroundColor(color: UIColor) {
+//            
+//            guard let statusBar = UIApplication.shared.value(forKeyPath: "statusBarWindow.statusBar") as? UIView else { return }
+//            
+//            statusBar.backgroundColor = appData.appColor
+//        }
+        
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

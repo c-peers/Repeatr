@@ -9,7 +9,6 @@
 import UIKit
 import Chameleon
 import Charts
-import KVOController
 
 class TaskDetailViewController: UIViewController {
 

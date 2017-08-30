@@ -9,11 +9,9 @@
 import UIKit
 import Chameleon
 
-class TaskViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource {
+class TaskViewController: UIViewController {
 
     //MARK: - View Controller
-
-    //MARK: - Collection View Delegate
 
     //MARK: - Collection View Data Source
 
@@ -38,145 +36,18 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     var willResetTimer = false
     
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return tasks.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
-        let reuseIdentifier = "taskCollectionCell"
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath as IndexPath) as! RepeatingTasksCollectionCell
-        
-        let task = tasks[indexPath.row]
-        
-        if taskTimer.isEnabled && task == selectedTask {
-            cell.playStopButton.setImage(#imageLiteral(resourceName: "Pause"), for: .normal)
-        } else {
-            cell.playStopButton.setImage(#imageLiteral(resourceName: "Play"), for: .normal)
-        }
-        
-        cell.playStopButton.backgroundColor = UIColor.clear
-        
-        
-        cell.progressView.progress = 0.0
-        cell.progressView.setProgress(0.0, animated: false)
-        cell.taskNameField.text = task
-        
-        //_ = formatTimer(for: cell, decrement: false)
-        //(_, _) = Task.instance.timer.formatTimer(for: task, from: cell, decrement: false)
-        //(_, _) = formatTimer(for: task, from: cell)
-        (_, _) = taskTimer.formatTimer(name: task, from: cell, dataset: taskData)
-        
-        let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = [.hour, .minute, .second]
-        formatter.unitsStyle = .positional
-        
-        //cell.taskTimeRemaining.text = formatter.string(from: TimeInterval(Task.instance.timer.remainingTime))!
-        //cell.taskTimeRemaining.text = formatter.string(from: TimeInterval(countdownTimer.remainingTime))!
-        
-        if cell.taskTimeRemaining.text == "Complete" {
-            cell.playStopButton.isEnabled = false
-        } else {
-            cell.playStopButton.isEnabled = true
-        }
-        
-        let colorArray = ColorSchemeOf(.analogous, color: .flatSkyBlue, isFlatScheme: true)
-        
-        print(indexPath)
-        
-        //let gradientBackground = GradientColor(.leftToRight, frame: cell.frame, colors: [UIColor.flatSkyBlue, UIColor.flatSkyBlueDark])
-        
-        //cell.backgroundColor = gradientBackground
-        
-        cell.backgroundColor = colorArray[indexPath.row % 4]
-        
-//        let gradient = CAGradientLayer()
-//        
-//        gradient.frame = cell.layer.bounds
-//        
-//        let gradientColor2 = UIColor.clear
-//        let gradientColor1 = UIColor.white.cgColor
-//        
-//        gradient.colors = [gradientColor1,gradientColor2]
-//        
-//        gradient.locations = [0.0, 0.75]
-//        gradient.startPoint = CGPoint(x: 1, y: 0)
-//        gradient.endPoint = CGPoint(x: 0, y: 1)
-//        
-//        cell.layer.addSublayer(gradient)
-//        
-//        switch (indexPath.row % 4) {
-//        case 0:
-//            cell.bgView.backgroundColor = UIColor(hue: 200/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
-//            cell.backgroundColor = UIColor(hue: 200/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
-//            
-//        case 1:
-//            cell.bgView.backgroundColor = UIColor(hue: 60/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
-//            cell.backgroundColor = UIColor(hue: 60/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
-//        case 2:
-//            cell.bgView.backgroundColor = UIColor(hue: 280/360, saturation: 0.35, brightness: 1.0, alpha: 1.0)
-//            cell.backgroundColor = UIColor(hue: 280/360, saturation: 0.35, brightness: 1.0, alpha: 1.0)
-//        case 3:
-//            cell.bgView.backgroundColor = UIColor(hue: 359/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
-//            cell.backgroundColor = UIColor(hue: 359/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
-//        default:
-//            break
-//        }
-        
-        
-        cell.layer.cornerRadius = 10.0
-        cell.layer.borderWidth = 1.0
-        cell.layer.masksToBounds = true
-        
-        cell.layer.shadowColor = UIColor.lightGray.cgColor
-        cell.layer.shadowOffset = CGSize.zero
-        cell.layer.shadowRadius = 2.0
-        cell.layer.shadowOpacity = 2.0
-        cell.layer.shadowPath = UIBezierPath(roundedRect: cell.layer.bounds, cornerRadius: cell.layer.cornerRadius).cgPath
-
-        cell.progressView.progressTintColor = UIColor.darkGray
-        
-        
-        
-        return cell
-        
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        
-        let task = tasks[indexPath.row]
-        
-        taskData.setTask(as: task)
-        
-        selectedTask = taskData.taskName
-        
-        print("taskData taskName \(taskData.taskName)")
-        
-        performSegue(withIdentifier: "taskDetailSegue", sender: self)
-        
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // Load any saved data
         loadData()
         
-        //if tasks.isEmpty {
-        //    tasks = ["Test1", "Test2", "Test3", "Test4", "Test5"]
-        //}
-        
         print("loaded Values")
         print(tasks)
         
         NotificationCenter.default.addObserver(forName: Notification.Name("StopTimerNotification"), object: nil, queue: nil, using: catchNotification)
         
-        let addBarButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addTask))
-        navigationItem.rightBarButtonItems = [addBarButton]
-        
-        let settingsButton = UIBarButtonItem(image: #imageLiteral(resourceName: "Settings"), style: .plain, target: self, action: #selector(settingsButtonTapped))
-        toolbarItems = [settingsButton]
-        navigationController?.isToolbarHidden = false
+        prepareNavBar()
         
         // Check current time
         // Determine the time interval between now and when the timers will reset
@@ -296,6 +167,13 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     func settingsButtonTapped() {
         performSegue(withIdentifier: "appSettingsSegue", sender: self)
+        
+        //let appSettingsVC = AppSettingsViewController()
+        //present(appSettingsVC, animated: true, completion: nil)
+        //appSettingsVC.appData = appData
+        //self.navigationController!.pushViewController(appSettingsVC, animated: true)
+        
+        
     }
     
     func resetTaskTimers() {
@@ -573,13 +451,29 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
             
             taskVC.taskTimer = taskTimer
             
+        } else if segue.identifier == "addTaskSegue" {
+            let newTaskVC = segue.destination as! NewTasksViewController
+            
+            newTaskVC.appData = appData
+            
+        } else if segue.identifier == "appSettingsSegue" {
+            let appSettingsVC = segue.destination as! AppSettingsViewController
+            
+            appSettingsVC.appData = appData
+            
         }
         
     }
-
+    
     func loadData() {
         
-        appData.load()
+        //appData.load()
+        
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        appData = appDelegate.appData
+        
+        print("Appdata color is \(appData.appColor)")
+        
         taskData.load()
         
         tasks = taskData.taskNameList
@@ -595,7 +489,72 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
     }
     
+    func prepareNavBar() {
+        
+        let addBarButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addTask))
+        navigationItem.rightBarButtonItems = [addBarButton]
+        
+        let settingsButton = UIBarButtonItem(image: #imageLiteral(resourceName: "Settings"), style: .plain, target: self, action: #selector(settingsButtonTapped))
+        toolbarItems = [settingsButton]
+        navigationController?.isToolbarHidden = false
+        
+        setTheme()
+        
+    }
+    
+    func setTheme() {
+        
+        let navigationBar = navigationController?.navigationBar
+        navigationBar?.barTintColor = appData.appColor
+        navigationBar?.mixedBarStyle = MixedBarStyle(normal: .default, night: .blackTranslucent)
+        
+        let toolbar = navigationController?.toolbar
+        toolbar?.barTintColor = appData.appColor
+        
+        if appData.isNightMode {
+            NightNight.theme = .night
+        } else {
+            NightNight.theme = .normal
+        }
+        
+        if darknessCheck() {
+            
+            navigationBar?.tintColor = UIColor.white
+            toolbar?.tintColor = UIColor.white
+            setStatusBarStyle(.lightContent)
+            
+        } else {
+            
+            navigationBar?.tintColor = UIColor.black
+            toolbar?.tintColor = UIColor.black
+            setStatusBarStyle(.default)
+        }
+        
+    }
+    
+    func darknessCheck(for color:UIColor? = nil) -> Bool {
+        
+        var r: CGFloat = 0.0, g: CGFloat = 0.0, b: CGFloat = 0.0, a: CGFloat = 0.0
+        
+        let bgColor = navigationController?.navigationBar.barTintColor
+        //let bgColor = navigationController?.toolbar.backgroundColor
+        bgColor?.getRed(&r, green: &g, blue: &b, alpha: &a)
+        
+        let twoLowColors = (r < 0.7 || g < 0.7)
+        
+        if r  < 0.7 && g  < 0.7 && b < 0.7 {
+            return true
+        } else {
+            return false
+        }
+    
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
+        
+        appData.setColorScheme()
+        
+        setTheme()
         
         if selectedTask != "" && runningCompletionTime > 0 {
             
@@ -634,7 +593,7 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
             //_ = formatTimer(for: selectedTask, from: selectedCell)
             _ = taskTimer.formatTimer(name: selectedTask, from: selectedCell, dataset: taskData)
             
-            let runningTaskTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self,
+            _ = Timer.scheduledTimer(timeInterval: 1.0, target: self,
                                                   selector: #selector(timerRunning), userInfo: nil,
                                                   repeats: true)
             
@@ -661,4 +620,143 @@ class TaskViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
 
 }
+
+//MARK: - Collection View Delegate
+
+extension TaskViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return tasks.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
+        let reuseIdentifier = "taskCollectionCell"
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath as IndexPath) as! RepeatingTasksCollectionCell
+        
+        let task = tasks[indexPath.row]
+        
+        if taskTimer.isEnabled && task == selectedTask {
+            cell.playStopButton.setImage(#imageLiteral(resourceName: "Pause"), for: .normal)
+        } else {
+            cell.playStopButton.setImage(#imageLiteral(resourceName: "Play"), for: .normal)
+        }
+        
+        cell.playStopButton.backgroundColor = UIColor.clear
+        
+        
+        cell.progressView.progress = 0.0
+        cell.progressView.setProgress(0.0, animated: false)
+        cell.taskNameField.text = task
+        
+        //_ = formatTimer(for: cell, decrement: false)
+        //(_, _) = Task.instance.timer.formatTimer(for: task, from: cell, decrement: false)
+        //(_, _) = formatTimer(for: task, from: cell)
+        (_, _) = taskTimer.formatTimer(name: task, from: cell, dataset: taskData)
+        
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.hour, .minute, .second]
+        formatter.unitsStyle = .positional
+        
+        //cell.taskTimeRemaining.text = formatter.string(from: TimeInterval(Task.instance.timer.remainingTime))!
+        //cell.taskTimeRemaining.text = formatter.string(from: TimeInterval(countdownTimer.remainingTime))!
+        
+        if cell.taskTimeRemaining.text == "Complete" {
+            cell.playStopButton.isEnabled = false
+        } else {
+            cell.playStopButton.isEnabled = true
+        }
+        
+        //let colorArray = ColorSchemeOf(.analogous, color: .flatSkyBlue, isFlatScheme: true)
+        
+        print(indexPath)
+        
+        //let gradientBackground = GradientColor(.leftToRight, frame: cell.frame, colors: [UIColor.flatSkyBlue, UIColor.flatSkyBlueDark])
+        
+        //cell.backgroundColor = gradientBackground
+        
+        let cellBGColor = appData.colorScheme[indexPath.row % 4]
+        cell.backgroundColor = cellBGColor
+        
+        if darknessCheck(for: cellBGColor) {
+
+            cell.taskNameField.textColor = UIColor.white
+            cell.taskTimeRemaining.textColor = UIColor.white
+
+        } else {
+            
+            cell.taskNameField.textColor = UIColor.black
+            cell.taskTimeRemaining.textColor = UIColor.black
+            
+        }
+        
+        //        let gradient = CAGradientLayer()
+        //
+        //        gradient.frame = cell.layer.bounds
+        //
+        //        let gradientColor2 = UIColor.clear
+        //        let gradientColor1 = UIColor.white.cgColor
+        //
+        //        gradient.colors = [gradientColor1,gradientColor2]
+        //
+        //        gradient.locations = [0.0, 0.75]
+        //        gradient.startPoint = CGPoint(x: 1, y: 0)
+        //        gradient.endPoint = CGPoint(x: 0, y: 1)
+        //
+        //        cell.layer.addSublayer(gradient)
+        //
+        //        switch (indexPath.row % 4) {
+        //        case 0:
+        //            cell.bgView.backgroundColor = UIColor(hue: 200/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
+        //            cell.backgroundColor = UIColor(hue: 200/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
+        //
+        //        case 1:
+        //            cell.bgView.backgroundColor = UIColor(hue: 60/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
+        //            cell.backgroundColor = UIColor(hue: 60/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
+        //        case 2:
+        //            cell.bgView.backgroundColor = UIColor(hue: 280/360, saturation: 0.35, brightness: 1.0, alpha: 1.0)
+        //            cell.backgroundColor = UIColor(hue: 280/360, saturation: 0.35, brightness: 1.0, alpha: 1.0)
+        //        case 3:
+        //            cell.bgView.backgroundColor = UIColor(hue: 359/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
+        //            cell.backgroundColor = UIColor(hue: 359/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
+        //        default:
+        //            break
+        //        }
+        
+        
+        cell.layer.cornerRadius = 10.0
+        cell.layer.borderWidth = 1.0
+        cell.layer.masksToBounds = true
+        
+        cell.layer.shadowColor = UIColor.lightGray.cgColor
+        cell.layer.shadowOffset = CGSize.zero
+        cell.layer.shadowRadius = 2.0
+        cell.layer.shadowOpacity = 2.0
+        cell.layer.shadowPath = UIBezierPath(roundedRect: cell.layer.bounds, cornerRadius: cell.layer.cornerRadius).cgPath
+        
+        cell.progressView.progressTintColor = UIColor.darkGray
+        
+        
+        
+        return cell
+        
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        let task = tasks[indexPath.row]
+        
+        taskData.setTask(as: task)
+        
+        selectedTask = taskData.taskName
+        
+        print("taskData taskName \(taskData.taskName)")
+        
+        performSegue(withIdentifier: "taskDetailSegue", sender: self)
+        
+    }
+    
+}
+
+
 

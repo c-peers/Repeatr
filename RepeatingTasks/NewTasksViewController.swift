@@ -13,6 +13,7 @@ class NewTasksViewController: UIViewController {
 
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var newTaskView: UIView!
+    @IBOutlet weak var statusBarView: UIView!
     
     @IBOutlet weak var taskNameTextField: UITextField!
     @IBOutlet weak var sunday: UIButton!
@@ -25,6 +26,8 @@ class NewTasksViewController: UIViewController {
     @IBOutlet weak var occurrenceRateTextField: UITextField!
     
     @IBOutlet weak var taskLengthTextField: UITextField!
+    
+    @IBOutlet weak var createTaskButton: UIButton!
     
     // Used to corretly show the keyboard and scroll the view into place
     var activeTextField: UITextField?
@@ -43,9 +46,14 @@ class NewTasksViewController: UIViewController {
     var timePickerView = UIPickerView()
     let pickerViewDatasource = TaskTimePicker()
     
+    var appData = AppData()
+    
     override func viewDidLoad() {
         
         super.viewDidLoad()
+        
+        // Themeing made the buttons blue. This 
+        //self.setThemeUsingPrimaryColor(appData.appColor, withSecondaryColor: UIColor.clear, andContentStyle: .contrast)
         
         taskNameTextField.delegate = self
         
@@ -69,12 +77,13 @@ class NewTasksViewController: UIViewController {
         // Notification Bar finished
         //******************************
         
-        //let navBarColor = navBar.color
-        //UIApplication.shared.statusBarStyle = .default
-        let statusBarView = UIView(frame: UIApplication.shared.statusBarFrame)
-        statusBarView.backgroundColor = UIColor(hexString: "52A7DF")
-        view.addSubview(statusBarView)
+        //let statusBarView = UIView(frame: UIApplication.shared.statusBarFrame)
         
+        statusBarView.backgroundColor = appData.appColor
+        statusBarView.alpha = 0.85 // Needed to match translucent navBar
+        
+        navBar.barTintColor = appData.appColor
+        //navBar.isTranslucent = false
 
     
         //******************************
@@ -138,123 +147,126 @@ class NewTasksViewController: UIViewController {
         //******************************
 
         sunday.layer.borderWidth = 1
-        sunday.layer.borderColor = UIColor.black.cgColor
+        sunday.layer.borderColor = appData.appColor.cgColor
         monday.layer.borderWidth = 1
-        monday.layer.borderColor = UIColor.black.cgColor
+        monday.layer.borderColor = appData.appColor.cgColor
         tuesday.layer.borderWidth = 1
-        tuesday.layer.borderColor = UIColor.black.cgColor
+        tuesday.layer.borderColor = appData.appColor.cgColor
         wednesday.layer.borderWidth = 1
-        wednesday.layer.borderColor = UIColor.black.cgColor
+        wednesday.layer.borderColor = appData.appColor.cgColor
         thursday.layer.borderWidth = 1
-        thursday.layer.borderColor = UIColor.black.cgColor
+        thursday.layer.borderColor = appData.appColor.cgColor
         friday.layer.borderWidth = 1
-        friday.layer.borderColor = UIColor.black.cgColor
+        friday.layer.borderColor = appData.appColor.cgColor
         saturday.layer.borderWidth = 1
-        saturday.layer.borderColor = UIColor.black.cgColor
+        saturday.layer.borderColor = appData.appColor.cgColor
 
+        sunday.tag = 0
+        monday.tag = 0
+        tuesday.tag = 0
+        wednesday.tag = 0
+        thursday.tag = 0
+        friday.tag = 0
+        saturday.tag = 0
         
-    
-        
+        createTaskButton.layer.borderColor = appData.appColor.cgColor
+        createTaskButton.layer.borderWidth = 1
+        createTaskButton.setTitleColor(appData.appColor, for: .normal)
         
     }
     
-    @IBAction func sundayTapped(_ sender: UIButton) {
-        if sunday.tag == 0 {
-            sunday.layer.backgroundColor = UIColor.white.cgColor
-            sunday.setTitleColor(UIColor.black, for: .normal)
-            sunday.tag = 1
-            taskDays = taskDays.filter { $0 != "Sunday" }
+    func buttonAction(for button: UIButton) {
+        
+        if button.tag == 0 {
+            UIView.animate(withDuration: 0.5, animations: { () -> Void in
+                button.layer.backgroundColor = self.appData.appColor.cgColor
+                button.setTitleColor(UIColor.white, for: .normal)
+            })
+            button.tag = 1
         } else {
-            sunday.layer.backgroundColor = UIColor.black.cgColor
-            sunday.setTitleColor(UIColor.white, for: .normal)
-            sunday.tag = 0
-            taskDays.append("Sunday")
+            button.layer.backgroundColor = UIColor.white.cgColor
+            button.setTitleColor(UIColor.black, for: .normal)
+            button.tag = 0
         }
+    
+    }
+    
+    @IBAction func sundayTapped(_ sender: UIButton) {
+
+        if sunday.tag == 0 {
+            taskDays.append("Sunday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Sunday" }
+        }
+        
+        buttonAction(for: sender)
+        
     }
     
     @IBAction func mondayTapped(_ sender: UIButton) {
         if monday.tag == 0 {
-            monday.layer.backgroundColor = UIColor.white.cgColor
-            monday.setTitleColor(UIColor.black, for: .normal)
-            monday.tag = 1
-            taskDays = taskDays.filter { $0 != "Monday" }
-        } else {
-            monday.layer.backgroundColor = UIColor.black.cgColor
-            monday.setTitleColor(UIColor.white, for: .normal)
-            monday.tag = 0
             taskDays.append("Monday")
-            
+        } else {
+            taskDays = taskDays.filter { $0 != "Monday" }
         }
+        
+        buttonAction(for: sender)
+        
     }
     
     @IBAction func tuesdayTapped(_ sender: UIButton) {
         if tuesday.tag == 0 {
-            tuesday.layer.backgroundColor = UIColor.white.cgColor
-            tuesday.setTitleColor(UIColor.black, for: .normal)
-            tuesday.tag = 1
-            taskDays = taskDays.filter { $0 != "Tuesday" }
-        } else {
-            tuesday.layer.backgroundColor = UIColor.black.cgColor
-            tuesday.setTitleColor(UIColor.white, for: .normal)
-            tuesday.tag = 0
             taskDays.append("Tuesday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Tuesday" }
         }
+        
+        buttonAction(for: sender)
+        
     }
     
     @IBAction func wednesdayTapped(_ sender: UIButton) {
         if wednesday.tag == 0 {
-            wednesday.layer.backgroundColor = UIColor.white.cgColor
-            wednesday.setTitleColor(UIColor.black, for: .normal)
-            wednesday.tag = 1
-            taskDays = taskDays.filter { $0 != "Wednesday" }
-        } else {
-            wednesday.layer.backgroundColor = UIColor.black.cgColor
-            wednesday.setTitleColor(UIColor.white, for: .normal)
-            wednesday.tag = 0
             taskDays.append("Wednesday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Wednesday" }
         }
+        
+        buttonAction(for: sender)
+        
     }
     
     @IBAction func thursdayTapped(_ sender: UIButton) {
         if thursday.tag == 0 {
-            thursday.layer.backgroundColor = UIColor.white.cgColor
-            thursday.setTitleColor(UIColor.black, for: .normal)
-            thursday.tag = 1
-            taskDays = taskDays.filter { $0 != "Thursday" }
-        } else {
-            thursday.layer.backgroundColor = UIColor.black.cgColor
-            thursday.setTitleColor(UIColor.white, for: .normal)
-            thursday.tag = 0
             taskDays.append("Thursday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Thursday" }
         }
+        
+        buttonAction(for: sender)
+        
     }
     
     @IBAction func fridayTapped(_ sender: UIButton) {
         if friday.tag == 0 {
-            friday.layer.backgroundColor = UIColor.white.cgColor
-            friday.setTitleColor(UIColor.black, for: .normal)
-            friday.tag = 1
-            taskDays = taskDays.filter { $0 != "Friday" }
-        } else {
-            friday.layer.backgroundColor = UIColor.black.cgColor
-            friday.setTitleColor(UIColor.white, for: .normal)
-            friday.tag = 0
             taskDays.append("Friday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Friday" }
         }
+        
+        buttonAction(for: sender)
+        
     }
     
     @IBAction func saturdayTapped(_ sender: UIButton) {
         if saturday.tag == 0 {
-            saturday.layer.backgroundColor = UIColor.white.cgColor
-            saturday.setTitleColor(UIColor.black, for: .normal)
-            saturday.tag = 1
-            taskDays = taskDays.filter { $0 != "Saturday" }
-        } else {
-            saturday.layer.backgroundColor = UIColor.black.cgColor
-            saturday.setTitleColor(UIColor.white, for: .normal)
-            saturday.tag = 0
             taskDays.append("Saturday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Saturday" }
         }
+        
+        buttonAction(for: sender)
+        
     }
     
     
@@ -302,7 +314,6 @@ class NewTasksViewController: UIViewController {
             vc.taskData.newStatsDictionaryEntry(name: taskName)
             
             vc.tasks.append(taskName)
-            
             
         }
     }
