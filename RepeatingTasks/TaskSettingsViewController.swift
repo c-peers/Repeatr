@@ -11,6 +11,8 @@ import Chameleon
 
 class TaskSettingsViewController: UIViewController {
 
+    //MARK: - Outlets
+    
     @IBOutlet weak var scrollView: UIScrollView!
     
     @IBOutlet weak var nameTextField: UITextField!
@@ -27,12 +29,15 @@ class TaskSettingsViewController: UIViewController {
     @IBOutlet weak var friday: UIButton!
     @IBOutlet weak var saturday: UIButton!
     
+    //MARK: - Properties
+    
     var task = ""
     var taskTime = 0.0
     var taskDays = [""]
     var occurranceRate = 0.0
     var rolloverMultiplier = 1.0
     
+    var appData = AppData()
     var taskData = TaskData()
     let timer = CountdownTimer()
     
@@ -50,6 +55,8 @@ class TaskSettingsViewController: UIViewController {
     var timePickerView = UIPickerView()
     let pickerViewDatasource = TaskTimePicker()
     
+    //MARK: - View and Basic Functions
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -66,14 +73,7 @@ class TaskSettingsViewController: UIViewController {
         rolloverSlider.maximumValue = 2.5
         rolloverSlider.tintColor = FlatSkyBlueDark()
         
-    
-        nameTextField.text = task
-        timeTextField.text = setTaskTime()
-        occurranceTextField.text = String(Int(occurranceRate))
-        
-        rolloverSlider.value = Float(rolloverMultiplier)
-        let sliderValueAsString = String(rolloverSlider.value)
-        rolloverSliderValueLabel.text = sliderValueAsString
+        setValues()
         
         //******************************
         // Occurrence rate start
@@ -136,20 +136,62 @@ class TaskSettingsViewController: UIViewController {
         //******************************
         
         sunday.layer.borderWidth = 1
-        sunday.layer.borderColor = UIColor.black.cgColor
+        sunday.layer.borderColor = appData.appColor.cgColor
         monday.layer.borderWidth = 1
-        monday.layer.borderColor = UIColor.black.cgColor
+        monday.layer.borderColor = appData.appColor.cgColor
         tuesday.layer.borderWidth = 1
-        tuesday.layer.borderColor = UIColor.black.cgColor
+        tuesday.layer.borderColor = appData.appColor.cgColor
         wednesday.layer.borderWidth = 1
-        wednesday.layer.borderColor = UIColor.black.cgColor
+        wednesday.layer.borderColor = appData.appColor.cgColor
         thursday.layer.borderWidth = 1
-        thursday.layer.borderColor = UIColor.black.cgColor
+        thursday.layer.borderColor = appData.appColor.cgColor
         friday.layer.borderWidth = 1
-        friday.layer.borderColor = UIColor.black.cgColor
+        friday.layer.borderColor = appData.appColor.cgColor
         saturday.layer.borderWidth = 1
-        saturday.layer.borderColor = UIColor.black.cgColor
+        saturday.layer.borderColor = appData.appColor.cgColor
 
+    }
+    
+    func setValues() {
+        
+        nameTextField.text = task
+        timeTextField.text = setTaskTime()
+        occurranceTextField.text = String(Int(occurranceRate))
+        
+        rolloverSlider.value = Float(rolloverMultiplier)
+        let sliderValueAsString = String(rolloverSlider.value)
+        rolloverSliderValueLabel.text = sliderValueAsString
+        
+        for day in taskDays {
+            
+            switch day {
+            case "Sunday":
+                sunday.tag = 1
+                setButtonOn(for: sunday)
+            case "Monday":
+                monday.tag = 1
+                setButtonOn(for: monday)
+            case "Tuesday":
+                tuesday.tag = 1
+                setButtonOn(for: tuesday)
+            case "Wednesday":
+                wednesday.tag = 1
+                setButtonOn(for: wednesday)
+            case "Thursday":
+                thursday.tag = 1
+                setButtonOn(for: thursday)
+            case "Friday":
+                friday.tag = 1
+                setButtonOn(for: friday)
+            case "Saturday":
+                saturday.tag = 1
+                setButtonOn(for: saturday)
+            default:
+                break
+            }
+        
+        }
+        
     }
     
     func setTaskTime() -> String {
@@ -201,122 +243,121 @@ class TaskSettingsViewController: UIViewController {
         vc.taskDays = taskDays
         vc.rolloverMultiplier = rolloverMultiplier
         vc.taskFrequency = occurranceRate
+
+    }
+    
+    //MARK: - Button Actions/Functions
+    
+    func setButtonOn(for button: UIButton) {
+    
+        button.layer.backgroundColor = self.appData.appColor.cgColor
+        button.setTitleColor(UIColor.white, for: .normal)
         
+    }
+    
+    func buttonAction(for button: UIButton) {
         
+        if button.tag == 0 {
+            UIView.animate(withDuration: 0.5, animations: { () -> Void in
+                button.layer.backgroundColor = self.appData.appColor.cgColor
+                button.setTitleColor(UIColor.white, for: .normal)
+            })
+            button.tag = 1
+        } else {
+            UIView.animate(withDuration: 0.5, animations: { () -> Void in
+                button.layer.backgroundColor = UIColor.white.cgColor
+                button.setTitleColor(UIColor.black, for: .normal)
+            })
+            button.tag = 0
+        }
         
     }
     
     @IBAction func sundayTapped(_ sender: UIButton) {
+
         if sunday.tag == 0 {
-            sunday.layer.backgroundColor = UIColor.white.cgColor
-            sunday.setTitleColor(UIColor.black, for: .normal)
-            sunday.tag = 1
-            taskDays = taskDays.filter { $0 != "Sunday" }
-        } else {
-            sunday.layer.backgroundColor = UIColor.black.cgColor
-            sunday.setTitleColor(UIColor.white, for: .normal)
-            sunday.tag = 0
             taskDays.append("Sunday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Sunday" }
         }
+        
+        buttonAction(for: sender)
+
     }
     
     @IBAction func mondayTapped(_ sender: UIButton) {
+
         if monday.tag == 0 {
-            monday.layer.backgroundColor = UIColor.white.cgColor
-            monday.setTitleColor(UIColor.black, for: .normal)
-            monday.tag = 1
-            taskDays = taskDays.filter { $0 != "Monday" }
-        } else {
-            monday.layer.backgroundColor = UIColor.black.cgColor
-            monday.setTitleColor(UIColor.white, for: .normal)
-            monday.tag = 0
             taskDays.append("Monday")
-            
+        } else {
+            taskDays = taskDays.filter { $0 != "Monday" }
         }
+        
+        buttonAction(for: sender)
+        
     }
     
     @IBAction func tuesdayTapped(_ sender: UIButton) {
+        
         if tuesday.tag == 0 {
-            tuesday.layer.backgroundColor = UIColor.white.cgColor
-            tuesday.setTitleColor(UIColor.black, for: .normal)
-            tuesday.tag = 1
-            taskDays = taskDays.filter { $0 != "Tuesday" }
-        } else {
-            tuesday.layer.backgroundColor = UIColor.black.cgColor
-            tuesday.setTitleColor(UIColor.white, for: .normal)
-            tuesday.tag = 0
             taskDays.append("Tuesday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Tuesday" }
         }
+        
+        buttonAction(for: sender)
+    
     }
     
     @IBAction func wednesdayTapped(_ sender: UIButton) {
+        
         if wednesday.tag == 0 {
-            wednesday.layer.backgroundColor = UIColor.white.cgColor
-            wednesday.setTitleColor(UIColor.black, for: .normal)
-            wednesday.tag = 1
-            taskDays = taskDays.filter { $0 != "Wednesday" }
-        } else {
-            wednesday.layer.backgroundColor = UIColor.black.cgColor
-            wednesday.setTitleColor(UIColor.white, for: .normal)
-            wednesday.tag = 0
             taskDays.append("Wednesday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Wednesday" }
         }
+        
+        buttonAction(for: sender)
+    
     }
     
     @IBAction func thursdayTapped(_ sender: UIButton) {
+        
         if thursday.tag == 0 {
-            thursday.layer.backgroundColor = UIColor.white.cgColor
-            thursday.setTitleColor(UIColor.black, for: .normal)
-            thursday.tag = 1
-            taskDays = taskDays.filter { $0 != "Thursday" }
-        } else {
-            thursday.layer.backgroundColor = UIColor.black.cgColor
-            thursday.setTitleColor(UIColor.white, for: .normal)
-            thursday.tag = 0
             taskDays.append("Thursday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Thursday" }
         }
+        
+        buttonAction(for: sender)
+    
     }
     
     @IBAction func fridayTapped(_ sender: UIButton) {
+        
         if friday.tag == 0 {
-            friday.layer.backgroundColor = UIColor.white.cgColor
-            friday.setTitleColor(UIColor.black, for: .normal)
-            friday.tag = 1
-            taskDays = taskDays.filter { $0 != "Friday" }
-        } else {
-            friday.layer.backgroundColor = UIColor.black.cgColor
-            friday.setTitleColor(UIColor.white, for: .normal)
-            friday.tag = 0
             taskDays.append("Friday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Friday" }
         }
+        
+        buttonAction(for: sender)
+    
     }
     
     @IBAction func saturdayTapped(_ sender: UIButton) {
+
         if saturday.tag == 0 {
-            saturday.layer.backgroundColor = UIColor.white.cgColor
-            saturday.setTitleColor(UIColor.black, for: .normal)
-            saturday.tag = 1
-            taskDays = taskDays.filter { $0 != "Saturday" }
-        } else {
-            saturday.layer.backgroundColor = UIColor.black.cgColor
-            saturday.setTitleColor(UIColor.white, for: .normal)
-            saturday.tag = 0
             taskDays.append("Saturday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Saturday" }
         }
+        
+        buttonAction(for: sender)
+        
     }
     
-    func doneOccurrence() {
-        occurranceTextField.resignFirstResponder()
-    }
-    
-    func donePicker() {
-        timeTextField.resignFirstResponder()
-    }
-    
-    func cancelPicker() {
-        timeTextField.resignFirstResponder()
-        timeTextField.text = ""
-    }
+    //MARK: - Keyoard Functions
     
     func registerForKeyboardNotifications(){
         //Adding notifies on keyboard appearing
@@ -420,6 +461,10 @@ extension TaskSettingsViewController: UITextFieldDelegate {
         activeTextField = nil
     }
     
+    func doneOccurrence() {
+        occurranceTextField.resignFirstResponder()
+    }
+    
 }
 
 //******************************
@@ -491,6 +536,15 @@ extension TaskSettingsViewController: UIPickerViewDataSource, UIPickerViewDelega
         
         return pickerLabel
         
+    }
+    
+    func donePicker() {
+        timeTextField.resignFirstResponder()
+    }
+    
+    func cancelPicker() {
+        timeTextField.resignFirstResponder()
+        timeTextField.text = ""
     }
     
 }

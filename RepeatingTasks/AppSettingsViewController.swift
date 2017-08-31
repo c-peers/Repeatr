@@ -12,9 +12,13 @@ import Chameleon
 
 class AppSettingsViewController: UITableViewController {
     
+    //MARK: - Outlets
+    
     @IBOutlet weak var setColorLabel: UILabel!
     @IBOutlet weak var setResetTimeLabel: UILabel!
     @IBOutlet var nightModeSwitch: UISwitch!
+    
+    //MARK: - Properties
     
     var appData = AppData()
     
@@ -25,14 +29,14 @@ class AppSettingsViewController: UITableViewController {
 //    }
     
     
-    // MARK: - UIViewController
+    //MARK: - View and Basic Functions
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setColorLabel.text = String(describing: appData.appColor)
-        setResetTimeLabel.text = "1:00"
-        
+        setColorLabel.text = appData.appColorName
+        print(appData.appColorName)
+                
         nightModeSwitch.isOn = false
         
         title = "Application Settings"
@@ -76,48 +80,30 @@ class AppSettingsViewController: UITableViewController {
 //        
 //    }
     
-    func setTextColor() {
-        
-        let navigationBar = navigationController?.navigationBar
-        let toolbar = navigationController?.toolbar
-        
-        if darknessCheck() {
-            
-            navigationBar?.tintColor = UIColor.white
-            navigationBar?.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white]
-            toolbar?.tintColor = UIColor.white
-            setStatusBarStyle(.lightContent)
-        } else {
-            
-            navigationBar?.tintColor = UIColor.black
-            navigationBar?.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.black]
-            toolbar?.tintColor = UIColor.black
-            setStatusBarStyle(.default)
-        }
-        
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        animateColorChange()
+        setTextColor()
+
+        setColorLabel.text = appData.appColorName
+        setResetTimeLabel.text = appData.resetOffset
+
     }
     
-    func darknessCheck(for color:UIColor? = nil) -> Bool {
-        
-        var r: CGFloat = 0.0, g: CGFloat = 0.0, b: CGFloat = 0.0, a: CGFloat = 0.0
-        
-        let bgColor = navigationController?.navigationBar.barTintColor
-        bgColor?.getRed(&r, green: &g, blue: &b, alpha: &a)
-        
-        if r  < 0.7 && g  < 0.7 && b < 0.7 {
-            return true
-        } else {
-            return false
-        }
-        
+    override func viewWillDisappear(_ animated: Bool) {
+        self.navigationItem.title = "Settings"
     }
     
+    //MARK: - Table Functions
+
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         if indexPath.section == 0 {
             if indexPath.row == 0 {
             performSegue(withIdentifier: "colorSettingsSegue", sender: self)
             }
+        } else if indexPath.section == 1 {
+            performSegue(withIdentifier: "resetTimeSettingsSegue", sender: self)
         }
     }
     
@@ -153,6 +139,32 @@ class AppSettingsViewController: UITableViewController {
         
     }
     
+    //MARK: - Theme/Color Functions
+
+    func setTextColor() {
+        
+        let navigationBar = navigationController?.navigationBar
+        let toolbar = navigationController?.toolbar
+        
+        let bgColor = navigationBar?.barTintColor
+        
+        if appData.darknessCheck(for: bgColor) {
+            
+            navigationBar?.tintColor = UIColor.white
+            navigationBar?.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white]
+            toolbar?.tintColor = UIColor.white
+            setStatusBarStyle(.lightContent)
+            
+        } else {
+            
+            navigationBar?.tintColor = UIColor.black
+            navigationBar?.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.black]
+            toolbar?.tintColor = UIColor.black
+            setStatusBarStyle(.default)
+            
+        }
+        
+    }
     func setNightMode(to nightModeEnabled: Bool) {
         
         if nightModeEnabled {
@@ -191,16 +203,6 @@ class AppSettingsViewController: UITableViewController {
         
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        animateColorChange()
-        setTextColor()
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        self.navigationItem.title = "Settings"
-    }
-    
     private func animateColorChange() {
         guard let coordinator = self.transitionCoordinator else {
             return
@@ -218,6 +220,8 @@ class AppSettingsViewController: UITableViewController {
         navigationController?.toolbar.barTintColor = appData.appColor
     }
     
+    //MARK: - Navigation
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
         if segue.identifier == "colorSettingsSegue" {
@@ -227,6 +231,8 @@ class AppSettingsViewController: UITableViewController {
             
         }
     }
+    
+    //MARK: - Data Handling
     
     func save() {
         

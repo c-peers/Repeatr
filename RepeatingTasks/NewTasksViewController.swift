@@ -11,6 +11,8 @@ import Chameleon
 
 class NewTasksViewController: UIViewController {
 
+    //MARK: - Outlets
+
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var newTaskView: UIView!
     @IBOutlet weak var statusBarView: UIView!
@@ -28,6 +30,8 @@ class NewTasksViewController: UIViewController {
     @IBOutlet weak var taskLengthTextField: UITextField!
     
     @IBOutlet weak var createTaskButton: UIButton!
+    
+    //MARK: - Properties
     
     // Used to corretly show the keyboard and scroll the view into place
     var activeTextField: UITextField?
@@ -48,6 +52,10 @@ class NewTasksViewController: UIViewController {
     
     var appData = AppData()
     
+    var navigationBar: UINavigationBar?
+
+    //MARK: - View and Basic Functions
+    
     override func viewDidLoad() {
         
         super.viewDidLoad()
@@ -61,31 +69,11 @@ class NewTasksViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillBeHidden), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
 
         //******************************
-        // Notification Bar start
+        // Notification Bar
         //******************************
         
-        let navBar: UINavigationBar = UINavigationBar(frame: CGRect(x: 0, y: 20, width: view.frame.width, height: 44))
-        self.view.addSubview(navBar);
-        let navItem = UINavigationItem(title: "Add Task");
+        prepareNavBar()
         
-        let cancelBarButton = UIBarButtonItem(title: "Cancel", style: .done, target: self, action: #selector(cancelTask))
-        navItem.leftBarButtonItems = [cancelBarButton]
-        
-        navBar.setItems([navItem], animated: false);
-        
-        //******************************
-        // Notification Bar finished
-        //******************************
-        
-        //let statusBarView = UIView(frame: UIApplication.shared.statusBarFrame)
-        
-        statusBarView.backgroundColor = appData.appColor
-        statusBarView.alpha = 0.85 // Needed to match translucent navBar
-        
-        navBar.barTintColor = appData.appColor
-        //navBar.isTranslucent = false
-
-    
         //******************************
         // Occurrence rate start
         //******************************
@@ -175,107 +163,56 @@ class NewTasksViewController: UIViewController {
         
     }
     
-    func buttonAction(for button: UIButton) {
+    func prepareNavBar() {
         
-        if button.tag == 0 {
-            UIView.animate(withDuration: 0.5, animations: { () -> Void in
-                button.layer.backgroundColor = self.appData.appColor.cgColor
-                button.setTitleColor(UIColor.white, for: .normal)
-            })
-            button.tag = 1
-        } else {
-            button.layer.backgroundColor = UIColor.white.cgColor
-            button.setTitleColor(UIColor.black, for: .normal)
-            button.tag = 0
-        }
-    
+        navigationBar = UINavigationBar(frame: CGRect(x: 0, y: 20, width: view.frame.width, height: 44))
+        self.view.addSubview(navigationBar!);
+        let navItem = UINavigationItem(title: "Add Task");
+        
+        let cancelBarButton = UIBarButtonItem(title: "Cancel", style: .done, target: self, action: #selector(cancelTask))
+        navItem.leftBarButtonItems = [cancelBarButton]
+        
+        navigationBar?.setItems([navItem], animated: false);
+        
+        setTheme()
+        
     }
     
-    @IBAction func sundayTapped(_ sender: UIButton) {
+    func setTheme() {
+        
+        statusBarView.backgroundColor = appData.appColor
+        statusBarView.alpha = 0.85 // Needed to match translucent navBar
+        
+        //let statusBarView = UIView(frame: UIApplication.shared.statusBarFrame)
+        //navBar.isTranslucent = false
 
-        if sunday.tag == 0 {
-            taskDays.append("Sunday")
+        navigationBar?.barTintColor = appData.appColor
+        
+        let toolbar = navigationController?.toolbar
+        toolbar?.barTintColor = appData.appColor
+        
+        if appData.isNightMode {
+            NightNight.theme = .night
         } else {
-            taskDays = taskDays.filter { $0 != "Sunday" }
+            NightNight.theme = .normal
         }
         
-        buttonAction(for: sender)
+        let bgColor = navigationBar?.barTintColor
         
-    }
-    
-    @IBAction func mondayTapped(_ sender: UIButton) {
-        if monday.tag == 0 {
-            taskDays.append("Monday")
+        if appData.darknessCheck(for: bgColor) {
+            
+            navigationBar?.tintColor = UIColor.white
+            navigationBar?.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white]
+            toolbar?.tintColor = UIColor.white
+            setStatusBarStyle(.lightContent)
+            
         } else {
-            taskDays = taskDays.filter { $0 != "Monday" }
+            
+            navigationBar?.tintColor = UIColor.black
+            navigationBar?.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.black]
+            toolbar?.tintColor = UIColor.black
+            setStatusBarStyle(.default)
         }
-        
-        buttonAction(for: sender)
-        
-    }
-    
-    @IBAction func tuesdayTapped(_ sender: UIButton) {
-        if tuesday.tag == 0 {
-            taskDays.append("Tuesday")
-        } else {
-            taskDays = taskDays.filter { $0 != "Tuesday" }
-        }
-        
-        buttonAction(for: sender)
-        
-    }
-    
-    @IBAction func wednesdayTapped(_ sender: UIButton) {
-        if wednesday.tag == 0 {
-            taskDays.append("Wednesday")
-        } else {
-            taskDays = taskDays.filter { $0 != "Wednesday" }
-        }
-        
-        buttonAction(for: sender)
-        
-    }
-    
-    @IBAction func thursdayTapped(_ sender: UIButton) {
-        if thursday.tag == 0 {
-            taskDays.append("Thursday")
-        } else {
-            taskDays = taskDays.filter { $0 != "Thursday" }
-        }
-        
-        buttonAction(for: sender)
-        
-    }
-    
-    @IBAction func fridayTapped(_ sender: UIButton) {
-        if friday.tag == 0 {
-            taskDays.append("Friday")
-        } else {
-            taskDays = taskDays.filter { $0 != "Friday" }
-        }
-        
-        buttonAction(for: sender)
-        
-    }
-    
-    @IBAction func saturdayTapped(_ sender: UIButton) {
-        if saturday.tag == 0 {
-            taskDays.append("Saturday")
-        } else {
-            taskDays = taskDays.filter { $0 != "Saturday" }
-        }
-        
-        buttonAction(for: sender)
-        
-    }
-    
-    
-    @IBAction func createTask(_ sender: Any) {
-
-        // TODO: check that all fields have data. Popup if blank
-        
-        print(taskDays)
-        performSegue(withIdentifier: "createdTaskUnwindSegue", sender: self)
         
     }
     
@@ -318,25 +255,147 @@ class NewTasksViewController: UIViewController {
         }
     }
     
-    func doneOccurrence() {
-        occurrenceRateTextField.resignFirstResponder()
+    //MARK: - Button Actions/Functions
+    
+    func buttonAction(for button: UIButton) {
+        
+        if button.tag == 0 {
+            UIView.animate(withDuration: 0.5, animations: { () -> Void in
+                button.layer.backgroundColor = self.appData.appColor.cgColor
+                button.setTitleColor(UIColor.white, for: .normal)
+            })
+            button.tag = 1
+        } else {
+            UIView.animate(withDuration: 0.5, animations: { () -> Void in
+                button.layer.backgroundColor = UIColor.white.cgColor
+                button.setTitleColor(UIColor.black, for: .normal)
+            })
+            button.tag = 0
+        }
+    
     }
+    
+    @IBAction func sundayTapped(_ sender: UIButton) {
 
-    func cancelTask() {
-        //navigationController?.popViewController(animated: true)
-        //self.removeFromParentViewController()
-        //navigationController?.popToRootViewController(animated: true)
-        dismiss(animated: true, completion: nil)
+        if sunday.tag == 0 {
+            taskDays.append("Sunday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Sunday" }
+        }
+        
+        buttonAction(for: sender)
+        
     }
     
-    func donePicker() {
-        taskLengthTextField.resignFirstResponder()
+    @IBAction func mondayTapped(_ sender: UIButton) {
+
+        if monday.tag == 0 {
+            taskDays.append("Monday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Monday" }
+        }
+        
+        buttonAction(for: sender)
+        
     }
     
-    func cancelPicker() {
-        taskLengthTextField.resignFirstResponder()
-        taskLengthTextField.text = ""
+    @IBAction func tuesdayTapped(_ sender: UIButton) {
+
+        if tuesday.tag == 0 {
+            taskDays.append("Tuesday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Tuesday" }
+        }
+        
+        buttonAction(for: sender)
+        
     }
+    
+    @IBAction func wednesdayTapped(_ sender: UIButton) {
+
+        if wednesday.tag == 0 {
+            taskDays.append("Wednesday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Wednesday" }
+        }
+        
+        buttonAction(for: sender)
+        
+    }
+    
+    @IBAction func thursdayTapped(_ sender: UIButton) {
+
+        if thursday.tag == 0 {
+            taskDays.append("Thursday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Thursday" }
+        }
+        
+        buttonAction(for: sender)
+        
+    }
+    
+    @IBAction func fridayTapped(_ sender: UIButton) {
+
+        if friday.tag == 0 {
+            taskDays.append("Friday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Friday" }
+        }
+        
+        buttonAction(for: sender)
+        
+    }
+    
+    @IBAction func saturdayTapped(_ sender: UIButton) {
+
+        if saturday.tag == 0 {
+            taskDays.append("Saturday")
+        } else {
+            taskDays = taskDays.filter { $0 != "Saturday" }
+        }
+        
+        buttonAction(for: sender)
+        
+    }
+    
+    
+    @IBAction func createTask(_ sender: Any) {
+
+        let taskNameWasEntered = taskNameTextField.hasText
+        let taskTimeWasEntered = taskLengthTextField.hasText
+        let frequencyWasEntered = occurrenceRateTextField.hasText
+        let taskDaysWereEntered = !taskDays.isEmpty
+        
+        if taskNameWasEntered && taskTimeWasEntered && frequencyWasEntered && taskDaysWereEntered {
+            
+            performSegue(withIdentifier: "createdTaskUnwindSegue", sender: self)
+
+        } else {
+            
+            popAlert()
+            
+        }
+
+    }
+    
+    func popAlert() {
+        
+        let alertController = UIAlertController(title: "Warning",
+                                                message: "Please fill out all fields to add your task",
+                                                preferredStyle: UIAlertControllerStyle.alert)
+        
+        let okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.default){ (action: UIAlertAction) in
+            print("Hello")
+        }
+        
+        alertController.addAction(okAction)
+        
+        present(alertController,animated: true,completion: nil)
+        
+    }
+    
+    //MARK: - Keyoard Functions
     
     func registerForKeyboardNotifications(){
         //Adding notifies on keyboard appearing
@@ -461,6 +520,15 @@ extension NewTasksViewController: UIPickerViewDelegate, UIPickerViewDataSource {
         
     }
     
+    func donePicker() {
+        taskLengthTextField.resignFirstResponder()
+    }
+    
+    func cancelPicker() {
+        taskLengthTextField.resignFirstResponder()
+        taskLengthTextField.text = ""
+    }
+    
 }
 
 //******************************
@@ -501,6 +569,17 @@ extension NewTasksViewController: UITextFieldDelegate {
     
     func textFieldDidEndEditing(_ textField: UITextField){
         activeTextField = nil
+    }
+    
+    func doneOccurrence() {
+        occurrenceRateTextField.resignFirstResponder()
+    }
+    
+    func cancelTask() {
+        //navigationController?.popViewController(animated: true)
+        //self.removeFromParentViewController()
+        //navigationController?.popToRootViewController(animated: true)
+        dismiss(animated: true, completion: nil)
     }
     
 }

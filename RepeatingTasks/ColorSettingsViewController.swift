@@ -70,7 +70,7 @@ class ColorSettingsViewController: UITableViewController {
     
     override func viewDidLoad() {
 
-        self.title = "Static"
+        self.title = "Theme Color"
         
         tableView.sectionIndexColor = UIColor.black
         
@@ -255,6 +255,7 @@ class ColorSettingsViewController: UITableViewController {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         appDelegate.setTheme(as: selectedColor!)
 
+        appDelegate.appData.appColorName = color
         appDelegate.appData.saveColorSettingsToDictionary()
         appDelegate.appData.save()
         

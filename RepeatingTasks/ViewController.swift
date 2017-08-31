@@ -11,11 +11,11 @@ import Chameleon
 
 class TaskViewController: UIViewController {
 
-    //MARK: - View Controller
-
-    //MARK: - Collection View Data Source
-
+    //MARK: - Outlets
+    
     @IBOutlet weak var taskList: UICollectionView!
+    
+    //MARK: - Properties
     
     var tasks = [String]()
     
@@ -35,6 +35,9 @@ class TaskViewController: UIViewController {
     var runningCompletionTime = 0.0
     
     var willResetTimer = false
+    var currentDay = Date()
+    
+    //MARK: - View and Basic Functions
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -53,6 +56,159 @@ class TaskViewController: UIViewController {
         // Determine the time interval between now and when the timers will reset
         // Set a timer to go off at that time
         
+        timeCheck()
+        
+    }
+    
+    func prepareNavBar() {
+        
+        let addBarButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addTask))
+        navigationItem.rightBarButtonItems = [addBarButton]
+        
+        let settingsButton = UIBarButtonItem(image: #imageLiteral(resourceName: "Settings"), style: .plain, target: self, action: #selector(settingsButtonTapped))
+        toolbarItems = [settingsButton]
+        navigationController?.isToolbarHidden = false
+        
+        setTheme()
+        
+    }
+    
+    func setTheme() {
+        
+        let navigationBar = navigationController?.navigationBar
+        navigationBar?.barTintColor = appData.appColor
+        navigationBar?.mixedBarStyle = MixedBarStyle(normal: .default, night: .blackTranslucent)
+        
+        let toolbar = navigationController?.toolbar
+        toolbar?.barTintColor = appData.appColor
+        
+        if appData.isNightMode {
+            NightNight.theme = .night
+        } else {
+            NightNight.theme = .normal
+        }
+        
+        let bgColor = navigationController?.navigationBar.barTintColor
+        
+        if appData.darknessCheck(for: bgColor) {
+            
+            navigationBar?.tintColor = UIColor.white
+            toolbar?.tintColor = UIColor.white
+            setStatusBarStyle(.lightContent)
+            
+        } else {
+            
+            navigationBar?.tintColor = UIColor.black
+            toolbar?.tintColor = UIColor.black
+            setStatusBarStyle(.default)
+        }
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        
+        appData.setColorScheme()
+        
+        setTheme()
+        
+        if selectedTask != "" && runningCompletionTime > 0 {
+            
+            taskData.taskDictionary[selectedTask]!["competedTime"] = runningCompletionTime
+            
+        }
+        
+        DispatchQueue.main.async {
+            self.taskList.collectionViewLayout.invalidateLayout()
+            self.taskList.reloadData()
+        }
+        
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        
+        if taskTimer.isEnabled && !taskTimer.firedFromMainVC {
+            
+            let currentTime = Date().timeIntervalSince1970
+            let timeElapsed = currentTime - taskTimer.startTime
+            print("time elapsed \(timeElapsed)")
+            
+            let wholeNumbers = floor(timeElapsed)
+            let milliseconds = Int((timeElapsed - wholeNumbers) * 1000)
+            
+            DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + .milliseconds(milliseconds)) {
+                
+                print("Wait until next second begins")
+                
+            }
+            
+            let indexPathRow = tasks.index(of: selectedTask)
+            let indexPath = IndexPath(row: indexPathRow!, section: 0)
+            selectedCell = taskList.cellForItem(at: indexPath) as? RepeatingTasksCollectionCell
+            
+            //_ = formatTimer(for: selectedTask, from: selectedCell)
+            _ = taskTimer.formatTimer(name: selectedTask, from: selectedCell, dataset: taskData)
+            
+            _ = Timer.scheduledTimer(timeInterval: 1.0, target: self,
+                                     selector: #selector(timerRunning), userInfo: nil,
+                                     repeats: true)
+            
+        }
+        
+    }
+    
+    func accessCheck(for task: String) -> Bool {
+        
+        taskData.setTask(as: task)
+        
+        // TODO: save date when app is accessed
+        // TODO: used reset offset so that the day changes at reset time
+        
+        let accessDates = taskData.taskAccessDictionary[task]
+
+        let now = Date()
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "EEEE"
+        
+        let dayOfWeekString: String = dateFormatter.string(from: now)
+        print("Today is \(dayOfWeekString)")
+        
+        return taskData.taskDays.contains(dayOfWeekString)
+        
+    }
+
+    
+    func settingsButtonTapped() {
+        performSegue(withIdentifier: "appSettingsSegue", sender: self)
+        
+        //let appSettingsVC = AppSettingsViewController()
+        //present(appSettingsVC, animated: true, completion: nil)
+        //appSettingsVC.appData = appData
+        //self.navigationController!.pushViewController(appSettingsVC, animated: true)
+        
+        
+    }
+    
+    //MARK: - Timer Related Functions
+    
+    func taskDayCheck(for task: String) -> Bool {
+        
+        taskData.setTask(as: task)
+        
+        let now = Date()
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "EEEE"
+        
+        let dayOfWeekString: String = dateFormatter.string(from: now)
+        print("Today is \(dayOfWeekString)")
+        
+        return taskData.taskDays.contains(dayOfWeekString)
+        
+    }
+    
+    func timeCheck() {
+        
         let now = Date()
         let calendar = Calendar.current
         
@@ -67,11 +223,11 @@ class TaskViewController: UIViewController {
         currentTime.hour = calendar.component(.hour, from: now)
         currentTime.minute = calendar.component(.minute, from: now)
         
-//        print(currentTime.year)
-//        print(currentTime.month)
-//        print(currentTime.day)
-//        print(currentTime.hour)
-//        print(currentTime.minute)
+        //        print(currentTime.year)
+        //        print(currentTime.month)
+        //        print(currentTime.day)
+        //        print(currentTime.hour)
+        //        print(currentTime.minute)
         
         let then = appData.taskLastTime
         var lastAppTime = DateComponents()
@@ -80,7 +236,7 @@ class TaskViewController: UIViewController {
         lastAppTime.day = calendar.component(.day, from: then)
         lastAppTime.hour = calendar.component(.hour, from: then)
         lastAppTime.minute = calendar.component(.minute, from: then)
-
+        
         reset.year = currentTime.year
         reset.month = currentTime.month
         
@@ -102,77 +258,66 @@ class TaskViewController: UIViewController {
             let timeToResetTime = Date().addingTimeInterval(timeDifference)
             let resetTimer = Timer(fireAt: timeToResetTime, interval: 0, target: self, selector: #selector(resetTaskTimers), userInfo: nil, repeats: false)
             RunLoop.main.add(resetTimer, forMode: RunLoopMode.commonModes)
-
+            
         } else {
-
+            
             //if !Task.instance.timer.isEnabled {
             if !taskTimer.isEnabled {
                 resetTaskTimers()
             } else {
                 willResetTimer = true
             }
-
+            
         }
         
-
         
-//        var tomorrow = DateComponents()
-//        tomorrow.year = currentTime.year
-//        tomorrow.month = currentTime.month
-//        if today.hour! < 2 { // check if it's actually late at night
-//            tomorrow.day = currentTime.day!
-//            
-//        } else {
-//            tomorrow.day = currentTime.day! + 1
-//            
-//        }
-//        tomorrow.hour = 2 // load hour and minutes here
-//        tomorrow.minute = 0
-//
-//        print(tomorrow.year)
-//        print(tomorrow.month)
-//        print(tomorrow.day)
-//        print(tomorrow.hour)
-//        print(tomorrow.minute)
-//        
-//        let tomorrowDate = calendar.date(from: tomorrow)
         
-//        let differenceComponents = calendar.dateComponents([.hour, .minute, .second], from: Date(), to: tomorrowDate!)
-//        
-//        let timeDifference = TimeInterval((differenceComponents.hour! * 3600) + (differenceComponents.minute! * 60) + differenceComponents.second!)
-//        
-//        print("now is \(now)")
-//        print("tomorrow is \(String(describing: tomorrowDate))")
-//        print("Time difference between now and 2am tomorrow is \(timeDifference) seconds")        
+        //        var tomorrow = DateComponents()
+        //        tomorrow.year = currentTime.year
+        //        tomorrow.month = currentTime.month
+        //        if today.hour! < 2 { // check if it's actually late at night
+        //            tomorrow.day = currentTime.day!
+        //
+        //        } else {
+        //            tomorrow.day = currentTime.day! + 1
+        //
+        //        }
+        //        tomorrow.hour = 2 // load hour and minutes here
+        //        tomorrow.minute = 0
+        //
+        //        print(tomorrow.year)
+        //        print(tomorrow.month)
+        //        print(tomorrow.day)
+        //        print(tomorrow.hour)
+        //        print(tomorrow.minute)
+        //
+        //        let tomorrowDate = calendar.date(from: tomorrow)
+        
+        //        let differenceComponents = calendar.dateComponents([.hour, .minute, .second], from: Date(), to: tomorrowDate!)
+        //
+        //        let timeDifference = TimeInterval((differenceComponents.hour! * 3600) + (differenceComponents.minute! * 60) + differenceComponents.second!)
+        //
+        //        print("now is \(now)")
+        //        print("tomorrow is \(String(describing: tomorrowDate))")
+        //        print("Time difference between now and 2am tomorrow is \(timeDifference) seconds")
         //let tomorrow = Date(timeIntervalSinceNow: 1)
         //let currentTime = date.timeIntervalSince1970
-
+        
         // If the current time is later than the reset time then reset now
         // Otherwise set task to reset at presribed time
-//        if timeDifference < 0 {
-//            
-//            if !timerEnabled {
-//                resetTaskTimers()
-//            } else {
-//                willResetTimer = true
-//            }
-//            
-//        } else {
-//            let resetTime = Date().addingTimeInterval(timeDifference)
-//            let resetTimer = Timer(fireAt: resetTime, interval: 0, target: self, selector: #selector(resetTaskTimers), userInfo: nil, repeats: false)
-//            RunLoop.main.add(resetTimer, forMode: RunLoopMode.commonModes)
-//        }
-    
-    }
-    
-    func settingsButtonTapped() {
-        performSegue(withIdentifier: "appSettingsSegue", sender: self)
-        
-        //let appSettingsVC = AppSettingsViewController()
-        //present(appSettingsVC, animated: true, completion: nil)
-        //appSettingsVC.appData = appData
-        //self.navigationController!.pushViewController(appSettingsVC, animated: true)
-        
+        //        if timeDifference < 0 {
+        //
+        //            if !timerEnabled {
+        //                resetTaskTimers()
+        //            } else {
+        //                willResetTimer = true
+        //            }
+        //            
+        //        } else {
+        //            let resetTime = Date().addingTimeInterval(timeDifference)
+        //            let resetTimer = Timer(fireAt: resetTime, interval: 0, target: self, selector: #selector(resetTaskTimers), userInfo: nil, repeats: false)
+        //            RunLoop.main.add(resetTimer, forMode: RunLoopMode.commonModes)
+        //        }
         
     }
     
@@ -390,48 +535,28 @@ class TaskViewController: UIViewController {
         
     }
     
+    func secondsToHoursMinutesSeconds(from seconds: Int) -> (Int, Int, Int) {
+        
+        return (seconds / 3600, (seconds % 3600) / 60, (seconds % 3600) & 60)
+        
+    }
+
     func catchNotification(notification:Notification) -> Void {
         print("Catch notification")
         
         taskTimer.run.invalidate()
         
     }
+
+    //MARK: - Button Functions
+    
     func addTask() {
         print("Do stuff")
         performSegue(withIdentifier: "addTaskSegue", sender: nil)
     
     }
     
-    @IBAction func newTaskCreatedUnwind(segue: UIStoryboardSegue) {
-        
-        print("Is this being run?")
-        print(tasks)
-        
-        print(taskData.taskNameList)
-        print(taskData.taskDictionary)
-        print(taskData.taskStatsDictionary)
-        
-        saveData()
-        
-        DispatchQueue.main.async {
-            self.taskList.reloadData()
-        }
-        
-    }
-    
-    @IBAction func taskDeletedUnwind(segue: UIStoryboardSegue) {
-        
-        print("Baleted")
-        print(tasks)
-        
-        //loadData()
-        saveData()
-        
-        DispatchQueue.main.async {
-            self.taskList.reloadData()
-        }
-        
-    }
+   //MARK: - Data Handling
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
@@ -489,136 +614,39 @@ class TaskViewController: UIViewController {
         
     }
     
-    func prepareNavBar() {
-        
-        let addBarButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addTask))
-        navigationItem.rightBarButtonItems = [addBarButton]
-        
-        let settingsButton = UIBarButtonItem(image: #imageLiteral(resourceName: "Settings"), style: .plain, target: self, action: #selector(settingsButtonTapped))
-        toolbarItems = [settingsButton]
-        navigationController?.isToolbarHidden = false
-        
-        setTheme()
-        
-    }
+    //MARK: - Navigation
     
-    func setTheme() {
+    @IBAction func newTaskCreatedUnwind(segue: UIStoryboardSegue) {
         
-        let navigationBar = navigationController?.navigationBar
-        navigationBar?.barTintColor = appData.appColor
-        navigationBar?.mixedBarStyle = MixedBarStyle(normal: .default, night: .blackTranslucent)
+        print("Is this being run?")
+        print(tasks)
         
-        let toolbar = navigationController?.toolbar
-        toolbar?.barTintColor = appData.appColor
+        print(taskData.taskNameList)
+        print(taskData.taskDictionary)
+        print(taskData.taskStatsDictionary)
         
-        if appData.isNightMode {
-            NightNight.theme = .night
-        } else {
-            NightNight.theme = .normal
-        }
+        saveData()
         
-        if darknessCheck() {
-            
-            navigationBar?.tintColor = UIColor.white
-            toolbar?.tintColor = UIColor.white
-            setStatusBarStyle(.lightContent)
-            
-        } else {
-            
-            navigationBar?.tintColor = UIColor.black
-            toolbar?.tintColor = UIColor.black
-            setStatusBarStyle(.default)
-        }
-        
-    }
-    
-    func darknessCheck(for color:UIColor? = nil) -> Bool {
-        
-        var r: CGFloat = 0.0, g: CGFloat = 0.0, b: CGFloat = 0.0, a: CGFloat = 0.0
-        
-        let bgColor = navigationController?.navigationBar.barTintColor
-        //let bgColor = navigationController?.toolbar.backgroundColor
-        bgColor?.getRed(&r, green: &g, blue: &b, alpha: &a)
-        
-        let twoLowColors = (r < 0.7 || g < 0.7)
-        
-        if r  < 0.7 && g  < 0.7 && b < 0.7 {
-            return true
-        } else {
-            return false
-        }
-    
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        
-        appData.setColorScheme()
-        
-        setTheme()
-        
-        if selectedTask != "" && runningCompletionTime > 0 {
-            
-            taskData.taskDictionary[selectedTask]!["competedTime"] = runningCompletionTime
-            
-        }
-
         DispatchQueue.main.async {
-            self.taskList.collectionViewLayout.invalidateLayout()
             self.taskList.reloadData()
         }
         
     }
-
-    override func viewDidAppear(_ animated: Bool) {
+    
+    @IBAction func taskDeletedUnwind(segue: UIStoryboardSegue) {
         
-        if taskTimer.isEnabled && !taskTimer.firedFromMainVC {
-            
-            let currentTime = Date().timeIntervalSince1970
-            let timeElapsed = currentTime - taskTimer.startTime
-            print("time elapsed \(timeElapsed)")
-            
-            let wholeNumbers = floor(timeElapsed)
-            let milliseconds = Int((timeElapsed - wholeNumbers) * 1000)
-            
-            DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + .milliseconds(milliseconds)) {
-
-                print("Wait until next second begins")
-            
-            }
-            
-            let indexPathRow = tasks.index(of: selectedTask)
-            let indexPath = IndexPath(row: indexPathRow!, section: 0)
-            selectedCell = taskList.cellForItem(at: indexPath) as? RepeatingTasksCollectionCell
-            
-            //_ = formatTimer(for: selectedTask, from: selectedCell)
-            _ = taskTimer.formatTimer(name: selectedTask, from: selectedCell, dataset: taskData)
-            
-            _ = Timer.scheduledTimer(timeInterval: 1.0, target: self,
-                                                  selector: #selector(timerRunning), userInfo: nil,
-                                                  repeats: true)
-            
-            
-            
-            
-            
+        print("Baleted")
+        print(tasks)
+        
+        //loadData()
+        saveData()
+        
+        DispatchQueue.main.async {
+            self.taskList.reloadData()
         }
         
-
-        
     }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
-    func secondsToHoursMinutesSeconds(from seconds: Int) -> (Int, Int, Int) {
-        
-        return (seconds / 3600, (seconds % 3600) / 60, (seconds % 3600) & 60)
-        
-    }
-    
-
 }
 
 //MARK: - Collection View Delegate
@@ -678,7 +706,7 @@ extension TaskViewController: UICollectionViewDelegate, UICollectionViewDataSour
         let cellBGColor = appData.colorScheme[indexPath.row % 4]
         cell.backgroundColor = cellBGColor
         
-        if darknessCheck(for: cellBGColor) {
+        if appData.darknessCheck(for: cellBGColor) {
 
             cell.taskNameField.textColor = UIColor.white
             cell.taskTimeRemaining.textColor = UIColor.white
@@ -736,7 +764,18 @@ extension TaskViewController: UICollectionViewDelegate, UICollectionViewDataSour
         
         cell.progressView.progressTintColor = UIColor.darkGray
         
-        
+        if taskDayCheck(for: task) {
+         
+            cell.playStopButton.isHidden = false
+            cell.progressView.isHidden = false
+            
+        } else {
+            
+            cell.playStopButton.isHidden = true
+            cell.taskTimeRemaining.text = "No task today"
+            cell.progressView.isHidden = true
+            
+        }
         
         return cell
         

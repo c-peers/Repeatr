@@ -11,17 +11,17 @@ import Chameleon
 
 class AppData: NSObject, NSCoding {
 
-    //MARK: - Object
-
-    //MARK: - Coding
+    //MARK: - Properties
     
     // Basic task information
     var taskResetTime = Date()
     var taskLastTime = Date()
     var taskCurrentTime = Date()
-    //var colorScheme: [String : Bool]?
     var colorScheme: [UIColor] = []
     var appColor = UIColor.red
+
+    var appColorName = ""
+    var resetOffset = ""
     
     // App settings
     var isNightMode = false
@@ -32,21 +32,34 @@ class AppData: NSObject, NSCoding {
     var appSettings = [String : Bool]()
     var timeSettings = [String : Date]()
     var colorSettings = [String : UIColor]()
+    var misc = [String : String]()
     
-    //MARK: Archiving Paths
+    //MARK: - Archiving Paths
+
     static let documentsDirectory = FileManager().urls(for: .documentDirectory, in: .userDomainMask).first!
     static let archiveAppSettings = documentsDirectory.appendingPathComponent("appSettings")
     static let archiveTimeSettings = documentsDirectory.appendingPathComponent("timeSettings")
     static let archiveColorSettings = documentsDirectory.appendingPathComponent("colorSettings")
+    static let archiveMisc = documentsDirectory.appendingPathComponent("miscSettings")
 
+    //MARK: - Data Handling
+    
     func save() {
+        
+        saveAppSettingsToDictionary()
+        saveTimeSettingsToDictionary()
+        saveColorSettingsToDictionary()
+        saveMiscSettingsToDictionary()
+        
         let appSettingsSaveSuccessful = NSKeyedArchiver.archiveRootObject(appSettings, toFile: AppData.archiveAppSettings.path)
         let timeSettingsSaveSuccessful = NSKeyedArchiver.archiveRootObject(timeSettings, toFile: AppData.archiveTimeSettings.path)
         let colorSettingsSaveSuccessful = NSKeyedArchiver.archiveRootObject(colorSettings, toFile: AppData.archiveColorSettings.path)
+        let miscSaveSuccessful = NSKeyedArchiver.archiveRootObject(misc, toFile: AppData.archiveMisc.path)
         
         print("Saved app settings: \(appSettingsSaveSuccessful)")
         print("Saved time settings: \(timeSettingsSaveSuccessful)")
         print("Saved color settings: \(colorSettingsSaveSuccessful)")
+        print("Saved misc: \(miscSaveSuccessful)")
         
     }
     
@@ -63,9 +76,16 @@ class AppData: NSObject, NSCoding {
             colorSettings = loadColorSettings
         }
 
+        if let loadMisc = NSKeyedUnarchiver.unarchiveObject(withFile: AppData.archiveMisc.path) as? [String : String] {
+            misc = loadMisc
+        }
+        
+        setAppValues()
         
     }
     
+    //MARK: - Color Functions
+
     func loadColors() {
         
         if let appColor = colorSettings["appColor"] {
@@ -73,6 +93,22 @@ class AppData: NSObject, NSCoding {
         }
         
         setColorScheme()
+        
+    }
+    
+    func darknessCheck(for color:UIColor? = nil) -> Bool {
+        
+        var r: CGFloat = 0.0, g: CGFloat = 0.0, b: CGFloat = 0.0, a: CGFloat = 0.0
+        
+        color?.getRed(&r, green: &g, blue: &b, alpha: &a)
+        
+        let twoLowColors = (r < 0.7 || g < 0.7)
+        
+        if r  < 0.7 && g  < 0.7 && b < 0.7 {
+            return true
+        } else {
+            return false
+        }
         
     }
     
@@ -99,6 +135,8 @@ class AppData: NSObject, NSCoding {
         
         isNightMode = appSettings["isNightMode"]!
         usesCircularProgress = appSettings["usesCircularProgress"]!
+        appColorName = misc["ColorName"] ?? "Red"
+        resetOffset = misc["ResetOffset"]!
         
     }
     
@@ -122,13 +160,21 @@ class AppData: NSObject, NSCoding {
         
         colorSettings["appColor"] = appColor
     }
+    
+    func saveMiscSettingsToDictionary() {
+        
+        misc["ColorName"] = appColorName
+        misc["ResetOffset"] = resetOffset
 
-    //MARK: NSCoding
+    }
+
+    //MARK: - NSCoding
     
     func encode(with aCoder: NSCoder) {
         aCoder.encode(appSettings, forKey: "appSettings")
         aCoder.encode(timeSettings, forKey: "timeSettings")
         aCoder.encode(colorSettings, forKey: "colorSettings")
+        aCoder.encode(appColorName, forKey: "miscSettings")
     }
     
     required convenience init?(coder aDecoder: NSCoder) {
@@ -142,19 +188,24 @@ class AppData: NSObject, NSCoding {
         guard let colorSettings = aDecoder.decodeObject(forKey: "colorSettings") as? [String : UIColor] else {
             return nil
         }
+        guard let misc = aDecoder.decodeObject(forKey: "miscSettings") as? [String : String] else {
+            return nil
+        }
         
         // Must call designated initializer.
-        self.init(appSettings: appSettings,  timeSettings: timeSettings, colorSettings: colorSettings)
+        self.init(appSettings: appSettings,  timeSettings: timeSettings, colorSettings: colorSettings, misc: misc)
         
     }
     
-    //MARK: Init
+    //MARK: - Init
     
-    init(appSettings: [String : Bool], timeSettings: [String : Date], colorSettings: [String : UIColor]) {
+    init(appSettings: [String : Bool], timeSettings: [String : Date], colorSettings: [String : UIColor], misc: [String : String]) {
         
         self.appSettings = appSettings
         self.timeSettings = timeSettings
         self.colorSettings = colorSettings
+        self.appColorName = misc["ColorName"] ?? "Red"
+        self.resetOffset = misc["ResetOffset"]!
         
     }
     

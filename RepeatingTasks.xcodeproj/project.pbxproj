@@ -61,6 +61,7 @@
 		C45664A51F5647FF0040387E /* UINavigationBar+MixedBarStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C45664841F5647FF0040387E /* UINavigationBar+MixedBarStyle.swift */; };
 		C45664A61F5647FF0040387E /* UINavigationBar+MixedTitleTextAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C45664851F5647FF0040387E /* UINavigationBar+MixedTitleTextAttributes.swift */; };
 		C45664A71F5647FF0040387E /* UIView+IBInspectable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C45664861F5647FF0040387E /* UIView+IBInspectable.swift */; };
+		C45664AF1F57F3290040387E /* ResetTimeSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C45664AE1F57F3290040387E /* ResetTimeSettingsViewController.swift */; };
 		C49C8D0E1EF35F91007F1069 /* NewTasksViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C49C8D0D1EF35F91007F1069 /* NewTasksViewController.swift */; };
 		C4A28F4F1F34583400B9D79A /* AppData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A28F4E1F34583400B9D79A /* AppData.swift */; };
 		C4D64E021F383AA600844404 /* TaskDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D64E011F383AA600844404 /* TaskDetailViewController.swift */; };
@@ -242,6 +243,7 @@
 		C45664841F5647FF0040387E /* UINavigationBar+MixedBarStyle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UINavigationBar+MixedBarStyle.swift"; sourceTree = "<group>"; };
 		C45664851F5647FF0040387E /* UINavigationBar+MixedTitleTextAttributes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UINavigationBar+MixedTitleTextAttributes.swift"; sourceTree = "<group>"; };
 		C45664861F5647FF0040387E /* UIView+IBInspectable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIView+IBInspectable.swift"; sourceTree = "<group>"; };
+		C45664AE1F57F3290040387E /* ResetTimeSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResetTimeSettingsViewController.swift; sourceTree = "<group>"; };
 		C49C8D0D1EF35F91007F1069 /* NewTasksViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewTasksViewController.swift; sourceTree = "<group>"; };
 		C4A28F4E1F34583400B9D79A /* AppData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppData.swift; sourceTree = "<group>"; };
 		C4D64E011F383AA600844404 /* TaskDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskDetailViewController.swift; sourceTree = "<group>"; };
@@ -319,6 +321,7 @@
 				C403E3231EF034E5001EE78D /* Info.plist */,
 				C403E31B1EF034E5001EE78D /* RepeatingTasks.xcdatamodeld */,
 				C417DE251F53B860004A649C /* AppSettingsViewController.swift */,
+				C45664AE1F57F3290040387E /* ResetTimeSettingsViewController.swift */,
 				C417DE271F53CE6C004A649C /* ColorSettingsViewController.swift */,
 				C49C8D0D1EF35F91007F1069 /* NewTasksViewController.swift */,
 			);
@@ -650,6 +653,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C45664AF1F57F3290040387E /* ResetTimeSettingsViewController.swift in Sources */,
 				C4540F381F4E704C00B2D1F3 /* TimePicker.swift in Sources */,
 				C45664A31F5647FF0040387E /* UIToolbar+Mixed.swift in Sources */,
 				C45664951F5647FF0040387E /* UIImageView+Mixed.swift in Sources */,
