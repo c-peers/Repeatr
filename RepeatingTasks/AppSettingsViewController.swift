@@ -15,6 +15,7 @@ class AppSettingsViewController: UITableViewController {
     //MARK: - Outlets
     
     @IBOutlet weak var setColorLabel: UILabel!
+    @IBOutlet weak var setProgressStyleLabel: UILabel!
     @IBOutlet weak var setResetTimeLabel: UILabel!
     @IBOutlet var nightModeSwitch: UISwitch!
     
@@ -87,6 +88,12 @@ class AppSettingsViewController: UITableViewController {
 
         setColorLabel.text = appData.appColorName
         setResetTimeLabel.text = appData.resetOffset
+        
+        if appData.usesCircularProgress {
+            setProgressStyleLabel.text = "Circular"
+        } else {
+            setProgressStyleLabel.text = "Flat"
+        }
 
     }
     
@@ -103,6 +110,8 @@ class AppSettingsViewController: UITableViewController {
             performSegue(withIdentifier: "colorSettingsSegue", sender: self)
             }
         } else if indexPath.section == 1 {
+            performSegue(withIdentifier: "progressViewSettingsSegue", sender: self)
+        } else if indexPath.section == 2 {
             performSegue(withIdentifier: "resetTimeSettingsSegue", sender: self)
         }
     }

@@ -33,7 +33,7 @@ class TaskDetailViewController: UIViewController {
     
     var elapsedTime = 0.0
     
-    let taskHistory = [600, 0, 1200]
+    //let taskHistory = [600, 0, 1200]
     
     var timeString: String = ""
     
@@ -405,7 +405,6 @@ class TaskDetailViewController: UIViewController {
         return arrayNewIndex
         
     }
-
     
     func taskChartSetup() {
         
@@ -436,22 +435,46 @@ class TaskDetailViewController: UIViewController {
         
         // TODO: get last 3 access times / task times and show completed time on chart
         
-        let taskDaysAsBinary = taskData.taskDaysAsBinary(from: taskDays)
-        let binaryArray = taskData.dblToIntArray(for: taskDaysAsBinary)
+        taskData.setTaskAccess(for: task)
+        
+        //let previousAccess = taskData.taskAccessDictionary[task]?.last
+        let taskAccess = taskData.taskAccess
+        var recentAccess: [Date]?
+        
+        if taskAccess.count > 3 {
+            recentAccess = Array(taskAccess.suffix(2))
+        } else {
+            recentAccess = taskAccess
+        }
+        
+        var recentAccessStringArray: [String] = []
+        
+        for x in 0..<recentAccess!.count {
+            
+            let date = recentAccess![x]
+            let formattedDate = taskData.set(date: date, as: "yyyy-MM-dd")
+            recentAccessStringArray.append(formattedDate)
+            
+        }
+        
+        xAxis.valueFormatter = IndexAxisValueFormatter(values: recentAccessStringArray)
+        //xAxis.valueFormatter = IndexAxisValueFormatter(values: ["Monday", "Wednesday", "Friday"])
+
+        
+        //let taskDaysAsBinary = taskData.taskDaysAsBinary(from: taskDays)
+        //let binaryArray = taskData.dblToIntArray(for: taskDaysAsBinary)
         
         
-        let today = taskData.taskDaysAsBinary(from: [dayOfWeekString])
-        let todayArray = taskData.dblToIntArray(for: today)
+        //let today = taskData.taskDaysAsBinary(from: [dayOfWeekString])
+        //let todayArray = taskData.dblToIntArray(for: today)
         //let todayIndex = todayArray.index(of: 1)
         
-        let newIndex = findNewIndex(compare: todayArray, to: binaryArray)
+        //let newIndex = findNewIndex(compare: todayArray, to: binaryArray)
         
-        let reindexedArray = binaryArray[0...newIndex] + binaryArray[(newIndex + 1)...6]
+        //let reindexedArray = binaryArray[0...newIndex] + binaryArray[(newIndex + 1)...6]
         
         
         //2017-08-31 07:02:35 +0000
-        
-        xAxis.valueFormatter = IndexAxisValueFormatter(values: ["Monday", "Wednesday", "Friday"])
         
         //        xAxis.
         //
@@ -496,10 +519,26 @@ class TaskDetailViewController: UIViewController {
         //let chartData = BarChartData(xVals: months, dataSet: chartDataSet)
         //barChartView.data = chartData
         
-        //here is the for loop
-        for i in 0..<taskHistory.count {
+        var taskAccess: [Date]?
+        
+        if taskData.taskAccess.count > 3 {
+            taskAccess = Array(taskData.taskAccess.suffix(2))
+        } else {
+            taskAccess = taskData.taskAccess
+        }
+
+        var taskTimeHistory = [Double]()
+        
+        for date in taskAccess! {
             
-            let value = BarChartDataEntry(x: Double(i), y: Double(taskHistory[i])) // here we set the X and Y status in a data chart entry
+            let completedTime = taskData.taskHistoryDictionary[task]![date]!["completedTimeHistory"]
+            taskTimeHistory.append(completedTime!)
+            
+        }
+            
+        for i in 0..<taskTimeHistory.count {
+            
+            let value = BarChartDataEntry(x: Double(i), y: taskTimeHistory[i]) // here we set the X and Y status in a data chart entry
             
             barChartEntry.append(value) // here we add it to the data set
         }

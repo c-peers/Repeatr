@@ -28,6 +28,7 @@
 		C4257AE81F4A97B200AA03B5 /* TaskSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4257AE71F4A97B200AA03B5 /* TaskSettingsViewController.swift */; };
 		C43A509D1F3BFB0600BEAA97 /* Singleton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C43A509C1F3BFB0600BEAA97 /* Singleton.swift */; };
 		C43A50C01F3E67E700BEAA97 /* Holding FIle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C43A50BF1F3E67E700BEAA97 /* Holding FIle.swift */; };
+		C44C220D1F59467200BC9833 /* ProgressViewSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C44C220C1F59467200BC9833 /* ProgressViewSettingsViewController.swift */; };
 		C4540F381F4E704C00B2D1F3 /* TimePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4540F371F4E704C00B2D1F3 /* TimePicker.swift */; };
 		C45664881F5647FF0040387E /* .gitkeep in Resources */ = {isa = PBXBuildFile; fileRef = C45664661F5647FF0040387E /* .gitkeep */; };
 		C45664891F5647FF0040387E /* AttributeNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = C45664671F5647FF0040387E /* AttributeNames.swift */; };
@@ -210,6 +211,7 @@
 		C43A50451F39641400BEAA97 /* RepeatingTasks-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RepeatingTasks-Bridging-Header.h"; sourceTree = "<group>"; };
 		C43A509C1F3BFB0600BEAA97 /* Singleton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Singleton.swift; sourceTree = "<group>"; };
 		C43A50BF1F3E67E700BEAA97 /* Holding FIle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Holding FIle.swift"; sourceTree = "<group>"; };
+		C44C220C1F59467200BC9833 /* ProgressViewSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressViewSettingsViewController.swift; sourceTree = "<group>"; };
 		C4540F371F4E704C00B2D1F3 /* TimePicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimePicker.swift; sourceTree = "<group>"; };
 		C45664661F5647FF0040387E /* .gitkeep */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		C45664671F5647FF0040387E /* AttributeNames.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AttributeNames.swift; sourceTree = "<group>"; };
@@ -322,6 +324,7 @@
 				C403E31B1EF034E5001EE78D /* RepeatingTasks.xcdatamodeld */,
 				C417DE251F53B860004A649C /* AppSettingsViewController.swift */,
 				C45664AE1F57F3290040387E /* ResetTimeSettingsViewController.swift */,
+				C44C220C1F59467200BC9833 /* ProgressViewSettingsViewController.swift */,
 				C417DE271F53CE6C004A649C /* ColorSettingsViewController.swift */,
 				C49C8D0D1EF35F91007F1069 /* NewTasksViewController.swift */,
 			);
@@ -655,6 +658,7 @@
 			files = (
 				C45664AF1F57F3290040387E /* ResetTimeSettingsViewController.swift in Sources */,
 				C4540F381F4E704C00B2D1F3 /* TimePicker.swift in Sources */,
+				C44C220D1F59467200BC9833 /* ProgressViewSettingsViewController.swift in Sources */,
 				C45664A31F5647FF0040387E /* UIToolbar+Mixed.swift in Sources */,
 				C45664951F5647FF0040387E /* UIImageView+Mixed.swift in Sources */,
 				C456648B1F5647FF0040387E /* Keys.swift in Sources */,

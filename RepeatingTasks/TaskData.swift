@@ -33,15 +33,9 @@ class TaskData: NSObject, NSCoding {
     var bestStreak = 0.0
     
     // Task history
-    var totalTaskTimeHistory = [Double]()
-    var missedTaskTimeHistory = [Double]()
-    var completedTaskTimeHistory = [Double]()
-    var totalTaskDaysHistory = [Double]()
-    var fullTaskDaysHistory = [Double]()
-    var partialTaskDaysHistory = [Double]()
-    var missedTaskDaysHistory = [Double]()
-    var currentStreakHistory = [Double]()
-    var bestStreakHistory = [Double]()
+    var taskTimeHistory = 0.0
+    var missedTimeHistory = 0.0
+    var completedTimeHistory = 0.0
     
     // Access
     var taskAccess = [Date]()
@@ -53,19 +47,19 @@ class TaskData: NSObject, NSCoding {
     var taskNameList = [String]()
     var taskDictionary = [String : [String : Double]]()
     var taskStatsDictionary = [String : [String : Double]]()
-    var taskHistoryDictionary = [String : [String : [Double]]]()
-    var taskAccessDictionary = [String : [Date]]()
+    var taskHistoryDictionary = [String : [Date : [String : Double]]]()
+    //var taskAccessDictionary = [String : [Date]]()
     
     var taskNameIndex = 0
     
-    //MARK: Archiving Paths
+    //MARK: - Archiving Paths
     
     static let documentsDirectory = FileManager().urls(for: .documentDirectory, in: .userDomainMask).first!
     static let archiveTasksURL = documentsDirectory.appendingPathComponent("taskList")
     static let archiveTaskSettingsURL = documentsDirectory.appendingPathComponent("taskSettings")
     static let archiveTaskStatsURL = documentsDirectory.appendingPathComponent("taskStatistics")
     static let archiveTaskHistoryURL = documentsDirectory.appendingPathComponent("taskHistory")
-    static let archiveTaskAccessURL = documentsDirectory.appendingPathComponent("taskAccess")
+    //static let archiveTaskAccessURL = documentsDirectory.appendingPathComponent("taskAccess")
 
     //MARK: - Save/Load functions
 
@@ -74,13 +68,13 @@ class TaskData: NSObject, NSCoding {
         let taskSettingsSaveSuccessful = NSKeyedArchiver.archiveRootObject(taskDictionary, toFile: TaskData.archiveTaskSettingsURL.path)
         let taskStatsSaveSuccessful = NSKeyedArchiver.archiveRootObject(taskStatsDictionary, toFile: TaskData.archiveTaskStatsURL.path)
         let taskHistorySaveSuccessful = NSKeyedArchiver.archiveRootObject(taskHistoryDictionary, toFile: TaskData.archiveTaskHistoryURL.path)
-        let taskAccessSaveSuccessful = NSKeyedArchiver.archiveRootObject(taskAccessDictionary, toFile: TaskData.archiveTaskAccessURL.path)
+        //let taskAccessSaveSuccessful = NSKeyedArchiver.archiveRootObject(taskAccessDictionary, toFile: TaskData.archiveTaskAccessURL.path)
         
         print("Saved task names: \(tasksSaveSuccessful)")
         print("Saved task settings: \(taskSettingsSaveSuccessful)")
         print("Saved task stats: \(taskStatsSaveSuccessful)")
         print("Saved task history: \(taskHistorySaveSuccessful)")
-        print("Saved task history: \(taskAccessSaveSuccessful)")
+        //print("Saved task history: \(taskAccessSaveSuccessful)")
         
         print("Printing saved data")
         print("Tasks: \(taskNameList)")
@@ -103,13 +97,13 @@ class TaskData: NSObject, NSCoding {
             taskStatsDictionary = loadTaskStatistics
         }
         
-        if let loadTaskHistory = NSKeyedUnarchiver.unarchiveObject(withFile: TaskData.archiveTaskHistoryURL.path) as? [String : [String : [Double]]] {
+        if let loadTaskHistory = NSKeyedUnarchiver.unarchiveObject(withFile: TaskData.archiveTaskHistoryURL.path) as? [String : [Date : [String : Double]]] {
             taskHistoryDictionary = loadTaskHistory
         }
         
-        if let loadTaskAccess = NSKeyedUnarchiver.unarchiveObject(withFile: TaskData.archiveTaskAccessURL.path) as? [String : [Date]] {
-            taskAccessDictionary = loadTaskAccess
-        }
+        //if let loadTaskAccess = NSKeyedUnarchiver.unarchiveObject(withFile: TaskData.archiveTaskAccessURL.path) as? [String : [Date]] {
+            //taskAccessDictionary = loadTaskAccess
+        //}
 
     }
     
@@ -354,62 +348,83 @@ class TaskData: NSObject, NSCoding {
 
     //MARK: - History Functions
 
-    func setTaskHistory(as taskName: String) {
+    func setTaskHistory(as taskName: String, for date: Date) {
         
         if let currentTaskHistory = taskHistoryDictionary[taskName] {
 
-            totalTaskTimeHistory = currentTaskHistory["totalTaskTimeHistory"]!
-            missedTaskTimeHistory = currentTaskHistory["missedTaskTimeHistory"]!
-            completedTaskTimeHistory = currentTaskHistory["completedTaskTimeHistory"]!
-            totalTaskDaysHistory = currentTaskHistory["totalTaskDaysHistory"]!
-            fullTaskDaysHistory = currentTaskHistory["fullTaskDaysHistory"]!
-            partialTaskDaysHistory = currentTaskHistory["partialTaskDaysHistory"]!
-            missedTaskDaysHistory = currentTaskHistory["missedTaskDaysHistory"]!
-            currentStreakHistory = currentTaskHistory["currentStreakHistory"]!
-            bestStreakHistory = currentTaskHistory["bestStreakHistory"]!
+            setTaskAccess(for: taskName)
+            
+            if let accessHistory = currentTaskHistory[date] {
+            
+                taskTimeHistory = accessHistory["totalTaskTimeHistory"]!
+                missedTimeHistory = accessHistory["missedTaskTimeHistory"]!
+                completedTimeHistory = accessHistory["completedTaskTimeHistory"]!
+
+            }
             
         }
         
     }
     
-    func newTaskHistory(name taskName: String) {
+    func setTaskAccess(for task: String) {
         
-        taskHistoryDictionary[taskName] = ["totalTaskTimeHistory": [],
-                                           "missedTaskTimeHistory": [],
-                                           "completedTaskTimeHistory": [],
-                                           "totalTaskDaysHistory": [],
-                                           "fullTaskDaysHistory": [],
-                                           "partialTaskDaysHistory": [],
-                                           "missedTaskDaysHistory": [],
-                                           "currentStreakHistory": [],
-                                           "bestStreakHistory": [] ]
+        if let currentTaskHistory = taskHistoryDictionary[task] {
+            
+            taskAccess = Array(currentTaskHistory.keys)
+            
+            //taskAccess.sort(){$0 < $1}
+            let sortedArray = taskAccess.sorted(by: {$0.timeIntervalSince1970 < $1.timeIntervalSince1970})
+            taskAccess = sortedArray
+
+        }
+        
+    }
+    
+    func set(date: Date, as format: String) -> String {
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = format
+        
+        return dateFormatter.string(from: date)
+
+    }
+    
+    func saveTaskHistory(for taskName: String, at date: Date) {
+        
+        //var history = taskHistoryDictionary[taskName]![date]!
+        
+        let historyForDate = ["taskTimeHistory": taskTimeHistory,
+                              "missedTimeHistory": missedTimeHistory,
+                              "completedTimeHistory": completedTimeHistory]
+        
+        taskHistoryDictionary[taskName] = [date : historyForDate]
         
     }
     
     //MARK: - Access Functions
     
-    func addAccess(for taskName: String) {
-        
-        if let previous = taskAccessDictionary[taskName] {
-            
-            var newAccess = previous
-            newAccess.append(Date())
-            taskAccessDictionary[taskName] = newAccess
-            
-        } else {
-            
-            taskAccessDictionary[taskName] = [Date()]
-            
-        }
-        
-        
-    }
-    
-    func setAccess(for taskName: String) {
-        
-        taskAccess = taskAccessDictionary[taskName] ?? []
-        
-    }
+//    func addAccess(for taskName: String) {
+//        
+//        if let previous = taskAccessDictionary[taskName] {
+//            
+//            var newAccess = previous
+//            newAccess.append(Date())
+//            taskAccessDictionary[taskName] = newAccess
+//            
+//        } else {
+//            
+//            taskAccessDictionary[taskName] = [Date()]
+//            
+//        }
+//        
+//        
+//    }
+//    
+//    func setAccess(for taskName: String) {
+//        
+//        taskAccess = taskAccessDictionary[taskName] ?? []
+//        
+//    }
     
     //MARK: - NSCoding
     
@@ -418,7 +433,7 @@ class TaskData: NSObject, NSCoding {
         aCoder.encode(taskDictionary, forKey: "taskDictionary")
         aCoder.encode(taskStatsDictionary, forKey: "taskStatsDictionary")
         aCoder.encode(taskHistoryDictionary, forKey: "taskHistoryDictionary")
-        aCoder.encode(taskAccessDictionary, forKey: "taskAccessDictionary")
+        //aCoder.encode(taskAccessDictionary, forKey: "taskAccessDictionary")
     }
     
     required convenience init?(coder aDecoder: NSCoder) {
@@ -435,30 +450,29 @@ class TaskData: NSObject, NSCoding {
             return nil
         }
 
-        guard let taskHistoryDictionary = aDecoder.decodeObject(forKey: "taskHistoryDictionary") as? [String:[String:[Double]]] else {
+        guard let taskHistoryDictionary = aDecoder.decodeObject(forKey: "taskHistoryDictionary") as? [String : [Date : [String : Double]]] else {
             return nil
         }
         
-        guard let taskAccessDictionary = aDecoder.decodeObject(forKey: "taskAccessDictionary") as? [String:[Date]] else {
-            return nil
-        }
+        //guard let taskAccessDictionary = aDecoder.decodeObject(forKey: "taskAccessDictionary") as? [String:[Date]] else {
+        //    return nil
+        //}
         
         // Must call designated initializer.
         self.init(name: taskNameList, taskSettings: taskDictionary,
-                  statistics: taskStatsDictionary, history: taskHistoryDictionary,
-                  access: taskAccessDictionary)
+                  statistics: taskStatsDictionary, history: taskHistoryDictionary)
         
     }
     
     //MARK: - Init
 
-    init(name: [String], taskSettings: [String:[String:Double]], statistics: [String:[String:Double]], history: [String:[String:[Double]]], access: [String:[Date]]) {
+    init(name: [String], taskSettings: [String:[String:Double]], statistics: [String:[String:Double]], history: [String : [Date : [String : Double]]]) {
         
         self.taskNameList = name
         self.taskDictionary = taskSettings
         self.taskStatsDictionary = statistics
         self.taskHistoryDictionary = history
-        self.taskAccessDictionary = access
+        //self.taskAccessDictionary = access
         
     }
     

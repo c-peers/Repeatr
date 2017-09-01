@@ -9,7 +9,7 @@
 import UIKit
 import Chameleon
 
-class NewTasksViewController: UIViewController {
+class NewTasksViewController: UIViewController, UIScrollViewDelegate {
 
     //MARK: - Outlets
 
@@ -60,6 +60,9 @@ class NewTasksViewController: UIViewController {
         
         super.viewDidLoad()
         
+        scrollView.delegate = self
+        scrollView.contentSize.width = view.bounds.width
+        
         // Themeing made the buttons blue. This 
         //self.setThemeUsingPrimaryColor(appData.appColor, withSecondaryColor: UIColor.clear, andContentStyle: .contrast)
         
@@ -80,6 +83,7 @@ class NewTasksViewController: UIViewController {
 
         let decimalPadToolBar = UIToolbar.init()
         decimalPadToolBar.sizeToFit()
+        decimalPadToolBar.barTintColor = appData.appColor
         let decimalDoneButton = UIBarButtonItem.init(barButtonSystemItem: .done, target: self, action: #selector(doneOccurrence))
         decimalPadToolBar.items = [decimalDoneButton]
         
@@ -108,7 +112,8 @@ class NewTasksViewController: UIViewController {
         let pickerToolBar = UIToolbar()
         pickerToolBar.barStyle = UIBarStyle.default
         pickerToolBar.isTranslucent = true
-        pickerToolBar.tintColor = UIColor(red: 76/255, green: 217/255, blue: 100/255, alpha: 1)
+        pickerToolBar.barTintColor = appData.appColor
+        //pickerToolBar.tintColor = UIColor(red: 76/255, green: 217/255, blue: 100/255, alpha: 1)
         pickerToolBar.sizeToFit()
         
         let doneButton = UIBarButtonItem(title: "Done", style: UIBarButtonItemStyle.plain, target: self, action: #selector(donePicker))
@@ -129,6 +134,20 @@ class NewTasksViewController: UIViewController {
         //******************************
         // Pickerview initialization finished
         //******************************
+
+        let bgColor = navigationBar?.barTintColor
+        
+        if appData.darknessCheck(for: bgColor) {
+            
+            pickerToolBar.tintColor = UIColor.white
+            decimalPadToolBar.tintColor = UIColor.white
+            
+        } else {
+            
+            pickerToolBar.tintColor = UIColor.black
+            decimalPadToolBar.tintColor = UIColor.black
+
+        }
 
         //******************************
         // Day selection start
@@ -158,7 +177,9 @@ class NewTasksViewController: UIViewController {
         saturday.tag = 0
         
         createTaskButton.layer.borderColor = appData.appColor.cgColor
-        createTaskButton.layer.borderWidth = 1
+        createTaskButton.layer.borderWidth = 2
+        createTaskButton.layer.cornerRadius = 10.0
+        
         createTaskButton.setTitleColor(appData.appColor, for: .normal)
         
     }
@@ -176,6 +197,12 @@ class NewTasksViewController: UIViewController {
         
         setTheme()
         
+    }
+    
+    func scrollViewDidScroll(scrollView: UIScrollView) {
+        if scrollView.contentOffset.x != 0 {
+            scrollView.contentOffset.x = 0
+        }
     }
     
     func setTheme() {

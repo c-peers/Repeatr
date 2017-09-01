@@ -130,13 +130,13 @@ class AppData: NSObject, NSCoding {
         
         //taskResetTime = timeSettings["taskResetTime"]!
         taskResetTime = Calendar.current.date(from: defaultReset)!
-        taskLastTime = timeSettings["taskLastTime"]!
-        taskCurrentTime = timeSettings["taskCurrentTime"]!
+        taskLastTime = timeSettings["taskLastTime"] ?? Date()
+        taskCurrentTime = timeSettings["taskCurrentTime"] ?? Date()
         
-        isNightMode = appSettings["isNightMode"]!
-        usesCircularProgress = appSettings["usesCircularProgress"]!
+        isNightMode = appSettings["isNightMode"] ?? false
+        usesCircularProgress = appSettings["usesCircularProgress"] ?? false
         appColorName = misc["ColorName"] ?? "Red"
-        resetOffset = misc["ResetOffset"]!
+        resetOffset = misc["ResetOffset"] ?? "12:00"
         
     }
     

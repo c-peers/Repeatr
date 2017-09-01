@@ -6,6 +6,7 @@
 //  Copyright © 2017 Chase Peers. All rights reserved.
 //
 
+import Foundation
 import UIKit
 import Chameleon
 
@@ -47,6 +48,9 @@ class TaskViewController: UIViewController {
         
         print("loaded Values")
         print(tasks)
+        
+        appData.taskCurrentTime = Date()
+        currentDay = appData.taskCurrentTime
         
         NotificationCenter.default.addObserver(forName: Notification.Name("StopTimerNotification"), object: nil, queue: nil, using: catchNotification)
         
@@ -156,27 +160,49 @@ class TaskViewController: UIViewController {
         
     }
     
-    func accessCheck(for task: String) -> Bool {
+    func accessCheck(for task: String) {
         
         taskData.setTask(as: task)
+        taskData.setTaskAccess(for: task)
         
-        // TODO: save date when app is accessed
-        // TODO: used reset offset so that the day changes at reset time
-        
-        let accessDates = taskData.taskAccessDictionary[task]
+        let offsetString = appData.resetOffset
 
-        let now = Date()
+        //let previousAccess = taskData.taskAccessDictionary[task]?.last
+        let previousAccess = taskData.taskAccess.last
         
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "EEEE"
+        if previousAccess != nil {
+            let previousAccessDay = getDay(for: previousAccess!, with: offsetString)
+            let currentAccessDay = getDay(for:currentDay, with: offsetString)
         
-        let dayOfWeekString: String = dateFormatter.string(from: now)
-        print("Today is \(dayOfWeekString)")
+            if previousAccessDay != currentAccessDay {
+                taskData.saveTaskHistory(for: task, at: currentDay)
+            }
+            
+        } else {
+            taskData.saveTaskHistory(for: task, at:currentDay)
+        }
+
+    }
+    
+    func getDay(for date: Date, with offset: String) -> Int {
         
-        return taskData.taskDays.contains(dayOfWeekString)
+        var resetOffset = DateComponents()
+        resetOffset.hour = offsetDate(by: offset)
+        
+        let date = Calendar.current.date(byAdding: resetOffset, to: date)
+        let offsetDay = Calendar.current.component(.weekday, from: date!)
+
+        return offsetDay
         
     }
 
+    func offsetDate(by offset: String) -> Int {
+        
+        let offsetTime = offset.components(separatedBy: ":")[0]
+        let offset = Int(offsetTime)
+        return offset!
+        
+    }
     
     func settingsButtonTapped() {
         performSegue(withIdentifier: "appSettingsSegue", sender: self)
@@ -194,13 +220,11 @@ class TaskViewController: UIViewController {
     func taskDayCheck(for task: String) -> Bool {
         
         taskData.setTask(as: task)
-        
-        let now = Date()
-        
+    
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "EEEE"
         
-        let dayOfWeekString: String = dateFormatter.string(from: now)
+        let dayOfWeekString: String = dateFormatter.string(from: currentDay)
         print("Today is \(dayOfWeekString)")
         
         return taskData.taskDays.contains(dayOfWeekString)
@@ -209,12 +233,8 @@ class TaskViewController: UIViewController {
     
     func timeCheck() {
         
-        let now = Date()
+        let now = currentDay
         let calendar = Calendar.current
-        
-        var reset = DateComponents()
-        reset.hour = calendar.component(.hour, from: appData.taskResetTime)
-        reset.minute = calendar.component(.minute, from: appData.taskResetTime)
         
         var currentTime = DateComponents()
         currentTime.year = calendar.component(.year, from: now)
@@ -237,8 +257,12 @@ class TaskViewController: UIViewController {
         lastAppTime.hour = calendar.component(.hour, from: then)
         lastAppTime.minute = calendar.component(.minute, from: then)
         
+        var reset = DateComponents()
         reset.year = currentTime.year
         reset.month = currentTime.month
+        reset.hour = offsetDate(by: appData.resetOffset)
+        reset.minute = 0
+        //reset.minute = calendar.component(.minute, from: appData.taskResetTime)
         
         if (lastAppTime.year != currentTime.year) || (lastAppTime.month != currentTime.month) {
             reset.day = currentTime.day
@@ -268,8 +292,11 @@ class TaskViewController: UIViewController {
                 willResetTimer = true
             }
             
+            
         }
         
+        appData.taskLastTime = now
+        appData.save()
         
         
         //        var tomorrow = DateComponents()
@@ -328,12 +355,17 @@ class TaskViewController: UIViewController {
         // 1. Reset completed time
         // 2. Calculate rollover time
         // 3. Refresh screen
+        
+        if tasks.count < 1 {
+            return
+        }
+        
         for x in 0...(tasks.count - 1) {
             let task = tasks[x]
             
             taskData.setTask(as: task)
             
-            let (_, weightedTaskTime) = getWeightedTime(for: task)
+            let (taskTime, weightedTaskTime) = getWeightedTime(for: task)
 
             let completedTime = taskData.completedTime
             
@@ -342,6 +374,20 @@ class TaskViewController: UIViewController {
             taskData.taskDictionary[task]?["completedTime"] = 0
             
             taskData.taskDictionary[task]?["rolloverTime"] = rolloverFromYesterday
+            
+            //=====================================
+            
+            taskData.setTaskAccess(for: task)
+            let date = taskData.taskAccess.last!
+            
+            taskData.taskHistoryDictionary[task]![date]!["totalTaskTimeHistory"] = taskTime
+            taskData.taskHistoryDictionary[task]![date]!["missedTaskTimeHistory"] = taskTime - completedTime
+            taskData.taskHistoryDictionary[task]![date]!["completedTaskTimeHistory"] = completedTime
+
+            // TODO: Insert Statistics Saving
+            
+            taskData.save()
+            
             
         }
         
@@ -768,6 +814,8 @@ extension TaskViewController: UICollectionViewDelegate, UICollectionViewDataSour
          
             cell.playStopButton.isHidden = false
             cell.progressView.isHidden = false
+            
+            accessCheck(for: task)
             
         } else {
             
