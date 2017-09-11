@@ -153,34 +153,50 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
         // Day selection start
         //******************************
 
-        sunday.layer.borderWidth = 1
-        sunday.layer.borderColor = appData.appColor.cgColor
-        monday.layer.borderWidth = 1
-        monday.layer.borderColor = appData.appColor.cgColor
-        tuesday.layer.borderWidth = 1
-        tuesday.layer.borderColor = appData.appColor.cgColor
-        wednesday.layer.borderWidth = 1
-        wednesday.layer.borderColor = appData.appColor.cgColor
-        thursday.layer.borderWidth = 1
-        thursday.layer.borderColor = appData.appColor.cgColor
-        friday.layer.borderWidth = 1
-        friday.layer.borderColor = appData.appColor.cgColor
-        saturday.layer.borderWidth = 1
-        saturday.layer.borderColor = appData.appColor.cgColor
-
-        sunday.tag = 0
-        monday.tag = 0
-        tuesday.tag = 0
-        wednesday.tag = 0
-        thursday.tag = 0
-        friday.tag = 0
-        saturday.tag = 0
+//        sunday.layer.borderWidth = 1
+//        sunday.layer.borderColor = appData.appColor.cgColor
+//        monday.layer.borderWidth = 1
+//        monday.layer.borderColor = appData.appColor.cgColor
+//        tuesday.layer.borderWidth = 1
+//        tuesday.layer.borderColor = appData.appColor.cgColor
+//        wednesday.layer.borderWidth = 1
+//        wednesday.layer.borderColor = appData.appColor.cgColor
+//        thursday.layer.borderWidth = 1
+//        thursday.layer.borderColor = appData.appColor.cgColor
+//        friday.layer.borderWidth = 1
+//        friday.layer.borderColor = appData.appColor.cgColor
+//        saturday.layer.borderWidth = 1
+//        saturday.layer.borderColor = appData.appColor.cgColor
+//
+//        sunday.tag = 0
+//        monday.tag = 0
+//        tuesday.tag = 0
+//        wednesday.tag = 0
+//        thursday.tag = 0
+//        friday.tag = 0
+//        saturday.tag = 0
+        
+        prepareDayButtons(for: sunday)
+        prepareDayButtons(for: monday)
+        prepareDayButtons(for: tuesday)
+        prepareDayButtons(for: wednesday)
+        prepareDayButtons(for: thursday)
+        prepareDayButtons(for: friday)
+        prepareDayButtons(for: saturday)
         
         createTaskButton.layer.borderColor = appData.appColor.cgColor
         createTaskButton.layer.borderWidth = 2
         createTaskButton.layer.cornerRadius = 10.0
         
         createTaskButton.setTitleColor(appData.appColor, for: .normal)
+        
+    }
+    
+    func prepareDayButtons(for button: UIButton) {
+        
+        button.layer.borderWidth = 1
+        button.layer.borderColor = appData.appColor.cgColor
+        button.tag = 0
         
     }
     
@@ -219,9 +235,9 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
         toolbar?.barTintColor = appData.appColor
         
         if appData.isNightMode {
-            NightNight.theme = .night
+            //NightNight.theme = .night
         } else {
-            NightNight.theme = .normal
+            //NightNight.theme = .normal
         }
         
         let bgColor = navigationBar?.barTintColor
@@ -278,7 +294,7 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
             vc.taskData.newStatsDictionaryEntry(name: taskName)
             
             vc.tasks.append(taskName)
-            
+            vc.taskData.setTask(as: taskName)
         }
     }
     

@@ -26,7 +26,8 @@ class TaskViewController: UIViewController {
     
     var taskTimer = CountdownTimer()
     
-    //var taskTimer = Timer()
+    //var taskTimer = Timer() performSegue(withIdentifier: "taskDeletedUnwindSegue", sender: self)
+    
     
     //var timerEnabled = false
     var timerFiringFromTaskVC = false
@@ -37,6 +38,7 @@ class TaskViewController: UIViewController {
     
     var willResetTimer = false
     var currentDay = Date()
+    var yesterday = Date()
     
     //MARK: - View and Basic Functions
     
@@ -81,15 +83,15 @@ class TaskViewController: UIViewController {
         
         let navigationBar = navigationController?.navigationBar
         navigationBar?.barTintColor = appData.appColor
-        navigationBar?.mixedBarStyle = MixedBarStyle(normal: .default, night: .blackTranslucent)
+        //navigationBar?.mixedBarStyle = MixedBarStyle(normal: .default, night: .blackTranslucent)
         
         let toolbar = navigationController?.toolbar
         toolbar?.barTintColor = appData.appColor
         
         if appData.isNightMode {
-            NightNight.theme = .night
+            //NightNight.theme = .night
         } else {
-            NightNight.theme = .normal
+            //NightNight.theme = .normal
         }
         
         let bgColor = navigationController?.navigationBar.barTintColor
@@ -117,7 +119,7 @@ class TaskViewController: UIViewController {
         
         if selectedTask != "" && runningCompletionTime > 0 {
             
-            taskData.taskDictionary[selectedTask]!["competedTime"] = runningCompletionTime
+            taskData.taskDictionary[selectedTask]![TaskData.completedTimeKey] = runningCompletionTime
             
         }
         
@@ -160,6 +162,12 @@ class TaskViewController: UIViewController {
         
     }
     
+    /*
+     Checks if last time accessed is the same day or not.
+     If it is the same day then do nothing. 
+     Otherwise create history dicionary with today's date.
+    */
+    
     func accessCheck(for task: String) {
         
         taskData.setTask(as: task)
@@ -167,27 +175,28 @@ class TaskViewController: UIViewController {
         
         let offsetString = appData.resetOffset
 
-        //let previousAccess = taskData.taskAccessDictionary[task]?.last
-        let previousAccess = taskData.taskAccess.last
-        
-        if previousAccess != nil {
-            let previousAccessDay = getDay(for: previousAccess!, with: offsetString)
+        if let previousAccess = taskData.taskAccess?.last {
+            
+            // Both give day of week as an int. Check if values match
+            let previousAccessDay = getDay(for: previousAccess, with: offsetString)
             let currentAccessDay = getDay(for:currentDay, with: offsetString)
-        
+            
             if previousAccessDay != currentAccessDay {
-                taskData.saveTaskHistory(for: task, at: currentDay)
+                taskData.newTaskHistory(for: task, for: currentDay)
             }
             
         } else {
-            taskData.saveTaskHistory(for: task, at:currentDay)
+            taskData.newTaskHistory(for: task, for: currentDay)
         }
-
-    }
+        
+        saveData()
     
+    }
+
     func getDay(for date: Date, with offset: String) -> Int {
         
         var resetOffset = DateComponents()
-        resetOffset.hour = offsetDate(by: offset)
+        resetOffset.hour = -offsetDate(by: offset)
         
         let date = Calendar.current.date(byAdding: resetOffset, to: date)
         let offsetDay = Calendar.current.component(.weekday, from: date!)
@@ -204,6 +213,30 @@ class TaskViewController: UIViewController {
         
     }
     
+    func getAccessDate(for task: String, lengthFromEnd count: Int) -> Date? {
+        
+        taskData.setTaskAccess(for: task)
+        
+        if let dates = taskData.taskAccess {
+            
+            let length = dates.count
+            
+            if length < 1 {
+                
+                return dates.last!
+                
+            } else if length >= count + 1 {
+                
+                return dates[length - count - 1]
+                
+            }
+        
+        }
+    
+        return nil
+        
+    }
+    
     func settingsButtonTapped() {
         performSegue(withIdentifier: "appSettingsSegue", sender: self)
         
@@ -217,18 +250,60 @@ class TaskViewController: UIViewController {
     
     //MARK: - Timer Related Functions
     
-    func taskDayCheck(for task: String) -> Bool {
+    func taskDayCheck(for task: String, at date: Date) -> Bool {
         
         taskData.setTask(as: task)
     
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "EEEE"
         
-        let dayOfWeekString: String = dateFormatter.string(from: currentDay)
+        var dayOfWeekString = dateFormatter.string(from: date)
         print("Today is \(dayOfWeekString)")
         
         return taskData.taskDays.contains(dayOfWeekString)
         
+    }
+    
+    func checkForMissedDays(in task: String) {
+        
+        taskData.setTaskAccess(for: task)
+        
+        let lastUsed = appData.taskLastTime
+        let lastIndex = taskData.taskAccess?.index(of: lastUsed)
+        
+        let daysBetween = calculateDaysBetweenTwoDates(start: lastUsed, end: currentDay)
+        
+        if daysBetween < 1 {
+            return
+        }
+        
+        var missedDays: Int = 0
+        for day in 1...daysBetween - 1 {
+            
+            let date = Calendar.current.date(byAdding: .day, value: day, to: lastUsed)
+            
+            if taskDayCheck(for: task, at: date!) {
+                taskData.newTaskHistory(for: task, for: date!)
+                taskData.taskHistoryDictionary[task]![date!]![TaskData.missedHistoryKey] = taskData.taskHistoryDictionary[task]![date!]![TaskData.taskTimeHistoryKey]
+                
+                taskData.taskAccess?.insert(date!, at: lastIndex! + missedDays)
+                missedDays += 1
+            }
+            
+        }
+        
+    }
+    
+    func calculateDaysBetweenTwoDates(start: Date, end: Date) -> Int {
+        
+        let currentCalendar = Calendar.current
+        guard let start = currentCalendar.ordinality(of: .day, in: .era, for: start) else {
+            return 0
+        }
+        guard let end = currentCalendar.ordinality(of: .day, in: .era, for: end) else {
+            return 0
+        }
+        return end - start
     }
     
     func timeCheck() {
@@ -236,26 +311,10 @@ class TaskViewController: UIViewController {
         let now = currentDay
         let calendar = Calendar.current
         
-        var currentTime = DateComponents()
-        currentTime.year = calendar.component(.year, from: now)
-        currentTime.month = calendar.component(.month, from: now)
-        currentTime.day = calendar.component(.day, from: now)
-        currentTime.hour = calendar.component(.hour, from: now)
-        currentTime.minute = calendar.component(.minute, from: now)
-        
-        //        print(currentTime.year)
-        //        print(currentTime.month)
-        //        print(currentTime.day)
-        //        print(currentTime.hour)
-        //        print(currentTime.minute)
+        var currentTime = getDateComponents(for: now)
         
         let then = appData.taskLastTime
-        var lastAppTime = DateComponents()
-        lastAppTime.year = calendar.component(.year, from: then)
-        lastAppTime.month = calendar.component(.month, from: then)
-        lastAppTime.day = calendar.component(.day, from: then)
-        lastAppTime.hour = calendar.component(.hour, from: then)
-        lastAppTime.minute = calendar.component(.minute, from: then)
+        var lastAppTime = getDateComponents(for: then)
         
         var reset = DateComponents()
         reset.year = currentTime.year
@@ -272,81 +331,60 @@ class TaskViewController: UIViewController {
             reset.day = currentTime.day! + 1
         }
         
-        let resetTime = calendar.date(from: reset)
+        let nextResetTime = calendar.date(from: reset)
+        let lastResetTime = calendar.date(byAdding: .day, value: -1, to: nextResetTime!)
         
-        if now < resetTime! {
+        let resetOccurred = resetTimePassed(between: then, and: now, with: lastResetTime!)
+        
+        if resetOccurred {
             
-            let differenceComponents = calendar.dateComponents([.hour, .minute, .second], from: Date(), to: resetTime!)
-            let timeDifference = TimeInterval((differenceComponents.hour! * 3600) + (differenceComponents.minute! * 60) + differenceComponents.second!)
-            
-            let timeToResetTime = Date().addingTimeInterval(timeDifference)
-            let resetTimer = Timer(fireAt: timeToResetTime, interval: 0, target: self, selector: #selector(resetTaskTimers), userInfo: nil, repeats: false)
-            RunLoop.main.add(resetTimer, forMode: RunLoopMode.commonModes)
-            
-        } else {
-            
-            //if !Task.instance.timer.isEnabled {
             if !taskTimer.isEnabled {
                 resetTaskTimers()
             } else {
                 willResetTimer = true
             }
             
+        } else {
+            
+            let differenceComponents = calendar.dateComponents([.hour, .minute, .second], from: Date(), to: nextResetTime!)
+            let timeDifference = TimeInterval((differenceComponents.hour! * 3600) + (differenceComponents.minute! * 60) + differenceComponents.second!)
+            
+            let timeToResetTime = Date().addingTimeInterval(timeDifference)
+            let resetTimer = Timer(fireAt: timeToResetTime, interval: 0, target: self, selector: #selector(resetTaskTimers), userInfo: nil, repeats: false)
+            RunLoop.main.add(resetTimer, forMode: RunLoopMode.commonModes)
             
         }
         
         appData.taskLastTime = now
         appData.save()
         
+    }
+    
+    func resetTimePassed(between then: Date, and now: Date, with reset: Date) -> Bool {
         
-        //        var tomorrow = DateComponents()
-        //        tomorrow.year = currentTime.year
-        //        tomorrow.month = currentTime.month
-        //        if today.hour! < 2 { // check if it's actually late at night
-        //            tomorrow.day = currentTime.day!
-        //
-        //        } else {
-        //            tomorrow.day = currentTime.day! + 1
-        //
-        //        }
-        //        tomorrow.hour = 2 // load hour and minutes here
-        //        tomorrow.minute = 0
-        //
-        //        print(tomorrow.year)
-        //        print(tomorrow.month)
-        //        print(tomorrow.day)
-        //        print(tomorrow.hour)
-        //        print(tomorrow.minute)
-        //
-        //        let tomorrowDate = calendar.date(from: tomorrow)
-        
-        //        let differenceComponents = calendar.dateComponents([.hour, .minute, .second], from: Date(), to: tomorrowDate!)
-        //
-        //        let timeDifference = TimeInterval((differenceComponents.hour! * 3600) + (differenceComponents.minute! * 60) + differenceComponents.second!)
-        //
-        //        print("now is \(now)")
-        //        print("tomorrow is \(String(describing: tomorrowDate))")
-        //        print("Time difference between now and 2am tomorrow is \(timeDifference) seconds")
-        //let tomorrow = Date(timeIntervalSinceNow: 1)
-        //let currentTime = date.timeIntervalSince1970
-        
-        // If the current time is later than the reset time then reset now
-        // Otherwise set task to reset at presribed time
-        //        if timeDifference < 0 {
-        //
-        //            if !timerEnabled {
-        //                resetTaskTimers()
-        //            } else {
-        //                willResetTimer = true
-        //            }
-        //            
-        //        } else {
-        //            let resetTime = Date().addingTimeInterval(timeDifference)
-        //            let resetTimer = Timer(fireAt: resetTime, interval: 0, target: self, selector: #selector(resetTaskTimers), userInfo: nil, repeats: false)
-        //            RunLoop.main.add(resetTimer, forMode: RunLoopMode.commonModes)
-        //        }
+        if reset > then && reset < now {
+            return true
+        } else {
+            return false
+        }
         
     }
+    
+    func getDateComponents(for date: Date) -> DateComponents {
+        
+        let calendar = Calendar.current
+        var time = DateComponents()
+        time.year = calendar.component(.year, from: date)
+        time.month = calendar.component(.month, from: date)
+        time.day = calendar.component(.day, from: date)
+        time.hour = calendar.component(.hour, from: date)
+        time.minute = calendar.component(.minute, from: date)
+        time.second = calendar.component(.second, from: date)
+        
+        return time
+
+    }
+    
     
     func resetTaskTimers() {
         print("RESET!!!!!!!!")
@@ -365,29 +403,64 @@ class TaskViewController: UIViewController {
             
             taskData.setTask(as: task)
             
-            let (taskTime, weightedTaskTime) = getWeightedTime(for: task)
+            let (_, weightedTaskTime) = taskTimer.getWeightedTime(for: task)
 
             let completedTime = taskData.completedTime
+            taskData.taskDictionary[task]?[TaskData.completedTimeKey] = 0
+
+            if let date = Calendar.current.date(byAdding: .day, value: -1, to: yesterday) {
+                yesterday = date
+            }
             
-            let rolloverFromYesterday = weightedTaskTime - completedTime
+            if taskDayCheck(for: task, at: yesterday) {
+                
+                var rolloverTime = weightedTaskTime - completedTime
+                
+                if rolloverTime < 0 {
+                    rolloverTime = 0
+                }
+                
+                taskData.taskDictionary[task]![TaskData.rolloverTimeKey] = rolloverTime
             
-            taskData.taskDictionary[task]?["completedTime"] = 0
+            }
             
-            taskData.taskDictionary[task]?["rolloverTime"] = rolloverFromYesterday
+            checkForMissedDays(in: task)
             
             //=====================================
             
             taskData.setTaskAccess(for: task)
-            let date = taskData.taskAccess.last!
             
-            taskData.taskHistoryDictionary[task]![date]!["totalTaskTimeHistory"] = taskTime
-            taskData.taskHistoryDictionary[task]![date]!["missedTaskTimeHistory"] = taskTime - completedTime
-            taskData.taskHistoryDictionary[task]![date]!["completedTaskTimeHistory"] = completedTime
+            let lastUsed = appData.taskLastTime
+            
+            if taskDayCheck(for: task, at: currentDay), let lastIndex = taskData.taskAccess?.index(of: lastUsed) {
 
+                let accessArrayLength = (taskData.taskAccess?.count)! - 1
+                var rollover = 0.0
+                
+                for index in lastIndex...accessArrayLength {
+                    
+                    let date = taskData.taskAccess![index]
+                    rollover += taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]!
+                    
+                }
+                
+                taskData.taskDictionary[task]![TaskData.rolloverTimeKey]! += rollover
+                
+//                if let previousAccess = getAccessDate(for: task, lengthFromEnd: 1) {
+//                    
+//                    let time = taskData.taskDictionary[task]!["completedTaskTimeHistory"]
+//                    let completion = taskData.taskHistoryDictionary[task]![previousAccess]!["completedTaskTimeHistory"]
+//                    
+//                    taskData.taskHistoryDictionary[task]![date]!["totalTaskTimeHistory"] = time
+//                    taskData.taskHistoryDictionary[task]![date]!["missedTaskTimeHistory"] = time! - completion!
+//                    taskData.taskHistoryDictionary[task]![date]!["completedTaskTimeHistory"] = completion
+//                    
+//                }
+                
+
+            }
+            
             // TODO: Insert Statistics Saving
-            
-            taskData.save()
-            
             
         }
         
@@ -481,14 +554,6 @@ class TaskViewController: UIViewController {
             
         }
         
-//        if (taskData.completedTime != nil) {
-//            print("Incrementing task time")
-//            taskSettings[taskName]!["completedTime"]! += 1
-//        } else {
-//            print("No task time set")
-//            taskSettings[taskName]!["completedTime"] = 1
-//        }
-        
         //let taskTime = currentTask["taskTime"] ?? 0
         
         //var (hours, minutes, seconds) = secondsToHoursMinutesSeconds(from: remainingTaskTime)
@@ -507,10 +572,19 @@ class TaskViewController: UIViewController {
         
         taskTimer.endTime = Date().timeIntervalSince1970
         
-        let elapsedTime = taskTimer.endTime - taskTimer.startTime
+        var elapsedTime = taskTimer.endTime - taskTimer.startTime
         //let previousCompletedTime = taskData.taskDictionary[task]?["completedTime"]!
         
-        taskData.taskDictionary[task]?["completedTime"]! += elapsedTime
+        if elapsedTime > taskData.taskTime {
+            elapsedTime = taskData.taskTime
+        }
+        
+        taskData.taskDictionary[task]![TaskData.completedTimeKey]! += elapsedTime
+
+        if let date = getAccessDate(for: task, lengthFromEnd: 0) {
+            taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]! += elapsedTime
+            taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]! = taskData.taskTime - elapsedTime
+        }
         
         //Task.instance.timer.isEnabled = false
         //taskData.timerEnabled = false
@@ -522,64 +596,64 @@ class TaskViewController: UIViewController {
         
     }
     
-    func formatTimer(for task: String, from cell: RepeatingTasksCollectionCell? = nil) -> (String, Double) {
-        // Used for initialization and when the task timer is updated
-        
-        taskData.setTask(as: task)
-        
-        let (taskTime, weightedTaskTime) = getWeightedTime(for: task)
-        
-        var completedTime = 0.0
-        
-        if runningCompletionTime == 0.0 {
-            completedTime = taskData.completedTime
-        } else if task == selectedTask {
-            completedTime = runningCompletionTime
-        }
-        
-        var remainingTaskTime = weightedTaskTime - completedTime
-        
-        if taskTimer.run.isValid {
-            remainingTaskTime -= 1
-        }
-        
-        print("Completed time is \(completedTime)")
-        
-        let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = [.hour, .minute, .second]
-        formatter.unitsStyle = .positional
-        
-        var remainingTimeAsString = formatter.string(from: TimeInterval(remainingTaskTime))!
-        
-        if remainingTaskTime <= 0 {
-            remainingTimeAsString = "Complete"
-        }
-        
-        if (cell != nil) {
-            
-            let currentProgress = 1 - Float(remainingTaskTime)/Float(taskTime)
-            
-            cell!.progressView.setProgress(currentProgress, animated: true)
-            
-            print("Current progress is \(currentProgress)")
-            
-            cell!.taskTimeRemaining.text = remainingTimeAsString
-            
-        }
-        
-        return (remainingTimeAsString, remainingTaskTime)
-
-    }
-    
-    func getWeightedTime(for task: String) -> (Double, Double) {
-        
-        let taskTime = taskData.taskTime
-        let rolloverMultiplier = taskData.rolloverMultiplier
-        let rolloverTime = taskData.rolloverTime
-        
-        return (taskTime, taskTime + (rolloverTime * rolloverMultiplier))
-        
-    }
+//    func formatTimer(for task: String, from cell: RepeatingTasksCollectionCell? = nil) -> (String, Double) {
+//        // Used for initialization and when the task timer is updated
+//        
+//        taskData.setTask(as: task)
+//        
+//        let (taskTime, weightedTaskTime) = getWeightedTime(for: task)
+//        
+//        var completedTime = 0.0
+//        
+//        if runningCompletionTime == 0.0 {
+//            completedTime = taskData.completedTime
+//        } else if task == selectedTask {
+//            completedTime = runningCompletionTime
+//        }
+//        
+//        var remainingTaskTime = weightedTaskTime - completedTime
+//        
+//        if taskTimer.run.isValid {
+//            remainingTaskTime -= 1
+//        }
+//        
+//        print("Completed time is \(completedTime)")
+//        
+//        let formatter = DateComponentsFormatter()
+//        formatter.allowedUnits = [.hour, .minute, .second]
+//        formatter.unitsStyle = .positional
+//        
+//        var remainingTimeAsString = formatter.string(from: TimeInterval(remainingTaskTime))!
+//        
+//        if remainingTaskTime <= 0 {
+//            remainingTimeAsString = "Complete"
+//        }
+//        
+//        if (cell != nil) {
+//            
+//            let currentProgress = 1 - Float(remainingTaskTime)/Float(taskTime)
+//            
+//            cell!.progressView.setProgress(currentProgress, animated: true)
+//            
+//            print("Current progress is \(currentProgress)")
+//            
+//            cell!.taskTimeRemaining.text = remainingTimeAsString
+//            
+//        }
+//        
+//        return (remainingTimeAsString, remainingTaskTime)
+//
+//    }
+//    
+//    func getWeightedTime(for task: String) -> (Double, Double) {
+//        
+//        let taskTime = taskData.taskTime
+//        let rolloverMultiplier = taskData.rolloverMultiplier
+//        let rolloverTime = taskData.rolloverTime
+//        
+//        return (taskTime, taskTime + (rolloverTime * rolloverMultiplier))
+//        
+//    }
     
     func secondsToHoursMinutesSeconds(from seconds: Int) -> (Int, Int, Int) {
         
@@ -670,6 +744,7 @@ class TaskViewController: UIViewController {
         print(taskData.taskNameList)
         print(taskData.taskDictionary)
         print(taskData.taskStatsDictionary)
+        print(taskData.taskHistoryDictionary)
         
         saveData()
         
@@ -683,6 +758,8 @@ class TaskViewController: UIViewController {
         
         print("Baleted")
         print(tasks)
+        
+        taskData.clearTask()
         
         //loadData()
         saveData()
@@ -723,9 +800,6 @@ extension TaskViewController: UICollectionViewDelegate, UICollectionViewDataSour
         cell.progressView.setProgress(0.0, animated: false)
         cell.taskNameField.text = task
         
-        //_ = formatTimer(for: cell, decrement: false)
-        //(_, _) = Task.instance.timer.formatTimer(for: task, from: cell, decrement: false)
-        //(_, _) = formatTimer(for: task, from: cell)
         (_, _) = taskTimer.formatTimer(name: task, from: cell, dataset: taskData)
         
         let formatter = DateComponentsFormatter()
@@ -764,40 +838,6 @@ extension TaskViewController: UICollectionViewDelegate, UICollectionViewDataSour
             
         }
         
-        //        let gradient = CAGradientLayer()
-        //
-        //        gradient.frame = cell.layer.bounds
-        //
-        //        let gradientColor2 = UIColor.clear
-        //        let gradientColor1 = UIColor.white.cgColor
-        //
-        //        gradient.colors = [gradientColor1,gradientColor2]
-        //
-        //        gradient.locations = [0.0, 0.75]
-        //        gradient.startPoint = CGPoint(x: 1, y: 0)
-        //        gradient.endPoint = CGPoint(x: 0, y: 1)
-        //
-        //        cell.layer.addSublayer(gradient)
-        //
-        //        switch (indexPath.row % 4) {
-        //        case 0:
-        //            cell.bgView.backgroundColor = UIColor(hue: 200/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
-        //            cell.backgroundColor = UIColor(hue: 200/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
-        //
-        //        case 1:
-        //            cell.bgView.backgroundColor = UIColor(hue: 60/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
-        //            cell.backgroundColor = UIColor(hue: 60/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
-        //        case 2:
-        //            cell.bgView.backgroundColor = UIColor(hue: 280/360, saturation: 0.35, brightness: 1.0, alpha: 1.0)
-        //            cell.backgroundColor = UIColor(hue: 280/360, saturation: 0.35, brightness: 1.0, alpha: 1.0)
-        //        case 3:
-        //            cell.bgView.backgroundColor = UIColor(hue: 359/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
-        //            cell.backgroundColor = UIColor(hue: 359/360, saturation: 0.6, brightness: 1.0, alpha: 1.0)
-        //        default:
-        //            break
-        //        }
-        
-        
         cell.layer.cornerRadius = 10.0
         cell.layer.borderWidth = 1.0
         cell.layer.masksToBounds = true
@@ -810,7 +850,7 @@ extension TaskViewController: UICollectionViewDelegate, UICollectionViewDataSour
         
         cell.progressView.progressTintColor = UIColor.darkGray
         
-        if taskDayCheck(for: task) {
+        if taskDayCheck(for: task, at: currentDay) {
          
             cell.playStopButton.isHidden = false
             cell.progressView.isHidden = false

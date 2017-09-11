@@ -18,8 +18,8 @@ class AppData: NSObject, NSCoding {
     var taskLastTime = Date()
     var taskCurrentTime = Date()
     var colorScheme: [UIColor] = []
-    var appColor = UIColor.red
-
+    var appColor = FlatSkyBlueDark()
+    
     var appColorName = ""
     var resetOffset = ""
     
@@ -135,7 +135,7 @@ class AppData: NSObject, NSCoding {
         
         isNightMode = appSettings["isNightMode"] ?? false
         usesCircularProgress = appSettings["usesCircularProgress"] ?? false
-        appColorName = misc["ColorName"] ?? "Red"
+        appColorName = misc["ColorName"] ?? "Sky Blue Dark"
         resetOffset = misc["ResetOffset"] ?? "12:00"
         
     }
@@ -204,7 +204,7 @@ class AppData: NSObject, NSCoding {
         self.appSettings = appSettings
         self.timeSettings = timeSettings
         self.colorSettings = colorSettings
-        self.appColorName = misc["ColorName"] ?? "Red"
+        self.appColorName = misc["ColorName"] ?? "Sky Blue Dark"
         self.resetOffset = misc["ResetOffset"]!
         
     }

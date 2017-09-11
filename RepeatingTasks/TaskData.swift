@@ -38,7 +38,7 @@ class TaskData: NSObject, NSCoding {
     var completedTimeHistory = 0.0
     
     // Access
-    var taskAccess = [Date]()
+    var taskAccess: [Date]?
 
     var timerEnabled = false
     
@@ -49,6 +49,28 @@ class TaskData: NSObject, NSCoding {
     var taskStatsDictionary = [String : [String : Double]]()
     var taskHistoryDictionary = [String : [Date : [String : Double]]]()
     //var taskAccessDictionary = [String : [Date]]()
+
+    // Dictionary Keys
+    static let taskTimeKey = "taskTime"
+    static let completedTimeKey = "completedTime"
+    static let daysKey = "taskDays"
+    static let frequencyKey = "taskFrequency"
+    static let rolloverMultKey = "rolloverMultiplier"
+    static let rolloverTimeKey = "rolloverTime"
+
+    static let totalTaskTimeKey = "totalTaskTime"
+    static let missedTaskTimeKey = "missedTaskTime"
+    static let completedTaskTimeKey = "completedTaskTime"
+    static let totalTaskDaysKey = "totalTaskDays"
+    static let fullTaskDaysKey = "fullTaskDays"
+    static let partialTaskDaysKey = "partialTaskDays"
+    static let missedTaskDaysKey = "missedTaskDays"
+    static let currentStreakKey = "currentStreak"
+    static let bestStreakKey = "bestStreak"
+
+    static let taskTimeHistoryKey = "taskTimeHistory"
+    static let missedHistoryKey = "missedTimeHistory"
+    static let completedHistoryKey = "completedTimeHistory"
     
     var taskNameIndex = 0
     
@@ -64,6 +86,7 @@ class TaskData: NSObject, NSCoding {
     //MARK: - Save/Load functions
 
     func save() {
+        
         let tasksSaveSuccessful = NSKeyedArchiver.archiveRootObject(taskNameList, toFile: TaskData.archiveTasksURL.path)
         let taskSettingsSaveSuccessful = NSKeyedArchiver.archiveRootObject(taskDictionary, toFile: TaskData.archiveTaskSettingsURL.path)
         let taskStatsSaveSuccessful = NSKeyedArchiver.archiveRootObject(taskStatsDictionary, toFile: TaskData.archiveTaskStatsURL.path)
@@ -79,7 +102,8 @@ class TaskData: NSObject, NSCoding {
         print("Printing saved data")
         print("Tasks: \(taskNameList)")
         print(taskDictionary)
-        print(taskStatsDictionary)
+        //print(taskStatsDictionary)
+        print(taskHistoryDictionary)
         
     }
     
@@ -120,18 +144,29 @@ class TaskData: NSObject, NSCoding {
         print("Task index is \(taskNameIndex)")
         
         if let currentTask = taskDictionary[taskName] {
-            taskTime = currentTask["taskTime"] ?? 3600.0
-            completedTime = currentTask["completedTime"] ?? 0.0
-            let taskDaysAsBinary = currentTask["taskDays"] ?? 1111111.0
-            taskFrequency = currentTask["taskFrequency"] ?? 1.0
-            rolloverMultiplier = currentTask["rolloverMultiplier"] ?? 1.0
-            rolloverTime = currentTask["rolloverTime"] ?? 0.0
+            taskTime = currentTask[TaskData.taskTimeKey] ?? 3600.0
+            completedTime = currentTask[TaskData.completedTimeKey] ?? 0.0
+            let taskDaysAsBinary = currentTask[TaskData.daysKey] ?? 1111111.0
+            taskFrequency = currentTask[TaskData.frequencyKey] ?? 1.0
+            rolloverMultiplier = currentTask[TaskData.rolloverMultKey] ?? 1.0
+            rolloverTime = currentTask[TaskData.rolloverTimeKey] ?? 0.0
             
             taskDays = taskDaysAsArray(from: taskDaysAsBinary)
             
             taskDictionary[taskName] = currentTask
             
         }
+        
+    }
+    
+    func clearTask() {
+        
+        taskTime = 0.0
+        completedTime = 0.0
+        taskFrequency = 0.0
+        taskDays = []
+        rolloverMultiplier = 1.0
+        rolloverTime = 0.0
         
     }
     
@@ -246,10 +281,24 @@ class TaskData: NSObject, NSCoding {
                  days taskDays: [String], frequency taskFrequency: Double) {
         self.taskName = taskName
         self.taskTime = taskTime
+        self.taskDays = taskDays
+        self.completedTime = 0.0
+        self.rolloverTime = 0.0
+        self.rolloverMultiplier = 1.0
         
         taskNameList.append(taskName)
         
-        saveToDictionary(name: taskName, time: taskTime, days: taskDays, frequency: taskFrequency)
+        // Saving this array as "binary" so I don't have to handle multiple datatypes
+        
+        let taskDays = taskDaysAsBinary(from: taskDays)
+        
+        taskDictionary[taskName] = [TaskData.taskTimeKey: taskTime,
+                                    TaskData.completedTimeKey: 0.0,
+                                    TaskData.daysKey: taskDays,
+                                    TaskData.frequencyKey: taskFrequency,
+                                    TaskData.rolloverMultKey: 1.0,
+                                    TaskData.rolloverTimeKey: 0.0]
+
         newStatsDictionaryEntry(name: taskName)
         
     }
@@ -261,25 +310,9 @@ class TaskData: NSObject, NSCoding {
         
         taskDictionary[newName] = taskDictionary[previousName]
         taskStatsDictionary[newName] = taskStatsDictionary[previousName]
+        taskHistoryDictionary[newName] = taskHistoryDictionary[previousName]
         
         removeTask(name: previousName)
-        
-    }
-    
-    func saveToDictionary(name taskName: String, time taskTime: Double,
-                          completed completedTime: Double = 0.0,
-                          days taskDaysArray: [String], frequency taskFrequency: Double) {
-        
-        // Saving this array as "binary" so I don't have to handle multiple datatypes
-        
-        let taskDays = taskDaysAsBinary(from: taskDaysArray)
-        
-        taskDictionary[taskName] = ["taskTime": taskTime,
-                                    "completedTime": completedTime,
-                                    "taskDays": taskDays,
-                                    "taskFrequency": taskFrequency,
-                                    "rolloverMultiplier": rolloverMultiplier,
-                                    "rolloverTime": rolloverTime]
         
     }
     
@@ -291,12 +324,12 @@ class TaskData: NSObject, NSCoding {
         
         let taskDaysBinary = taskDaysAsBinary(from: taskDays)
         
-        taskDictionary[task] = ["taskTime": self.taskTime,
-                                "completedTime": self.completedTime,
-                                "taskDays": taskDaysBinary,
-                                "taskFrequency": self.taskFrequency,
-                                "rolloverMultiplier": self.rolloverMultiplier,
-                                "rolloverTime": self.rolloverTime]
+        taskDictionary[task] = [TaskData.taskTimeKey: self.taskTime,
+                                TaskData.completedTimeKey: self.completedTime,
+                                TaskData.daysKey: taskDaysBinary,
+                                TaskData.frequencyKey: self.taskFrequency,
+                                TaskData.rolloverMultKey: self.rolloverMultiplier,
+                                TaskData.rolloverTimeKey: self.rolloverTime]
         
     }
 
@@ -306,6 +339,7 @@ class TaskData: NSObject, NSCoding {
         
         taskDictionary.removeValue(forKey: taskName)
         taskStatsDictionary.removeValue(forKey: taskName)
+        taskHistoryDictionary.removeValue(forKey: taskName)
         
     }
     
@@ -314,15 +348,15 @@ class TaskData: NSObject, NSCoding {
     func setTaskStatistics(as taskName: String) {
         
         if let currentTaskStatistics = taskStatsDictionary[taskName] {
-            totalTaskTime = currentTaskStatistics["totalTaskTime"]!
-            missedTaskTime = currentTaskStatistics["missedTaskTime"]!
-            completedTaskTime = currentTaskStatistics["completedTaskTime"]!
-            totalTaskDays = currentTaskStatistics["totalTaskDays"]!
-            fullTaskDays = currentTaskStatistics["fullTaskDays"]!
-            partialTaskDays = currentTaskStatistics["partialTaskDays"]!
-            missedTaskDays = currentTaskStatistics["missedTaskDays"]!
-            currentStreak = currentTaskStatistics["currentStreak"]!
-            bestStreak = currentTaskStatistics["bestStreak"]!
+            totalTaskTime = currentTaskStatistics[TaskData.totalTaskTimeKey]!
+            missedTaskTime = currentTaskStatistics[TaskData.missedTaskTimeKey]!
+            completedTaskTime = currentTaskStatistics[TaskData.completedTaskTimeKey]!
+            totalTaskDays = currentTaskStatistics[TaskData.totalTaskDaysKey]!
+            fullTaskDays = currentTaskStatistics[TaskData.fullTaskDaysKey]!
+            partialTaskDays = currentTaskStatistics[TaskData.partialTaskDaysKey]!
+            missedTaskDays = currentTaskStatistics[TaskData.missedTaskDaysKey]!
+            currentStreak = currentTaskStatistics[TaskData.currentStreakKey]!
+            bestStreak = currentTaskStatistics[TaskData.bestStreakKey]!
             
         }
         
@@ -330,15 +364,15 @@ class TaskData: NSObject, NSCoding {
     
     func newStatsDictionaryEntry(name taskName: String) {
         
-        taskStatsDictionary[taskName] = ["totalTaskTime": 0.0,
-                                         "missedTaskTime": 0.0,
-                                         "completedTaskTime": 0.0,
-                                         "totalTaskDays": 0.0,
-                                         "fullTaskDays": 0.0,
-                                         "partialTaskDays": 0.0,
-                                         "missedTaskDays": 0.0,
-                                         "currentStreak": 0.0,
-                                         "bestStreak": 0.0 ]
+        taskStatsDictionary[taskName] = [TaskData.totalTaskTimeKey: 0.0,
+                                         TaskData.missedTaskTimeKey: 0.0,
+                                         TaskData.completedTaskTimeKey: 0.0,
+                                         TaskData.totalTaskDaysKey: 0.0,
+                                         TaskData.fullTaskDaysKey: 0.0,
+                                         TaskData.partialTaskDaysKey: 0.0,
+                                         TaskData.missedTaskDaysKey: 0.0,
+                                         TaskData.currentStreakKey: 0.0,
+                                         TaskData.bestStreakKey: 0.0 ]
         
     }
     
@@ -347,6 +381,17 @@ class TaskData: NSObject, NSCoding {
     }
 
     //MARK: - History Functions
+    
+    func newTaskHistory(for task: String, for date: Date) {
+        
+        setTask(as: task)
+        
+        taskTimeHistory = taskTime
+        missedTimeHistory = 0
+        completedTimeHistory = 0
+        
+        saveTaskHistory(for: task, at: date)
+    }
 
     func setTaskHistory(as taskName: String, for date: Date) {
         
@@ -356,12 +401,12 @@ class TaskData: NSObject, NSCoding {
             
             if let accessHistory = currentTaskHistory[date] {
             
-                taskTimeHistory = accessHistory["totalTaskTimeHistory"]!
-                missedTimeHistory = accessHistory["missedTaskTimeHistory"]!
-                completedTimeHistory = accessHistory["completedTaskTimeHistory"]!
+                taskTimeHistory = accessHistory[TaskData.taskTimeHistoryKey]!
+                missedTimeHistory = accessHistory[TaskData.missedHistoryKey]!
+                completedTimeHistory = accessHistory[TaskData.completedHistoryKey]!
 
             }
-            
+        
         }
         
     }
@@ -373,9 +418,11 @@ class TaskData: NSObject, NSCoding {
             taskAccess = Array(currentTaskHistory.keys)
             
             //taskAccess.sort(){$0 < $1}
-            let sortedArray = taskAccess.sorted(by: {$0.timeIntervalSince1970 < $1.timeIntervalSince1970})
+            let sortedArray = taskAccess!.sorted(by: {$0.timeIntervalSince1970 < $1.timeIntervalSince1970})
             taskAccess = sortedArray
 
+        } else {
+            taskAccess = nil
         }
         
     }
@@ -393,11 +440,19 @@ class TaskData: NSObject, NSCoding {
         
         //var history = taskHistoryDictionary[taskName]![date]!
         
-        let historyForDate = ["taskTimeHistory": taskTimeHistory,
-                              "missedTimeHistory": missedTimeHistory,
-                              "completedTimeHistory": completedTimeHistory]
+        let historyForDate = [TaskData.taskTimeHistoryKey: taskTimeHistory,
+                              TaskData.missedHistoryKey: missedTimeHistory,
+                              TaskData.completedHistoryKey: completedTimeHistory]
         
-        taskHistoryDictionary[taskName] = [date : historyForDate]
+        if let _ = taskHistoryDictionary[taskName] {
+            
+            taskHistoryDictionary[taskName]![date] = historyForDate
+            
+        } else {
+            
+            taskHistoryDictionary[taskName] = [date : historyForDate]
+
+        }
         
     }
     
@@ -473,6 +528,7 @@ class TaskData: NSObject, NSCoding {
         self.taskStatsDictionary = statistics
         self.taskHistoryDictionary = history
         //self.taskAccessDictionary = access
+        self.taskAccess = []
         
     }
     

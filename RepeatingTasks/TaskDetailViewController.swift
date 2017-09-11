@@ -207,12 +207,8 @@ class TaskDetailViewController: UIViewController {
         formatter.allowedUnits = [.hour, .minute, .second]
         formatter.unitsStyle = .positional
         
-        let remainingTimeAsString = formatter.string(from: TimeInterval(remainingTaskTime))!
+        let remainingTimeAsString = formatter.string(from: TimeInterval(remainingTaskTime.rounded()))!
         
-//        let remainingTaskTime = weightedTaskTime - taskData.completedTime
-//        
-//        print("Completed time is \(taskData.completedTime)")
-//        
         if remainingTaskTime > 0 {
             taskTimeLabel.text = remainingTimeAsString
             taskStartButton.isEnabled = true
@@ -260,7 +256,7 @@ class TaskDetailViewController: UIViewController {
         
         let elapsedTime = taskTimer.endTime - taskTimer.startTime
         
-        taskData.taskDictionary[task]?["completedTime"]! += elapsedTime
+        taskData.taskDictionary[task]?[TaskData.completedTimeKey]! += elapsedTime
         
         taskTimer.isEnabled = false
         taskTimer.firedFromMainVC = false
@@ -272,9 +268,9 @@ class TaskDetailViewController: UIViewController {
     func setTheme() {
         
         if appData.isNightMode {
-            NightNight.theme = .night
+            //NightNight.theme = .night
         } else {
-            NightNight.theme = .normal
+            //NightNight.theme = .normal
         }
         
         let navigationBar = navigationController?.navigationBar
@@ -351,18 +347,37 @@ class TaskDetailViewController: UIViewController {
         
     }
     
-    func trashTapped() {
-        
-        print("Erase Task")
-        performSegue(withIdentifier: "taskDeletedUnwindSegue", sender: self)
-        
-    }
-    
     func settingsTapped() {
         
         print("Go to Settings")
         performSegue(withIdentifier: "taskSettingsSegue", sender: self)
-
+        
+    }
+    
+    func trashTapped() {
+        
+        print("Erase Task")
+        popAlert()
+    }
+    
+    func popAlert() {
+        
+        let alertController = UIAlertController(title: "Delete Task",
+                                                message: "Are you sure you want to delete this?",
+                                                preferredStyle: UIAlertControllerStyle.alert)
+        
+        let yesAction = UIAlertAction(title: "Yes", style: UIAlertActionStyle.default){ (action: UIAlertAction) in
+            print("Hello")
+            self.performSegue(withIdentifier: "taskDeletedUnwindSegue", sender: self)
+        }
+        
+        let noAction = UIAlertAction(title: "No", style: UIAlertActionStyle.cancel, handler: nil)
+        
+        alertController.addAction(yesAction)
+        alertController.addAction(noAction)
+        
+        present(alertController,animated: true,completion: nil)
+        
     }
     
     //MARK: - Chart Functions
@@ -437,27 +452,31 @@ class TaskDetailViewController: UIViewController {
         
         taskData.setTaskAccess(for: task)
         
-        //let previousAccess = taskData.taskAccessDictionary[task]?.last
-        let taskAccess = taskData.taskAccess
         var recentAccess: [Date]?
         
-        if taskAccess.count > 3 {
-            recentAccess = Array(taskAccess.suffix(2))
-        } else {
-            recentAccess = taskAccess
+        if let taskAccess = taskData.taskAccess {
+            
+            if taskAccess.count > 3 {
+                recentAccess = Array(taskAccess.suffix(3))
+            } else {
+                recentAccess = taskAccess
+            }
+
+            var recentAccessStringArray: [String] = []
+            
+            for x in 0..<recentAccess!.count {
+                
+                let date = recentAccess![x]
+                let formattedDate = taskData.set(date: date, as: "yyyy-MM-dd")
+                recentAccessStringArray.append(formattedDate)
+                
+            }
+
+            xAxis.valueFormatter = IndexAxisValueFormatter(values: recentAccessStringArray)
+            
         }
         
-        var recentAccessStringArray: [String] = []
         
-        for x in 0..<recentAccess!.count {
-            
-            let date = recentAccess![x]
-            let formattedDate = taskData.set(date: date, as: "yyyy-MM-dd")
-            recentAccessStringArray.append(formattedDate)
-            
-        }
-        
-        xAxis.valueFormatter = IndexAxisValueFormatter(values: recentAccessStringArray)
         //xAxis.valueFormatter = IndexAxisValueFormatter(values: ["Monday", "Wednesday", "Friday"])
 
         
@@ -521,38 +540,45 @@ class TaskDetailViewController: UIViewController {
         
         var taskAccess: [Date]?
         
-        if taskData.taskAccess.count > 3 {
-            taskAccess = Array(taskData.taskAccess.suffix(2))
-        } else {
-            taskAccess = taskData.taskAccess
-        }
+        if let access = taskData.taskAccess {
+            
+            if access.count > 3 {
+                taskAccess = Array(access.suffix(3))
+            } else {
+                taskAccess = access
+            }
 
-        var taskTimeHistory = [Double]()
-        
-        for date in taskAccess! {
+            var taskTimeHistory = [Double]()
             
-            let completedTime = taskData.taskHistoryDictionary[task]![date]!["completedTimeHistory"]
-            taskTimeHistory.append(completedTime!)
+            for date in taskAccess! {
+                
+                let completedTime = taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]
+                taskTimeHistory.append(completedTime!)
+                
+            }
             
+            for i in 0..<taskTimeHistory.count {
+                
+                let value = BarChartDataEntry(x: Double(i), y: taskTimeHistory[i]) // here we set the X and Y status in a data chart entry
+                
+                barChartEntry.append(value) // here we add it to the data set
+            }
+            
+            let bar = BarChartDataSet(values: barChartEntry, label: "") //Here we convert lineChartEntry to a LineChartDataSet
+            
+            bar.colors = ChartColorTemplates.pastel()
+            
+            let data = BarChartData() //This is the object that will be added to the chart
+            
+            data.addDataSet(bar) //Adds the line to the dataSet
+            
+            recentTaskHistory.animate(xAxisDuration: 2.0, yAxisDuration: 2.0)
+
+            recentTaskHistory.data = data //finally - it adds the chart data to the chart and causes an update
+
+        } else {
+            recentTaskHistory.data = nil
         }
-            
-        for i in 0..<taskTimeHistory.count {
-            
-            let value = BarChartDataEntry(x: Double(i), y: taskTimeHistory[i]) // here we set the X and Y status in a data chart entry
-            
-            barChartEntry.append(value) // here we add it to the data set
-        }
-        
-        let bar = BarChartDataSet(values: barChartEntry, label: "") //Here we convert lineChartEntry to a LineChartDataSet
-        
-        bar.colors = ChartColorTemplates.pastel()
-        
-        let data = BarChartData() //This is the object that will be added to the chart
-        
-        data.addDataSet(bar) //Adds the line to the dataSet
-        
-        recentTaskHistory.animate(xAxisDuration: 2.0, yAxisDuration: 2.0)
-        recentTaskHistory.data = data //finally - it adds the chart data to the chart and causes an update
         
     }
     
@@ -564,7 +590,7 @@ class TaskDetailViewController: UIViewController {
             
             let vc = segue.destination as! TaskViewController
             vc.tasks = vc.tasks.filter { $0 != task }
-            print(vc.tasks)
+            print(" Deleting \(vc.tasks)")
             
             vc.taskData.removeTask(name: task)
             
