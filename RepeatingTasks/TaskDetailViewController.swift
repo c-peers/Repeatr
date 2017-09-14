@@ -40,6 +40,8 @@ class TaskDetailViewController: UIViewController {
     
     var dayOfWeekString = ""
     
+    var axisMaximum = 0.0
+    
     var taskData = TaskData()
     var appData = AppData()
     var taskTimer = CountdownTimer()
@@ -128,7 +130,7 @@ class TaskDetailViewController: UIViewController {
         
         let settings = UIBarButtonItem(image: #imageLiteral(resourceName: "Settings"), style: .plain, target: self, action: #selector(settingsTapped))
         let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        let statsButton = UIBarButtonItem(barButtonSystemItem: .bookmarks, target: self, action: #selector(statsTapped))
+        let statsButton = UIBarButtonItem(image: #imageLiteral(resourceName: "Charts"), style: .plain, target: self, action: #selector(statsTapped))
         let trashButton = UIBarButtonItem(barButtonSystemItem: .trash, target: self, action: #selector(trashTapped))
         
         toolbarItems = [settings, space, statsButton, space, trashButton]
@@ -516,7 +518,7 @@ class TaskDetailViewController: UIViewController {
         
         //xAxis.valueFormatter = IndexAxisValueFormatter(values: ["Monday", "Wednesday", "Friday"])
 
-        var axisMaximum = 0.0
+        axisMaximum = 0.0
         
         for date in recentAccess! {
             
@@ -612,8 +614,20 @@ class TaskDetailViewController: UIViewController {
             
             data.addDataSet(bar) //Adds the line to the dataSet
             
+            if taskAccess?.count == 1 {
+                data.barWidth = 0.4
+            }
+            
             if !willUpdate {
                 recentTaskHistory.animate(xAxisDuration: 2.0, yAxisDuration: 2.0)
+            }
+            
+            if elapsedTime > axisMaximum {
+                let leftAxis = recentTaskHistory.getAxis(.left)
+                let rightAxis = recentTaskHistory.getAxis(.right)
+                
+                leftAxis.resetCustomAxisMax()
+                rightAxis.resetCustomAxisMax()
             }
             
             recentTaskHistory.data = data //finally - it adds the chart data to the chart and causes an update

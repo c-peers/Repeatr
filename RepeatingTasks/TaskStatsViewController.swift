@@ -369,6 +369,10 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         
         data.addDataSet(bar) //Adds the line to the dataSet
         
+        if taskAccess?.count == 1 {
+            data.barWidth = 0.4
+        }
+
         chart.animate(xAxisDuration: 2.0, yAxisDuration: 2.0)
         
         chart.data = data //finally - it adds the chart data to the chart and causes an update
