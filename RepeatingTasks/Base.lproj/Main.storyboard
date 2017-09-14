@@ -761,6 +761,12 @@
                                     <action selector="taskButtonTapped:" destination="7eH-F0-hBU" eventType="touchUpInside" id="FcV-pP-Fch"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Recent Progress" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tPw-eQ-5kE">
+                                <rect key="frame" x="55" y="340" width="147" height="24"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
@@ -768,10 +774,12 @@
                             <constraint firstItem="hi4-ID-NXk" firstAttribute="leading" secondItem="ySm-pY-put" secondAttribute="leadingMargin" constant="96" id="EZB-pf-aWi"/>
                             <constraint firstItem="H0s-Mk-Y02" firstAttribute="centerX" secondItem="ySm-pY-put" secondAttribute="centerX" id="FYJ-N9-lTk"/>
                             <constraint firstItem="H0s-Mk-Y02" firstAttribute="top" secondItem="j5Z-ne-lTq" secondAttribute="bottom" constant="83" id="GRr-Cr-en0"/>
+                            <constraint firstItem="tPw-eQ-5kE" firstAttribute="leading" secondItem="ySm-pY-put" secondAttribute="leadingMargin" constant="39" id="N7p-UP-uRs"/>
                             <constraint firstItem="hi4-ID-NXk" firstAttribute="top" secondItem="0QP-kS-ekk" secondAttribute="bottom" constant="34" id="QrB-qo-plc"/>
                             <constraint firstItem="j5Z-ne-lTq" firstAttribute="centerX" secondItem="ySm-pY-put" secondAttribute="centerX" id="Vz3-5l-038"/>
                             <constraint firstItem="j5Z-ne-lTq" firstAttribute="top" secondItem="hi4-ID-NXk" secondAttribute="bottom" constant="42" id="jqa-c9-1FK"/>
                             <constraint firstAttribute="bottom" secondItem="H0s-Mk-Y02" secondAttribute="bottom" constant="159" id="mkL-Ea-tr9"/>
+                            <constraint firstItem="H0s-Mk-Y02" firstAttribute="top" secondItem="tPw-eQ-5kE" secondAttribute="bottom" constant="5" id="pwY-fe-14V"/>
                             <constraint firstItem="hi4-ID-NXk" firstAttribute="centerX" secondItem="ySm-pY-put" secondAttribute="centerX" id="rvj-E1-Rek"/>
                         </constraints>
                     </view>

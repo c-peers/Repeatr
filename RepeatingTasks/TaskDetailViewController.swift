@@ -30,6 +30,7 @@ class TaskDetailViewController: UIViewController {
     var taskFrequency = 1.0
     var rolloverMultiplier = 1.0
     var rolloverTime = 0.0
+    var weightedTime = 0.0
     
     var elapsedTime = 0.0
     
@@ -166,9 +167,7 @@ class TaskDetailViewController: UIViewController {
     
     func synchedTimer(for completedTime: Double) -> String {
         
-        let weightedTaskTime = taskTime + (rolloverTime * rolloverMultiplier)
-
-        let remainingTaskTime = weightedTaskTime - completedTime
+        let remainingTaskTime = weightedTime - completedTime
         
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.hour, .minute, .second]
@@ -197,15 +196,13 @@ class TaskDetailViewController: UIViewController {
         
         let currentTime = Date().timeIntervalSince1970
 
-        let weightedTaskTime = taskTime + (rolloverTime * rolloverMultiplier)
-
         elapsedTime = completedTime
         
         if taskTimer.isEnabled {
             elapsedTime += (currentTime - taskTimer.startTime)
         }
         
-        let remainingTaskTime = weightedTaskTime - elapsedTime
+        let remainingTaskTime = weightedTime - elapsedTime
         
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.hour, .minute, .second]
@@ -244,7 +241,7 @@ class TaskDetailViewController: UIViewController {
         
         print("Time remaining is \(timeRemaining)")
         
-        if timeRemaining <= 0 || (completedTime == taskTime) {
+        if timeRemaining <= 0 || (completedTime == weightedTime) {
             
             timerStopped(for: task)
             
@@ -267,17 +264,26 @@ class TaskDetailViewController: UIViewController {
         
         var elapsedTime = taskTimer.endTime - taskTimer.startTime
         
-        if elapsedTime > taskData.taskTime {
-            elapsedTime = taskData.taskTime
+        if elapsedTime > taskData.weightedTime {
+            elapsedTime = taskData.weightedTime
         }
-
-        taskData.taskDictionary[task]?[TaskData.completedTimeKey]! += elapsedTime
+        
+        taskData.taskDictionary[task]![TaskData.completedTimeKey]! += elapsedTime
         
         if let date = taskData.getAccessDate(for: task, lengthFromEnd: 0) {
             taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]! += elapsedTime
-            taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]! = taskData.taskTime - elapsedTime
+            
+            let unfinishedTime = taskData.taskTime - elapsedTime
+            
+            if unfinishedTime >= 0 {
+                taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]! = unfinishedTime
+            } else {
+                taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]! = 0.0
+            }
+            //setMissedTime(for: task, at: date)
+            
         }
-
+        
         taskTimer.isEnabled = false
         taskTimer.firedFromMainVC = false
         
@@ -463,18 +469,20 @@ class TaskDetailViewController: UIViewController {
         recentTaskHistory.leftAxis.enabled = false
         recentTaskHistory.drawGridBackgroundEnabled = false
         
+        
+        
         let leftAxis = recentTaskHistory.getAxis(.left)
         let rightAxis = recentTaskHistory.getAxis(.right)
         let xAxis = recentTaskHistory.xAxis
         
         leftAxis.drawLabelsEnabled = false
-        rightAxis.drawLabelsEnabled = false
+        rightAxis.drawLabelsEnabled = true
         
         leftAxis.axisMinimum = 0.0
         rightAxis.axisMinimum = 0.0
         
-        rightAxis.axisMaximum = taskData.taskTime
-        leftAxis.axisMaximum = taskData.taskTime
+        //rightAxis.axisMaximum = taskData.taskTime
+        //leftAxis.axisMaximum = taskData.taskTime
         
         xAxis.granularity = 1.0
         xAxis.drawGridLinesEnabled = false
@@ -506,25 +514,23 @@ class TaskDetailViewController: UIViewController {
             
         }
         
-        
         //xAxis.valueFormatter = IndexAxisValueFormatter(values: ["Monday", "Wednesday", "Friday"])
 
+        var axisMaximum = 0.0
         
-        //let taskDaysAsBinary = taskData.taskDaysAsBinary(from: taskDays)
-        //let binaryArray = taskData.dblToIntArray(for: taskDaysAsBinary)
+        for date in recentAccess! {
+            
+            let nextValue = taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]
+            
+            if nextValue! > axisMaximum {
+                axisMaximum = nextValue!
+            }
+            
+        }
         
-        
-        //let today = taskData.taskDaysAsBinary(from: [dayOfWeekString])
-        //let todayArray = taskData.dblToIntArray(for: today)
-        //let todayIndex = todayArray.index(of: 1)
-        
-        //let newIndex = findNewIndex(compare: todayArray, to: binaryArray)
-        
-        //let reindexedArray = binaryArray[0...newIndex] + binaryArray[(newIndex + 1)...6]
-        
-        
-        //2017-08-31 07:02:35 +0000
-        
+        leftAxis.axisMaximum = axisMaximum + 100.0
+        rightAxis.axisMaximum = leftAxis.axisMaximum
+
         //        xAxis.
         //
         //        _chartView.delegate = self;

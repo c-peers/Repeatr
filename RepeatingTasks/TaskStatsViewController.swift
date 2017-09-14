@@ -25,7 +25,7 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
     
     //var taskHistory
     var statCharts: [UIView: String] {
-        return [taskTimeHistory: "Line", missedTimeHistory: "Bar", completedTimeHistory: "Bar"]
+        return [taskTimeHistory: "Task Time Line Chart", missedTimeHistory: "Missed Time Bar Chart", completedTimeHistory: "Completed Time Bar Chart"]
     }
     
     let nameLabels = ["Task Time", "Completed Task Time", "Missed Task Time", "Total Days", "Total Days (Complete)", "Total Days (Partial Complete", "Total Days (Missed)", "Current Streak", "Best Streak"]
@@ -33,6 +33,7 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
     var valueLabels = ["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0"]
     
     var task = ""
+    var accessDates = [String]()
     
     var taskData = TaskData()
     var appData = AppData()
@@ -46,11 +47,27 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         scrollView.contentSize.width = view.bounds.width
         scrollView.contentSize.height = CGFloat(1000)
         
+        getAccessDates()
+        
         setStatNameLabels()
         setStatValues()
         
         chartInit()
         
+    }
+    
+    func getAccessDates() {
+
+        if let taskAccess = taskData.taskAccess {
+            
+            for x in 0..<taskAccess.count {
+                let date = taskAccess[x]
+                let formattedDate = taskData.set(date: date, as: "MM/dd")
+                accessDates.append(formattedDate)
+            }
+            
+        }
+
     }
     
     func setStatNameLabels() {
@@ -108,129 +125,164 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         
     }
     
-    func setXAxis(for chartView: Any, as type: String) {
-        
-        var chart: AnyObject
-        
-        switch type {
-        case "Line":
-            chart = chartView as! LineChartView
-        case "Bar":
-            chart = chartView as! BarChartView
-        default:
-            return
-        }
-        
-        var xAxis = chart.xAxis
-        xAxis!.granularity = 1.0
-        xAxis!.drawGridLinesEnabled = false
-        xAxis!.centerAxisLabelsEnabled = false
-        
-        //taskData.setTaskAccess(for: task)
-        
-        //var recentAccess: [Date]?
-        
-//        if let taskAccess = taskData.taskAccess {
-//            
-//            if taskAccess.count > 3 {
-//                recentAccess = Array(taskAccess.suffix(3))
-//            } else {
-//                recentAccess = taskAccess
-//            }
-//            
-//            var recentAccessStringArray: [String] = []
-//            
-//            for x in 0..<recentAccess!.count {
-//                
-//                let date = recentAccess![x]
-//                let formattedDate = taskData.set(date: date, as: "yyyy-MM-dd")
-//                recentAccessStringArray.append(formattedDate)
-//                
-//            }
-//            
-//            xAxis!.valueFormatter = IndexAxisValueFormatter(values: recentAccessStringArray)
-//            
-//        }
-
-        xAxis?.valueFormatter = IndexAxisValueFormatter(values: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"])
-        
-    }
+    func setMissedChart() {
     
-    func setYAxis(for chartView: Any, as type: String) {
-     
-        var chart: AnyObject
-
-        switch type {
-        case "Line":
-            chart = chartView as! LineChartView
-        case "Bar":
-            chart = chartView as! BarChartView
-        default:
-            return
-        }
-
-        let leftAxis = chart.getAxis(.left)
-        let rightAxis = chart.getAxis(.right)
-        
-        leftAxis.drawLabelsEnabled = false
-        rightAxis.drawLabelsEnabled = false
-        
-        leftAxis.axisMinimum = 0.0
-        rightAxis.axisMinimum = 0.0
-        
-        
-        
-    }
-
-    func setChartView(for chartView: Any, as type: String) {
-        
-        var chart: AnyObject
-        
-        switch type {
-        case "Line":
-            chart = chartView as! LineChartView
-        case "Bar":
-            chart = chartView as! BarChartView
-        default:
-            return
-        }
-
-        chart.chartDescription??.enabled = false
-        chart.legend.enabled = false
-        chart.xAxis.labelPosition = .bottom
-        //recentTaskHistory.drawValueAboveBarEnabled = false
-        //recentTaskHistory.borderLineWidth = 1.5
-        //recentTaskHistory.borderColor = UIColor.flatBlackDark
-        
         missedTimeHistory.scaleYEnabled = false
         missedTimeHistory.scaleXEnabled = true
         missedTimeHistory.dragEnabled = true
         missedTimeHistory.setVisibleXRangeMaximum(5.0)
         missedTimeHistory.moveViewToX(5.0)
+        missedTimeHistory.rightAxis.enabled = true
+        missedTimeHistory.leftAxis.enabled = false
+        
+        missedTimeHistory.chartDescription?.enabled = false
+        missedTimeHistory.legend.enabled = false
+        missedTimeHistory.xAxis.labelPosition = .bottom
 
-        chart.rightAxis.enabled = false
-        chart.leftAxis.enabled = false
-        //chart.drawGridBackgroundEnabled = false
-
+        let xAxis = missedTimeHistory.xAxis
+        xAxis.granularity = 1.0
+        xAxis.drawGridLinesEnabled = false
+        xAxis.centerAxisLabelsEnabled = false
+        
+        xAxis.valueFormatter = IndexAxisValueFormatter(values: accessDates)
+    
+        let leftAxis = missedTimeHistory.getAxis(.left)
+        let rightAxis = missedTimeHistory.getAxis(.right)
+        
+        leftAxis.drawLabelsEnabled = false
+        rightAxis.drawLabelsEnabled = true
+        
+        leftAxis.axisMinimum = 0.0
+        rightAxis.axisMinimum = 0.0
+    
+    
     }
+    
+    func setCompletedChart() {
+        
+        completedTimeHistory.scaleYEnabled = false
+        completedTimeHistory.scaleXEnabled = true
+        completedTimeHistory.dragEnabled = true
+        completedTimeHistory.setVisibleXRangeMaximum(5.0)
+        completedTimeHistory.moveViewToX(5.0)
+        completedTimeHistory.rightAxis.enabled = true
+        completedTimeHistory.leftAxis.enabled = false
+        
+        completedTimeHistory.chartDescription?.enabled = false
+        completedTimeHistory.legend.enabled = false
+        completedTimeHistory.xAxis.labelPosition = .bottom
+
+        let xAxis = completedTimeHistory.xAxis
+        xAxis.granularity = 1.0
+        xAxis.drawGridLinesEnabled = false
+        xAxis.centerAxisLabelsEnabled = false
+        
+        xAxis.valueFormatter = IndexAxisValueFormatter(values: accessDates)
+        
+        let leftAxis = completedTimeHistory.getAxis(.left)
+        let rightAxis = completedTimeHistory.getAxis(.right)
+        
+        leftAxis.drawLabelsEnabled = false
+        rightAxis.drawLabelsEnabled = true
+        
+        leftAxis.axisMinimum = 0.0
+        rightAxis.axisMinimum = 0.0
+
+        
+    }
+    
+//    func setXAxis(for chartView: Any, as type: String) {
+//        
+//        var chart: AnyObject
+//        
+//        switch type {
+//        case "Line":
+//            chart = chartView as! LineChartView
+//        case "Bar":
+//            chart = chartView as! BarChartView
+//        default:
+//            return
+//        }
+//        
+//        var xAxis = chart.xAxis
+//        xAxis!.granularity = 1.0
+//        xAxis!.drawGridLinesEnabled = false
+//        xAxis!.centerAxisLabelsEnabled = false
+//        
+//        xAxis!.valueFormatter = IndexAxisValueFormatter(values: accessDates)
+//        //xAxis?.valueFormatter = IndexAxisValueFormatter(values: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"])
+//        
+//    }
+//    
+//    func setYAxis(for chartView: Any, as type: String) {
+//     
+//        var chart: AnyObject
+//
+//        switch type {
+//        case "Line":
+//            chart = chartView as! LineChartView
+//        case "Bar":
+//            chart = chartView as! BarChartView
+//        default:
+//            return
+//        }
+//
+//        let leftAxis = chart.getAxis(.left)
+//        let rightAxis = chart.getAxis(.right)
+//        
+//        leftAxis.drawLabelsEnabled = false
+//        rightAxis.drawLabelsEnabled = false
+//        
+//        leftAxis.axisMinimum = 0.0
+//        rightAxis.axisMinimum = 0.0
+//        
+//    }
+
+//    func setChartView(for chartView: Any, as type: String) {
+//        
+//        var chart: AnyObject
+//        
+//        switch type {
+//        case "Line":
+//            chart = chartView as! LineChartView
+//        case "Bar":
+//            chart = chartView as! BarChartView
+//        default:
+//            return
+//        }
+//
+//        chart.chartDescription??.enabled = false
+//        chart.legend.enabled = false
+//        chart.xAxis.labelPosition = .bottom
+//        //recentTaskHistory.drawValueAboveBarEnabled = false
+//        //recentTaskHistory.borderLineWidth = 1.5
+//        //recentTaskHistory.borderColor = UIColor.flatBlackDark
+//        
+//        chart.rightAxis.enabled = false
+//        chart.leftAxis.enabled = false
+//        //chart.drawGridBackgroundEnabled = false
+//
+//    }
     
     func chartInit() {
         
+        setMissedChart()
+        setCompletedChart()
+
         for (chart, type) in statCharts {
             
-            setXAxis(for: chart, as: type)
-            setYAxis(for: chart, as: type)
-            setChartView(for: chart, as: type)
+            //setXAxis(for: chart, as: type)
+            //setYAxis(for: chart, as: type)
+            //setChartView(for: chart, as: type)
             
-            if type == "Line" {
-                //loadLineChartData(chart: chart as! LineChartView)
-            } else if type == "Bar" {
-                loadBarChartData(chart: chart as! BarChartView)
+            if type.contains("Line") {
+                //loadLineChartData(chart: chart as! LineChartView, as: type)
+            } else if type.contains("Bar") {
+                loadBarChartData(chart: chart as! BarChartView, as: type)
             }
             
         }
  
-
         //xAxis.valueFormatter = IndexAxisValueFormatter(values: ["Monday", "Wednesday", "Friday"])
         
         //        xAxis.
@@ -265,7 +317,7 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         
     }
     
-    func loadLineChartData() {
+    func loadLineChartData(chart: LineChartView, as type: String) {
         
         var lineChartEntry = [LineChartDataSet]()
         
@@ -273,59 +325,57 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         
     }
     
-    func loadBarChartData(chart: BarChartView) {
+    func loadBarChartData(chart: BarChartView, as type: String) {
         
         var barChartEntry  = [BarChartDataEntry]() //this is the Array that will eventually be displayed on the graph.
                 
-//        var taskAccess: [Date]?
-//        
-//        if let access = taskData.taskAccess {
-//            
-//            if access.count > 3 {
-//                taskAccess = Array(access.suffix(3))
-//            } else {
-//                taskAccess = access
-//            }
-//            
-//            var taskTimeHistory = [Double]()
-//            
-//            for date in taskAccess! {
-//                
-//                let completedTime = taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]
-//                taskTimeHistory.append(completedTime!)
-//                
-//            }
-//            
-//            for i in 0..<taskTimeHistory.count {
-        for i in 0..<testData.count {
-                var value: BarChartDataEntry
-                //if i != taskTimeHistory.count - 1 {
-                //    value = BarChartDataEntry(x: Double(i), y: taskTimeHistory[i]) // here we set the X and Y status in a data chart entry
-                //} else {
-                //    value = BarChartDataEntry(x: Double(i), y: elapsedTime)
-                //}
-                value = BarChartDataEntry(x: Double(i), y: Double(testData[i]))
-                barChartEntry.append(value) // here we add it to the data set
+        var taskAccess: [Date]?
+        
+        if let access = taskData.taskAccess {
+            taskAccess = access
+        }
+        
+        var dataSet = [Double]()
+        
+        for date in taskAccess! {
+
+            var entry = 0.0
             
+            if type.contains("Missed") {
+                    entry = taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]!
+            } else if type.contains("Complete") {
+                entry = taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]!
             }
+         
+            dataSet.append(entry)
             
-            let bar = BarChartDataSet(values: barChartEntry, label: "") //Here we convert lineChartEntry to a LineChartDataSet
+        }
+
+        for i in 0..<dataSet.count {
+        //for i in 0..<testData.count {
+            var value: BarChartDataEntry
             
-            bar.colors = ChartColorTemplates.pastel()
+            value = BarChartDataEntry(x: Double(i), y: dataSet[i])
+            //value = BarChartDataEntry(x: Double(i), y: Double(testData[i]))
+            barChartEntry.append(value) // here we add it to the data set
             
-            let data = BarChartData() //This is the object that will be added to the chart
-            
-            data.addDataSet(bar) //Adds the line to the dataSet
-            
-            //if !willUpdate {
-                chart.animate(xAxisDuration: 2.0, yAxisDuration: 2.0)
-            //}
-            
-            chart.data = data //finally - it adds the chart data to the chart and causes an update
-            
-//        } else {
-//            recentTaskHistory.data = nil
-//        }
+        }
+        
+        let bar = BarChartDataSet(values: barChartEntry, label: "") //Here we convert lineChartEntry to a LineChartDataSet
+        
+        bar.colors = ChartColorTemplates.pastel()
+        
+        let data = BarChartData() //This is the object that will be added to the chart
+        
+        data.addDataSet(bar) //Adds the line to the dataSet
+        
+        chart.animate(xAxisDuration: 2.0, yAxisDuration: 2.0)
+        
+        chart.data = data //finally - it adds the chart data to the chart and causes an update
+        
+        //        } else {
+        //            recentTaskHistory.data = nil
+        //        }
         
     }
 

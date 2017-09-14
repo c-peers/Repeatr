@@ -20,6 +20,7 @@ class TaskData: NSObject, NSCoding {
     var taskFrequency = 1.0
     var rolloverMultiplier = 1.0
     var rolloverTime = 0.0
+    var weightedTime = 0.0
     
     // Task statistics
     var totalTaskTime = 0.0
@@ -41,7 +42,7 @@ class TaskData: NSObject, NSCoding {
     var taskAccess: [Date]?
 
     var timerEnabled = false
-    
+
     // Vars that holds all task data
     // Used for saving
     var taskNameList = [String]()
@@ -97,7 +98,6 @@ class TaskData: NSObject, NSCoding {
         print("Saved task settings: \(taskSettingsSaveSuccessful)")
         print("Saved task stats: \(taskStatsSaveSuccessful)")
         print("Saved task history: \(taskHistorySaveSuccessful)")
-        //print("Saved task history: \(taskAccessSaveSuccessful)")
         
         print("Printing saved data")
         print("Tasks: \(taskNameList)")
@@ -141,7 +141,7 @@ class TaskData: NSObject, NSCoding {
             taskNameIndex = index
         }
         
-        print("Task index is \(taskNameIndex)")
+        //print("Task index is \(taskNameIndex)")
         
         if let currentTask = taskDictionary[taskName] {
             taskTime = currentTask[TaskData.taskTimeKey] ?? 3600.0
@@ -157,6 +157,8 @@ class TaskData: NSObject, NSCoding {
             
         }
         
+        weightedTime = taskTime + (rolloverTime * rolloverMultiplier)
+        
     }
     
     func clearTask() {
@@ -167,6 +169,7 @@ class TaskData: NSObject, NSCoding {
         taskDays = []
         rolloverMultiplier = 1.0
         rolloverTime = 0.0
+        weightedTime = 0.0
         
     }
     
@@ -186,9 +189,6 @@ class TaskData: NSObject, NSCoding {
         while taskDaysBinaryArray.count != 7 {
             taskDaysBinaryArray.insert(0, at: 0)
         }
-        
-        print("taskDaysBinaryArray is of length \(taskDaysBinaryArray.count)")
-        print(taskDaysBinaryArray)
         
         return taskDaysBinaryArray
         
@@ -285,6 +285,7 @@ class TaskData: NSObject, NSCoding {
         self.completedTime = 0.0
         self.rolloverTime = 0.0
         self.rolloverMultiplier = 1.0
+        self.weightedTime = 0.0
         
         taskNameList.append(taskName)
         

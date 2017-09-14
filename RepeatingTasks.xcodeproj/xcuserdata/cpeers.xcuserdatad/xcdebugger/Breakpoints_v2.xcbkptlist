@@ -189,7 +189,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "556"
             endingLineNumber = "556"
-            landmarkName = "taskStartStopButtonPressed(_:)"
+            landmarkName = "resetTaskTimers()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -200,11 +200,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "RepeatingTasks/TaskData.swift"
-            timestampString = "526798676.495909"
+            timestampString = "526957786.780717"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "146"
-            endingLineNumber = "146"
+            startingLineNumber = "147"
+            endingLineNumber = "147"
             landmarkName = "setTask(as:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -216,11 +216,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "RepeatingTasks/TaskDetailViewController.swift"
-            timestampString = "526809758.868519"
+            timestampString = "526883745.528017"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "350"
-            endingLineNumber = "350"
+            startingLineNumber = "359"
+            endingLineNumber = "359"
             landmarkName = "taskButtonTapped(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -377,8 +377,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "189"
             endingLineNumber = "189"
-            landmarkName = "synchedTimer(for:)"
-            landmarkType = "7">
+            landmarkName = "TaskDetailViewController"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -393,7 +393,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "417"
             endingLineNumber = "417"
-            landmarkName = "calculateStats(for:)"
+            landmarkName = "resetTimePassed(between:and:with:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -420,11 +420,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "RepeatingTasks/TaskDetailViewController.swift"
-            timestampString = "526809758.868519"
+            timestampString = "526883745.528017"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "338"
-            endingLineNumber = "338"
+            startingLineNumber = "347"
+            endingLineNumber = "347"
             landmarkName = "taskButtonTapped(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -675,22 +675,6 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "RepeatingTasks/TaskDetailViewController.swift"
-            timestampString = "526809758.868519"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "522"
-            endingLineNumber = "522"
-            landmarkName = "taskChartSetup()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
             filePath = "RepeatingTasks/AppData.swift"
             timestampString = "525859034.340242"
             startingColumnNumber = "9223372036854775807"
@@ -825,7 +809,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "391"
             endingLineNumber = "391"
-            landmarkName = "calculateStats(for:)"
+            landmarkName = "timeCheck()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -841,7 +825,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "273"
             endingLineNumber = "273"
-            landmarkName = "checkForMissedDays(in:)"
+            landmarkName = "getHistory(for:at:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -857,7 +841,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "289"
             endingLineNumber = "289"
-            landmarkName = "calculateDaysBetweenTwoDates(start:end:)"
+            landmarkName = "getHistory(for:at:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -868,11 +852,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "RepeatingTasks/TaskDetailViewController.swift"
-            timestampString = "526809758.868519"
+            timestampString = "526883745.528017"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "484"
-            endingLineNumber = "484"
+            startingLineNumber = "493"
+            endingLineNumber = "493"
             landmarkName = "taskChartSetup()"
             landmarkType = "7">
          </BreakpointContent>
@@ -884,13 +868,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "RepeatingTasks/TaskData.swift"
-            timestampString = "526799875.349675"
+            timestampString = "526957786.780717"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "434"
-            endingLineNumber = "434"
-            landmarkName = "set(date:as:)"
-            landmarkType = "7">
+            startingLineNumber = "439"
+            endingLineNumber = "439"
+            landmarkName = "TaskData"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -905,23 +889,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "484"
             endingLineNumber = "484"
-            landmarkName = "resetTaskTimers()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "RepeatingTasks/ViewController.swift"
-            timestampString = "527581161.850549"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "250"
-            endingLineNumber = "250"
-            landmarkName = "checkForMissedDays(in:)"
+            landmarkName = "calculateStats(for:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -953,8 +921,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "712"
             endingLineNumber = "712"
-            landmarkName = "TaskViewController"
-            landmarkType = "3">
+            landmarkName = "timerStopped(for:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1042,11 +1010,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "RepeatingTasks/TaskDetailViewController.swift"
-            timestampString = "526809758.868519"
+            timestampString = "526883745.528017"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "481"
-            endingLineNumber = "481"
+            startingLineNumber = "490"
+            endingLineNumber = "490"
             landmarkName = "taskChartSetup()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1063,7 +1031,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "721"
             endingLineNumber = "721"
-            landmarkName = "prepare(for:sender:)"
+            landmarkName = "timerStopped(for:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1095,7 +1063,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "379"
             endingLineNumber = "379"
-            landmarkName = "calculateStats(for:)"
+            landmarkName = "timeCheck()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1111,7 +1079,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "246"
             endingLineNumber = "246"
-            landmarkName = "checkForMissedDays(in:)"
+            landmarkName = "settingsButtonTapped()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1127,7 +1095,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "301"
             endingLineNumber = "301"
-            landmarkName = "timeCheck()"
+            landmarkName = "checkForMissedDays(in:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1138,11 +1106,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "RepeatingTasks/TaskDetailViewController.swift"
-            timestampString = "526357583.729921"
+            timestampString = "526872340.300358"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "52"
-            endingLineNumber = "52"
+            startingLineNumber = "53"
+            endingLineNumber = "53"
             landmarkName = "viewWillAppear(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1159,7 +1127,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "350"
             endingLineNumber = "350"
-            landmarkName = "timeCheck()"
+            landmarkName = "calculateDaysBetweenTwoDates(start:end:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1175,7 +1143,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "318"
             endingLineNumber = "318"
-            landmarkName = "timeCheck()"
+            landmarkName = "checkForMissedDays(in:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1207,8 +1175,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "741"
             endingLineNumber = "741"
-            landmarkName = "prepare(for:sender:)"
-            landmarkType = "7">
+            landmarkName = "TaskViewController"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1234,11 +1202,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "RepeatingTasks/TaskDetailViewController.swift"
-            timestampString = "526809758.868519"
+            timestampString = "526883745.528017"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "584"
-            endingLineNumber = "584"
+            startingLineNumber = "591"
+            endingLineNumber = "591"
             landmarkName = "loadChartData(willUpdate:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1298,11 +1266,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "RepeatingTasks/TaskDetailViewController.swift"
-            timestampString = "526809758.868519"
+            timestampString = "526883745.528017"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "591"
-            endingLineNumber = "591"
+            startingLineNumber = "598"
+            endingLineNumber = "598"
             landmarkName = "loadChartData(willUpdate:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1326,7 +1294,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "RepeatingTasks/ViewController.swift"
@@ -1335,18 +1303,18 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "623"
             endingLineNumber = "623"
-            landmarkName = "timerStopped(for:)"
+            landmarkName = "taskStartStopButtonPressed(_:)"
             landmarkType = "7">
             <Locations>
                <Location
-                  shouldBeEnabled = "Yes"
+                  shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
                   symbolName = "RepeatingTasks.TaskViewController.timerStopped (for : Swift.String) -&gt; ()"
                   moduleName = "RepeatingTasks"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/cpeers/Documents/Swift/RepeatingTasks/RepeatingTasks/ViewController.swift"
-                  timestampString = "527581162.021268"
+                  timestampString = "526459794.864658"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "624"
@@ -1354,14 +1322,14 @@
                   offsetFromSymbolStart = "1760">
                </Location>
                <Location
-                  shouldBeEnabled = "Yes"
+                  shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
                   symbolName = "RepeatingTasks.TaskViewController.timerStopped (for : Swift.String) -&gt; ()"
                   moduleName = "RepeatingTasks"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/cpeers/Documents/Swift/RepeatingTasks/RepeatingTasks/ViewController.swift"
-                  timestampString = "527581162.025653"
+                  timestampString = "526459794.869374"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "624"
@@ -1383,7 +1351,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "263"
             endingLineNumber = "263"
-            landmarkName = "checkForMissedDays(in:)"
+            landmarkName = "taskDayCheck(for:at:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1399,7 +1367,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "475"
             endingLineNumber = "475"
-            landmarkName = "resetTaskTimers()"
+            landmarkName = "calculateStats(for:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1415,7 +1383,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "476"
             endingLineNumber = "476"
-            landmarkName = "resetTaskTimers()"
+            landmarkName = "calculateStats(for:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1431,7 +1399,103 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "257"
             endingLineNumber = "257"
-            landmarkName = "checkForMissedDays(in:)"
+            landmarkName = "taskDayCheck(for:at:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "RepeatingTasks/ViewController.swift"
+            timestampString = "527044828.929541"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "650"
+            endingLineNumber = "650"
+            landmarkName = "timerRunning()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "RepeatingTasks/TaskDetailViewController.swift"
+            timestampString = "526956306.385269"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "261"
+            endingLineNumber = "261"
+            landmarkName = "timerStopped(for:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "RepeatingTasks/ViewController.swift"
+            timestampString = "527044828.929541"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "119"
+            endingLineNumber = "119"
+            landmarkName = "viewWillAppear(_:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "RepeatingTasks/TaskDetailViewController.swift"
+            timestampString = "526883678.728779"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "525"
+            endingLineNumber = "525"
+            landmarkName = "taskChartSetup()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "RepeatingTasks/ViewController.swift"
+            timestampString = "526801336.472493"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "536"
+            endingLineNumber = "536"
+            landmarkName = "resetTaskTimers()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "RepeatingTasks/ViewController.swift"
+            timestampString = "526801336.472493"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "389"
+            endingLineNumber = "389"
+            landmarkName = "timeCheck()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

@@ -106,7 +106,7 @@ class CountdownTimer: NSObject {
         
         if (cell != nil) {
             
-            let currentProgress = 1 - Float(remainingTaskTime)/Float(taskTime)
+            let currentProgress = 1 - Float(remainingTaskTime)/Float(weightedTaskTime)
             
             cell!.progressView.setProgress(currentProgress, animated: true)
             
