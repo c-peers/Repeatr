@@ -31,6 +31,8 @@
 		C44C220D1F59467200BC9833 /* ProgressViewSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C44C220C1F59467200BC9833 /* ProgressViewSettingsViewController.swift */; };
 		C4540F381F4E704C00B2D1F3 /* TimePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4540F371F4E704C00B2D1F3 /* TimePicker.swift */; };
 		C45664AF1F57F3290040387E /* ResetTimeSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C45664AE1F57F3290040387E /* ResetTimeSettingsViewController.swift */; };
+		C46DD2101F667AC0005FF68A /* TaskStatsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C46DD20F1F667AC0005FF68A /* TaskStatsViewController.swift */; };
+		C47285701F60C43B00AE7C01 /* StatsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = C472856F1F60C43B00AE7C01 /* StatsView.xib */; };
 		C49C8D0E1EF35F91007F1069 /* NewTasksViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C49C8D0D1EF35F91007F1069 /* NewTasksViewController.swift */; };
 		C4A28F4F1F34583400B9D79A /* AppData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A28F4E1F34583400B9D79A /* AppData.swift */; };
 		C4D64E021F383AA600844404 /* TaskDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D64E011F383AA600844404 /* TaskDetailViewController.swift */; };
@@ -182,6 +184,8 @@
 		C44C220C1F59467200BC9833 /* ProgressViewSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressViewSettingsViewController.swift; sourceTree = "<group>"; };
 		C4540F371F4E704C00B2D1F3 /* TimePicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimePicker.swift; sourceTree = "<group>"; };
 		C45664AE1F57F3290040387E /* ResetTimeSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResetTimeSettingsViewController.swift; sourceTree = "<group>"; };
+		C46DD20F1F667AC0005FF68A /* TaskStatsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskStatsViewController.swift; sourceTree = "<group>"; };
+		C472856F1F60C43B00AE7C01 /* StatsView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StatsView.xib; sourceTree = "<group>"; };
 		C49C8D0D1EF35F91007F1069 /* NewTasksViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewTasksViewController.swift; sourceTree = "<group>"; };
 		C4A28F4E1F34583400B9D79A /* AppData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppData.swift; sourceTree = "<group>"; };
 		C4D64E011F383AA600844404 /* TaskDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskDetailViewController.swift; sourceTree = "<group>"; };
@@ -252,12 +256,14 @@
 				C40AABE11F2B07270061BFE3 /* TaskData.swift */,
 				C4A28F4E1F34583400B9D79A /* AppData.swift */,
 				C403E3181EF034E5001EE78D /* Main.storyboard */,
+				C472856F1F60C43B00AE7C01 /* StatsView.xib */,
 				C403E3451EF139ED001EE78D /* RepeatingTasksCollectionCell.swift */,
 				C403E31E1EF034E5001EE78D /* Assets.xcassets */,
 				C403E3201EF034E5001EE78D /* LaunchScreen.storyboard */,
 				C403E3231EF034E5001EE78D /* Info.plist */,
 				C403E31B1EF034E5001EE78D /* RepeatingTasks.xcdatamodeld */,
 				C417DE251F53B860004A649C /* AppSettingsViewController.swift */,
+				C46DD20F1F667AC0005FF68A /* TaskStatsViewController.swift */,
 				C45664AE1F57F3290040387E /* ResetTimeSettingsViewController.swift */,
 				C44C220C1F59467200BC9833 /* ProgressViewSettingsViewController.swift */,
 				C417DE271F53CE6C004A649C /* ColorSettingsViewController.swift */,
@@ -507,6 +513,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C47285701F60C43B00AE7C01 /* StatsView.xib in Resources */,
 				C403E3221EF034E5001EE78D /* LaunchScreen.storyboard in Resources */,
 				C403E31F1EF034E5001EE78D /* Assets.xcassets in Resources */,
 				C403E31A1EF034E5001EE78D /* Main.storyboard in Resources */,
@@ -535,6 +542,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C45664AF1F57F3290040387E /* ResetTimeSettingsViewController.swift in Sources */,
+				C46DD2101F667AC0005FF68A /* TaskStatsViewController.swift in Sources */,
 				C4540F381F4E704C00B2D1F3 /* TimePicker.swift in Sources */,
 				C44C220D1F59467200BC9833 /* ProgressViewSettingsViewController.swift in Sources */,
 				C403E3171EF034E5001EE78D /* ViewController.swift in Sources */,

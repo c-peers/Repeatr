@@ -24,6 +24,7 @@ class ResetTimeSettingsViewController: UITableViewController {
         
         self.title = "Reset Time"
         
+        
         //tableView.sectionIndexColor = UIColor.black
         
     }
@@ -31,24 +32,35 @@ class ResetTimeSettingsViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ResetTimeCell", for: indexPath)
         
-        if previouslySelectedCell != nil {
+        if let cell = tableView.cellForRow(at: indexPath as IndexPath) {
             
-            let previousCell = tableView.dequeueReusableCell(withIdentifier: "ResetTimeCell", for: previouslySelectedCell!)
-            previousCell.accessoryType = .none
-            previousCell.selectionStyle = .none
-            tableView.deselectRow(at: indexPath, animated: true)
+            cell.selectionStyle = .none
             
+            if cell.accessoryType == .checkmark{
+                cell.accessoryType = .none
+            }
+            else{
+                cell.accessoryType = .checkmark
+            }
         }
-        
-        cell.accessoryType = .checkmark
+//        if previouslySelectedCell != nil {
+//            
+//            let previousCell = tableView.dequeueReusableCell(withIdentifier: "ResetTimeCell", for: previouslySelectedCell!)
+//            previousCell.accessoryType = .none
+//            previousCell.selectionStyle = .none
+//            tableView.deselectRow(at: indexPath, animated: true)
+//            
+//        }
+//        
+//        cell.accessoryType = .checkmark
         cell.textLabel?.text = resetTimes[indexPath.row]
         
-        UIView.animate(withDuration: 0.4, animations: { () -> Void in
-            cell.contentView.backgroundColor = UIColor.white
-            cell.accessoryView?.backgroundColor = UIColor.white
-            cell.backgroundColor = UIColor.white
-            
-        })
+//        UIView.animate(withDuration: 0.4, animations: { () -> Void in
+//            cell.contentView.backgroundColor = UIColor.white
+//            cell.accessoryView?.backgroundColor = UIColor.white
+//            cell.backgroundColor = UIColor.white
+//            
+//        })
         
         appData.resetOffset = resetTimes[indexPath.row]
         
@@ -65,14 +77,14 @@ class ResetTimeSettingsViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ResetTimeCell", for: indexPath)
+        //let cell = tableView.dequeueReusableCell(withIdentifier: "ResetTimeCell", for: indexPath)
         
-        cell.accessoryType = .none
+        //cell.accessoryType = .none
         
     }
     
     func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
-        cell.backgroundColor = UIColor.white
+        cell.backgroundColor = UIColor.clear
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {

@@ -61,6 +61,8 @@ class TaskDetailViewController: UIViewController {
         
         startButtonSetup()
 
+        elapsedTime = completedTime
+        
         taskChartSetup()
         
         if taskDayCheck(for: task) {
@@ -125,9 +127,10 @@ class TaskDetailViewController: UIViewController {
         
         let settings = UIBarButtonItem(image: #imageLiteral(resourceName: "Settings"), style: .plain, target: self, action: #selector(settingsTapped))
         let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        let statsButton = UIBarButtonItem(barButtonSystemItem: .bookmarks, target: self, action: #selector(statsTapped))
         let trashButton = UIBarButtonItem(barButtonSystemItem: .trash, target: self, action: #selector(trashTapped))
         
-        toolbarItems = [settings, space, trashButton]
+        toolbarItems = [settings, space, statsButton, space, trashButton]
         
         setTheme()
         
@@ -157,6 +160,7 @@ class TaskDetailViewController: UIViewController {
             // Update Time Label
         //_ = synchedTimer(for: change![NSKeyValueChangeKey.newKey] as! Double)
         _ = formatTimer()
+        
         //}
     }
     
@@ -212,6 +216,13 @@ class TaskDetailViewController: UIViewController {
         if remainingTaskTime > 0 {
             taskTimeLabel.text = remainingTimeAsString
             taskStartButton.isEnabled = true
+
+            // observeValue is called after view disappears.
+            // If you don't check if view is visible then chart will cause a crash
+            if self.isViewLoaded && self.view.isTopViewInWindow() {
+                loadChartData(willUpdate: true)
+            }
+
         } else {
             taskTimeLabel.text = "Complete"
             taskStartButton.isEnabled = false
@@ -254,10 +265,19 @@ class TaskDetailViewController: UIViewController {
         
         taskTimer.endTime = Date().timeIntervalSince1970
         
-        let elapsedTime = taskTimer.endTime - taskTimer.startTime
+        var elapsedTime = taskTimer.endTime - taskTimer.startTime
         
+        if elapsedTime > taskData.taskTime {
+            elapsedTime = taskData.taskTime
+        }
+
         taskData.taskDictionary[task]?[TaskData.completedTimeKey]! += elapsedTime
         
+        if let date = taskData.getAccessDate(for: task, lengthFromEnd: 0) {
+            taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]! += elapsedTime
+            taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]! = taskData.taskTime - elapsedTime
+        }
+
         taskTimer.isEnabled = false
         taskTimer.firedFromMainVC = false
         
@@ -339,6 +359,8 @@ class TaskDetailViewController: UIViewController {
             
             NotificationCenter.default.post(name: Notification.Name("StopTimerNotification"), object: nil)
             
+            
+            
 //            if willResetTimer {
 //                resetTaskTimers()
 //            }
@@ -353,7 +375,14 @@ class TaskDetailViewController: UIViewController {
         performSegue(withIdentifier: "taskSettingsSegue", sender: self)
         
     }
-    
+
+    func statsTapped() {
+        
+        print("Go to Stats")
+        performSegue(withIdentifier: "taskStatsSegue", sender: self)
+        
+    }
+
     func trashTapped() {
         
         print("Erase Task")
@@ -444,11 +473,12 @@ class TaskDetailViewController: UIViewController {
         leftAxis.axisMinimum = 0.0
         rightAxis.axisMinimum = 0.0
         
+        rightAxis.axisMaximum = taskData.taskTime
+        leftAxis.axisMaximum = taskData.taskTime
+        
         xAxis.granularity = 1.0
         xAxis.drawGridLinesEnabled = false
         xAxis.centerAxisLabelsEnabled = false
-        
-        // TODO: get last 3 access times / task times and show completed time on chart
         
         taskData.setTaskAccess(for: task)
         
@@ -526,11 +556,11 @@ class TaskDetailViewController: UIViewController {
         //        leftAxis.zeroLineWidth = 0.7f;
         
         
-        updateCompletionChart()
+        loadChartData()
         
     }
     
-    func updateCompletionChart() {
+    func loadChartData(willUpdate: Bool = false) {
         
         var barChartEntry  = [BarChartDataEntry]() //this is the Array that will eventually be displayed on the graph.
         
@@ -559,8 +589,12 @@ class TaskDetailViewController: UIViewController {
             
             for i in 0..<taskTimeHistory.count {
                 
-                let value = BarChartDataEntry(x: Double(i), y: taskTimeHistory[i]) // here we set the X and Y status in a data chart entry
-                
+                var value: BarChartDataEntry
+                if i != taskTimeHistory.count - 1 {
+                    value = BarChartDataEntry(x: Double(i), y: taskTimeHistory[i]) // here we set the X and Y status in a data chart entry
+                } else {
+                    value = BarChartDataEntry(x: Double(i), y: elapsedTime)
+                }
                 barChartEntry.append(value) // here we add it to the data set
             }
             
@@ -572,8 +606,10 @@ class TaskDetailViewController: UIViewController {
             
             data.addDataSet(bar) //Adds the line to the dataSet
             
-            recentTaskHistory.animate(xAxisDuration: 2.0, yAxisDuration: 2.0)
-
+            if !willUpdate {
+                recentTaskHistory.animate(xAxisDuration: 2.0, yAxisDuration: 2.0)
+            }
+            
             recentTaskHistory.data = data //finally - it adds the chart data to the chart and causes an update
 
         } else {
@@ -603,6 +639,15 @@ class TaskDetailViewController: UIViewController {
             vc.taskDays = taskDays
             vc.occurranceRate = taskFrequency
             vc.rolloverMultiplier = rolloverMultiplier
+            
+            vc.taskData = taskData
+            vc.appData = appData
+            
+        } else if segue.identifier == "taskStatsSegue" {
+            
+            let vc = segue.destination as! TaskStatsViewController
+            
+            vc.task = task
             
             vc.taskData = taskData
             vc.appData = appData

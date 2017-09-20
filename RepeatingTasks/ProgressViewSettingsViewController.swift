@@ -74,7 +74,7 @@ class ProgressViewSettingsViewController: UITableViewController {
     }
     
     func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
-        cell.backgroundColor = UIColor.white
+        cell.backgroundColor = UIColor.clear
     }
     
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -84,7 +84,7 @@ class ProgressViewSettingsViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return progressStyle.count
     }
-    
+
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ProgressViewStyleCell", for: indexPath)
         

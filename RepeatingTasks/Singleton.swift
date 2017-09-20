@@ -98,7 +98,7 @@ class CountdownTimer: NSObject {
         formatter.allowedUnits = [.hour, .minute, .second]
         formatter.unitsStyle = .positional
         
-        var remainingTimeAsString = formatter.string(from: TimeInterval(remainingTaskTime))!
+        var remainingTimeAsString = formatter.string(from: TimeInterval(remainingTaskTime.rounded()))!
         
         if remainingTaskTime <= 0 {
             remainingTimeAsString = "Complete"

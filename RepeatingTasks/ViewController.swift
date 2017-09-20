@@ -39,6 +39,7 @@ class TaskViewController: UIViewController {
     var willResetTimer = false
     var currentDay = Date()
     var yesterday = Date()
+    var lastUsed = Date()
     
     //MARK: - View and Basic Functions
     
@@ -189,6 +190,7 @@ class TaskViewController: UIViewController {
             taskData.newTaskHistory(for: task, for: currentDay)
         }
         
+        
         saveData()
     
     }
@@ -213,30 +215,6 @@ class TaskViewController: UIViewController {
         
     }
     
-    func getAccessDate(for task: String, lengthFromEnd count: Int) -> Date? {
-        
-        taskData.setTaskAccess(for: task)
-        
-        if let dates = taskData.taskAccess {
-            
-            let length = dates.count
-            
-            if length < 1 {
-                
-                return dates.last!
-                
-            } else if length >= count + 1 {
-                
-                return dates[length - count - 1]
-                
-            }
-        
-        }
-    
-        return nil
-        
-    }
-    
     func settingsButtonTapped() {
         performSegue(withIdentifier: "appSettingsSegue", sender: self)
         
@@ -257,7 +235,7 @@ class TaskViewController: UIViewController {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "EEEE"
         
-        var dayOfWeekString = dateFormatter.string(from: date)
+        let dayOfWeekString = dateFormatter.string(from: date)
         print("Today is \(dayOfWeekString)")
         
         return taskData.taskDays.contains(dayOfWeekString)
@@ -268,8 +246,8 @@ class TaskViewController: UIViewController {
         
         taskData.setTaskAccess(for: task)
         
-        let lastUsed = appData.taskLastTime
-        let lastIndex = taskData.taskAccess?.index(of: lastUsed)
+        let lastUsed = self.lastUsed
+        //let lastIndex = taskData.taskAccess?.index(of: lastUsed)
         
         let daysBetween = calculateDaysBetweenTwoDates(start: lastUsed, end: currentDay)
         
@@ -277,18 +255,29 @@ class TaskViewController: UIViewController {
             return
         }
         
-        var missedDays: Int = 0
-        for day in 1...daysBetween - 1 {
+        //var missedDays: Int = 0
+        for day in 0..<daysBetween {
             
             let date = Calendar.current.date(byAdding: .day, value: day, to: lastUsed)
             
-            if taskDayCheck(for: task, at: date!) {
-                taskData.newTaskHistory(for: task, for: date!)
-                taskData.taskHistoryDictionary[task]![date!]![TaskData.missedHistoryKey] = taskData.taskHistoryDictionary[task]![date!]![TaskData.taskTimeHistoryKey]
+            let dateExistsInDict = taskData.taskHistoryDictionary[task]?[date!]
+            
+            if taskDayCheck(for: task, at: date!) && dateExistsInDict == nil {
                 
-                taskData.taskAccess?.insert(date!, at: lastIndex! + missedDays)
-                missedDays += 1
+                taskData.newTaskHistory(for: task, for: date!)
+                
+                //taskData.taskAccess?.insert(date!, at: lastIndex! + missedDays)
+                //missedDays += 1
+                
             }
+            
+            let taskTime = taskData.taskHistoryDictionary[task]?[date!]?[TaskData.taskTimeHistoryKey]
+            let completedTime = taskData.taskHistoryDictionary[task]?[date!]?[TaskData.completedHistoryKey]
+
+            if (taskTime != nil) && (completedTime != nil) {
+                taskData.taskHistoryDictionary[task]![date!]![TaskData.missedHistoryKey] = taskTime! - completedTime!
+            }
+            
             
         }
         
@@ -314,6 +303,7 @@ class TaskViewController: UIViewController {
         var currentTime = getDateComponents(for: now)
         
         let then = appData.taskLastTime
+        lastUsed = then
         var lastAppTime = getDateComponents(for: then)
         
         var reset = DateComponents()
@@ -385,6 +375,52 @@ class TaskViewController: UIViewController {
 
     }
     
+    func calculateStats(for task: String) {
+        
+        taskData.setTask(as: task)
+        
+        var taskStats = [String: Double]()
+        
+        if let statsCheck = taskData.taskStatsDictionary[task] {
+            taskStats = statsCheck
+        }
+        
+        taskStats[TaskData.totalTaskDaysKey]! += 1.0
+        taskStats[TaskData.totalTaskTimeKey]! += taskData.taskTime
+        taskStats[TaskData.completedTaskTimeKey]! += taskData.completedTime
+        
+        if taskData.completedTime == taskData.taskTime { // Full
+            
+            taskStats[TaskData.fullTaskDaysKey]! += 1
+            taskStats[TaskData.currentStreakKey]! += 1
+            
+            if taskStats[TaskData.currentStreakKey]! > taskStats[TaskData.bestStreakKey]! {
+                taskStats[TaskData.bestStreakKey]! = taskStats[TaskData.currentStreakKey]!
+            }
+            
+            
+        } else if taskData.completedTime > 0 { // Partial
+        
+            taskStats[TaskData.partialTaskDaysKey]! += 1
+            
+            if taskStats[TaskData.currentStreakKey]! > 0 {
+                taskStats[TaskData.currentStreakKey] = 0
+            }
+            
+        } else { // Missed
+            
+            taskStats[TaskData.missedTaskDaysKey]! += 1.0
+            taskStats[TaskData.missedTaskTimeKey]! += taskData.taskTime
+            
+            if taskStats[TaskData.currentStreakKey]! > 0 {
+                taskStats[TaskData.currentStreakKey] = 0
+            }
+
+        }
+        
+        taskData.saveToStatsDictionary(name: task, stats: taskStats)
+        
+    }
     
     func resetTaskTimers() {
         print("RESET!!!!!!!!")
@@ -403,6 +439,12 @@ class TaskViewController: UIViewController {
             
             taskData.setTask(as: task)
             
+            let daysBetween = calculateDaysBetweenTwoDates(start: self.lastUsed, end: self.currentDay)
+
+            for _ in 0..<daysBetween {
+                self.calculateStats(for: task)
+            }
+            
             let (_, weightedTaskTime) = taskTimer.getWeightedTime(for: task)
 
             let completedTime = taskData.completedTime
@@ -420,7 +462,7 @@ class TaskViewController: UIViewController {
                     rolloverTime = 0
                 }
                 
-                taskData.taskDictionary[task]![TaskData.rolloverTimeKey] = rolloverTime
+                //taskData.taskDictionary[task]![TaskData.rolloverTimeKey] = rolloverTime
             
             }
             
@@ -430,7 +472,7 @@ class TaskViewController: UIViewController {
             
             taskData.setTaskAccess(for: task)
             
-            let lastUsed = appData.taskLastTime
+            let lastUsed = self.lastUsed
             
             if taskDayCheck(for: task, at: currentDay), let lastIndex = taskData.taskAccess?.index(of: lastUsed) {
 
@@ -453,14 +495,12 @@ class TaskViewController: UIViewController {
 //                    
 //                    taskData.taskHistoryDictionary[task]![date]!["totalTaskTimeHistory"] = time
 //                    taskData.taskHistoryDictionary[task]![date]!["missedTaskTimeHistory"] = time! - completion!
-//                    taskData.taskHistoryDictionary[task]![date]!["completedTaskTimeHistory"] = completion
+//                    taskData.taskHistoryDictionary[task]![date]!["completedTaskTimeHistory"] = completionf
 //                    
 //                }
                 
 
             }
-            
-            // TODO: Insert Statistics Saving
             
         }
         
@@ -581,7 +621,7 @@ class TaskViewController: UIViewController {
         
         taskData.taskDictionary[task]![TaskData.completedTimeKey]! += elapsedTime
 
-        if let date = getAccessDate(for: task, lengthFromEnd: 0) {
+        if let date = taskData.getAccessDate(for: task, lengthFromEnd: 0) {
             taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]! += elapsedTime
             taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]! = taskData.taskTime - elapsedTime
         }

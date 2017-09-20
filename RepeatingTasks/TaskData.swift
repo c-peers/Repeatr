@@ -376,8 +376,8 @@ class TaskData: NSObject, NSCoding {
         
     }
     
-    func saveToStatsDictionary(name taskName: String, stats taskStats: [String: [String:Double]]) {
-        taskStatsDictionary[taskName] = taskStats[taskName]
+    func saveToStatsDictionary(name taskName: String, stats taskStats: [String:Double]) {
+        taskStatsDictionary[taskName] = taskStats
     }
 
     //MARK: - History Functions
@@ -481,6 +481,34 @@ class TaskData: NSObject, NSCoding {
 //        
 //    }
     
+    //MARK: - Helper Functions
+    
+    func getAccessDate(for task: String, lengthFromEnd count: Int) -> Date? {
+        
+        setTaskAccess(for: task)
+        
+        if let dates = taskAccess {
+            
+            let length = dates.count
+            
+            if length < 1 {
+                
+                return dates.last!
+                
+            } else if length >= count + 1 {
+                
+                return dates[length - count - 1]
+                
+            }
+            
+        }
+        
+        return nil
+        
+    }
+    
+
+
     //MARK: - NSCoding
     
     func encode(with aCoder: NSCoder) {

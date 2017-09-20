@@ -118,7 +118,7 @@ class ColorSettingsViewController: UITableViewController {
     }
     
     func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
-        cell.backgroundColor = UIColor.white
+        cell.backgroundColor = UIColor.clear
     }
     
     override func numberOfSections(in tableView: UITableView) -> Int {

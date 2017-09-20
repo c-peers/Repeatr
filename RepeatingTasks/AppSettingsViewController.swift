@@ -39,6 +39,7 @@ class AppSettingsViewController: UITableViewController {
         print(appData.appColorName)
                 
         nightModeSwitch.isOn = false
+        nightModeSwitch.isEnabled = false
         
         title = "Application Settings"
 
@@ -120,10 +121,18 @@ class AppSettingsViewController: UITableViewController {
         
         if appData.isNightMode {
             cell.contentView.backgroundColor = FlatBlack()
+            cell.accessoryView?.backgroundColor = FlatBlack()
+            cell.accessoryView?.tintColor = FlatGray()
         } else {
             cell.contentView.backgroundColor = UIColor.white
+            cell.accessoryView?.backgroundColor = UIColor.white
+            cell.accessoryView?.tintColor = UIColor.gray
         }
         
+    }
+    
+    func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+        cell.backgroundColor = UIColor.clear
     }
     
     @IBAction func nightModeSelected(_ sender: UISwitch) {
@@ -188,6 +197,7 @@ class AppSettingsViewController: UITableViewController {
                 self.navigationController?.navigationBar.layoutIfNeeded()
                 
                 self.tableView.backgroundColor = FlatBlack()
+                self.tableView.separatorColor = UIColor.gray
                 //self.tableView.backgroundView?.backgroundColor = FlatBlack()
                 self.tableView.reloadData()
                 
@@ -201,6 +211,8 @@ class AppSettingsViewController: UITableViewController {
                 self.tableView.backgroundColor = UIColor.white
             
                 self.tableView.backgroundColor = UIColor.white
+                self.tableView.separatorColor = UIColor.lightGray
+                
                 //self.tableView.backgroundView?.backgroundColor = FlatBlack()
                 self.tableView.reloadData()
                 
@@ -209,6 +221,12 @@ class AppSettingsViewController: UITableViewController {
             }
             
         }
+        
+    }
+    
+    func setLabelColor(for label: UILabel, to color: UIColor) {
+        
+        label.backgroundColor = color
         
     }
     
