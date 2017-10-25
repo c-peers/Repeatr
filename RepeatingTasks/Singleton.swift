@@ -7,21 +7,23 @@
 //
 
 import Foundation
+import UserNotifications
 
 class CountdownTimer: NSObject {
     
     var isEnabled = false
     var firedFromMainVC = false
 
-    dynamic var remainingTime = 0
+    @objc dynamic var remainingTime = 0
     var run = Timer()
     
-    var cell: RepeatingTasksCollectionCell? = nil
+    var cell: TaskCollectionViewCell? = nil
     
     var startTime = Date().timeIntervalSince1970
     var endTime = Date().timeIntervalSince1970
+    var currentTime = Date().timeIntervalSince1970
     
-    dynamic var elapsedTime = 0.0
+    @objc dynamic var elapsedTime = 0.0
     
     var taskData = TaskData()
     
@@ -40,7 +42,7 @@ class CountdownTimer: NSObject {
         //Task.instance.data.save()
     }
     
-    func timerRunning() {
+    @objc func timerRunning() {
         
 //        //let userData = timer.userInfo as Array
 //        //let cellz = userData[0] as! RepeatingTasksCollectionCell
@@ -75,16 +77,16 @@ class CountdownTimer: NSObject {
         
     }
     
-    func formatTimer(name task: String, from cell: RepeatingTasksCollectionCell? = nil, dataset: TaskData) -> (String, Double) {
+    func formatTimer(name task: String, from cell: TaskCollectionViewCell? = nil, ofType type: CellType? = nil, dataset: TaskData) -> (String, Double) {
         // Used for initialization and when the task timer is updated
 
         taskData = dataset
         
         taskData.setTask(as: task)
         
-        let (taskTime, weightedTaskTime) = getWeightedTime(for: task)
+        let (_, weightedTaskTime) = getWeightedTime(for: task)
 
-        let currentTime = Date().timeIntervalSince1970
+        currentTime = Date().timeIntervalSince1970
         print(taskData.completedTime)
         elapsedTime = taskData.completedTime
 
@@ -108,7 +110,13 @@ class CountdownTimer: NSObject {
             
             let currentProgress = 1 - Float(remainingTaskTime)/Float(weightedTaskTime)
             
-            cell!.progressView.setProgress(currentProgress, animated: true)
+            if type == .line {
+                //TaskViewController.calculateProgress()
+                //cell!.progressView.setProgress(currentProgress, animated: true)
+            
+            } else if type == .circular {
+                cell!.circleProgressView.progress = Double(currentProgress)
+            }
             
             print("Current progress is \(currentProgress)")
             
@@ -120,44 +128,6 @@ class CountdownTimer: NSObject {
         
     }
 
-    
-//        Task.instance.data.setTask(as: task)
-//
-//        let (taskTime, weightedTaskTime) = getWeightedTime(for: task)
-//        let completedTime = Task.instance.data.completedTime
-//        
-//        remainingTime = weightedTaskTime - completedTime
-//        
-//        print("Completed time is \(completedTime)")
-//        
-//        if decrement {
-//            remainingTime -= 1
-//        }
-//        
-//        let formatter = DateComponentsFormatter()
-//        formatter.allowedUnits = [.hour, .minute, .second]
-//        formatter.unitsStyle = .positional
-//        
-//        var remainingTimeAsString = formatter.string(from: TimeInterval(remainingTime))!
-//        
-//        if remainingTime == 0 {
-//            remainingTimeAsString = "Complete"
-//        }
-//        
-//        if (cell != nil) {
-//            
-//            let currentProgress = 1 - Float(remainingTime)/Float(taskTime)
-//            
-//            cell!.progressView.setProgress(currentProgress, animated: true)
-//            
-//            print("Current progress is \(currentProgress)")
-//            
-//            cell!.taskTimeRemaining.text = remainingTimeAsString
-//            
-//        }
-//        
-//        return (remainingTimeAsString, remainingTime)
-
     func getWeightedTime(for task: String) -> (Double, Double) {
         
         let taskTime = taskData.taskTime
@@ -168,6 +138,60 @@ class CountdownTimer: NSObject {
         
     }
     
+    // MARK: - Notification Functions
+    
+    func setFinishedNotification(for task: String, atTime time: Double) {
+        
+        let notification = UNMutableNotificationContent()
+        notification.title = "Task Complete"
+        notification.body = "Great job! You've completed " + task + "."
+        
+        let id = task + "Complete"
+        let notificationTrigger = UNTimeIntervalNotificationTrigger(timeInterval: time, repeats: false)
+        let request = UNNotificationRequest(identifier: id, content: notification, trigger: notificationTrigger)
+        
+        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+        
+    }
+    
+    func cancelFinishedNotification(for task: String) {
+        
+        let id = task + "Complete"
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id])
+        
+        //        UNUserNotificationCenter.current().getPendingNotificationRequests { (notificationRequests) in
+        //            var identifiers: [String] = []
+        //            for notification:UNNotificationRequest in notificationRequests {
+        //                if notification.identifier == id {
+        //                    identifiers.append(notification.identifier)
+        //                }
+        //            }
+        //            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
+        //        }
+        
+    }
+    
+    func setMissedTimeNotification(for task: String, at time: TimeInterval, withRemaining remainingTime: String) {
+        
+        let notification = UNMutableNotificationContent()
+        notification.title = "Oh no"
+        notification.body = "You didn't complete " + task + ". " + remainingTime + " will be added next time."
+        
+        let id = task + "Missed"
+        let notificationTrigger = UNTimeIntervalNotificationTrigger(timeInterval: time, repeats: false)
+        let request = UNNotificationRequest(identifier: id, content: notification, trigger: notificationTrigger)
+        
+        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+        
+    }
+    
+    func cancelMissedTimeNotification(for task: String) {
+        
+        let id = task + "Missed"
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id])
+        
+    }
+
 //        let taskTime = Task.instance.data.taskTime
 //        let leftoverMultiplier = Task.instance.data.leftoverMultiplier
 //        let leftoverTime = Task.instance.data.leftoverTime

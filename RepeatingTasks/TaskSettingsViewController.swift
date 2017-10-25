@@ -8,17 +8,27 @@
 
 import UIKit
 import Chameleon
+import SkyFloatingLabelTextField
 
 class TaskSettingsViewController: UIViewController {
 
     //MARK: - Outlets
     
-    @IBOutlet weak var scrollView: UIScrollView!
+    //@IBOutlet weak var scrollView: UIScrollView!
+    //@IBOutlet weak var bgView: UIView!
     
-    @IBOutlet weak var nameTextField: UITextField!
-    @IBOutlet weak var timeTextField: UITextField!
+    //@IBOutlet weak var nameTextField: UITextField!
+    //@IBOutlet weak var timeTextField: UITextField!
+    //@IBOutlet weak var occurranceTextField: UITextField!
+    
+    @IBOutlet weak var taskNameTextField: SkyFloatingLabelTextField!
+    @IBOutlet weak var taskLengthTextField: SkyFloatingLabelTextField!
+    @IBOutlet weak var occurrenceRateTextField: SkyFloatingLabelTextField!
+
+    @IBOutlet weak var occurrenceLabel: UILabel!
+
+    @IBOutlet weak var rolloverRateLabel: UILabel!
     @IBOutlet weak var rolloverSlider: UISlider!
-    @IBOutlet weak var occurranceTextField: UITextField!
     @IBOutlet weak var rolloverSliderValueLabel: UILabel!
     
     @IBOutlet weak var sunday: UIButton!
@@ -29,6 +39,9 @@ class TaskSettingsViewController: UIViewController {
     @IBOutlet weak var friday: UIButton!
     @IBOutlet weak var saturday: UIButton!
     
+    @IBOutlet weak var completeButton: UIButton!
+    @IBOutlet weak var completeButtonConstraint: NSLayoutConstraint!
+    
     //MARK: - Properties
     
     var task = ""
@@ -37,12 +50,20 @@ class TaskSettingsViewController: UIViewController {
     var occurranceRate = 0.0
     var rolloverMultiplier = 1.0
     
+    var originalTime = 0.0
+    var originalDays = [""]
+    var originalRate = 0.0
+    var originalRollever = 0.0
+    
+    var valuesChanged = false
+    
     var appData = AppData()
     var taskData = TaskData()
     let timer = CountdownTimer()
     
     // Used to corretly show the keyboard and scroll the view into place
     var activeTextField: UITextField?
+    var textFieldArray = [SkyFloatingLabelTextField]()
     
     // For pickerview
     var hours = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
@@ -52,6 +73,8 @@ class TaskSettingsViewController: UIViewController {
     var pickerData: [[String]] = []
     var selectedFromPicker: UILabel!
     
+    var tasks = [String]()
+    
     var timePickerView = UIPickerView()
     let pickerViewDatasource = TaskTimePicker()
     
@@ -60,18 +83,36 @@ class TaskSettingsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // Array of textfields for easier setup and color changing
+        textFieldArray = [taskNameTextField, taskLengthTextField, occurrenceRateTextField]
+        
+        setTheme()
+
         taskData.setTask(as: task)
         
-        nameTextField.delegate = self
-        timeTextField.delegate = self
-        occurranceTextField.delegate = self
+        taskNameTextField.delegate = self
+        taskLengthTextField.delegate = self
+        occurrenceRateTextField.delegate = self
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWasShown), name: NSNotification.Name.UIKeyboardDidShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillBeHidden), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
+        //let iOSDefaultBlue = UIButton(type: UIButtonType.system).titleColor(for: .normal)!
+        //rolloverSlider.tintColor = FlatSkyBlueDark()
         rolloverSlider.minimumValue = 0.0
         rolloverSlider.maximumValue = 2.5
-        rolloverSlider.tintColor = FlatSkyBlueDark()
+        
+        //******************************
+        // Day selection start
+        //******************************
+        
+        prepareDayButtons(for: sunday)
+        prepareDayButtons(for: monday)
+        prepareDayButtons(for: tuesday)
+        prepareDayButtons(for: wednesday)
+        prepareDayButtons(for: thursday)
+        prepareDayButtons(for: friday)
+        prepareDayButtons(for: saturday)
         
         setValues()
         
@@ -84,8 +125,8 @@ class TaskSettingsViewController: UIViewController {
         let decimalDoneButton = UIBarButtonItem.init(barButtonSystemItem: .done, target: self, action: #selector(doneOccurrence))
         decimalPadToolBar.items = [decimalDoneButton]
         
-        occurranceTextField.keyboardType = .numberPad
-        occurranceTextField.inputAccessoryView = decimalPadToolBar
+        occurrenceRateTextField.keyboardType = .numberPad
+        occurrenceRateTextField.inputAccessoryView = decimalPadToolBar
         
         //******************************
         // Occurrence rate initialization finished
@@ -107,7 +148,7 @@ class TaskSettingsViewController: UIViewController {
         let pickerToolBar = UIToolbar()
         pickerToolBar.barStyle = UIBarStyle.default
         pickerToolBar.isTranslucent = true
-        pickerToolBar.tintColor = UIColor(red: 76/255, green: 217/255, blue: 100/255, alpha: 1)
+        pickerToolBar.barTintColor = appData.appColor
         pickerToolBar.sizeToFit()
         
         let doneButton = UIBarButtonItem(title: "Done", style: UIBarButtonItemStyle.plain, target: self, action: #selector(donePicker))
@@ -117,12 +158,11 @@ class TaskSettingsViewController: UIViewController {
         pickerToolBar.setItems([cancelButton, spaceButton, doneButton], animated: false)
         
         pickerToolBar.isUserInteractionEnabled = true
-        
-        
+                
         timePickerView.dataSource = self
         timePickerView.delegate = self
-        timeTextField.inputView = timePickerView
-        timeTextField.inputAccessoryView = pickerToolBar
+        taskLengthTextField.inputView = timePickerView
+        taskLengthTextField.inputAccessoryView = pickerToolBar
         
         timePickerView.selectRow(0, inComponent: 0, animated: true)
         timePickerView.selectRow(0, inComponent: 1, animated: true)
@@ -131,37 +171,100 @@ class TaskSettingsViewController: UIViewController {
         // Pickerview initialization finished
         //******************************
         
-        //******************************
-        // Day selection start
-        //******************************
+        let themeColor = appData.appColor
         
-        sunday.layer.borderWidth = 1
-        sunday.layer.borderColor = appData.appColor.cgColor
-        monday.layer.borderWidth = 1
-        monday.layer.borderColor = appData.appColor.cgColor
-        tuesday.layer.borderWidth = 1
-        tuesday.layer.borderColor = appData.appColor.cgColor
-        wednesday.layer.borderWidth = 1
-        wednesday.layer.borderColor = appData.appColor.cgColor
-        thursday.layer.borderWidth = 1
-        thursday.layer.borderColor = appData.appColor.cgColor
-        friday.layer.borderWidth = 1
-        friday.layer.borderColor = appData.appColor.cgColor
-        saturday.layer.borderWidth = 1
-        saturday.layer.borderColor = appData.appColor.cgColor
+        if appData.darknessCheck(for: themeColor) {
+            
+            pickerToolBar.tintColor = UIColor.white
+            decimalPadToolBar.tintColor = UIColor.white
+            
+        } else {
+            
+            pickerToolBar.tintColor = UIColor.black
+            decimalPadToolBar.tintColor = UIColor.black
+            
+        }
+        
+        completeButton.layer.borderColor = appData.appColor.cgColor
+        completeButton.layer.borderWidth = 2
+        completeButton.layer.cornerRadius = 10.0
+        
+        completeButton.setTitleColor(appData.appColor, for: .normal)
 
+    }
+    
+    func setTheme() {
+        
+        let themeColor = appData.appColor
+        let darkerThemeColor = themeColor.darken(byPercentage: 0.25)
+        
+        view.backgroundColor = darkerThemeColor
+        //scrollView.backgroundColor = darkerThemeColor
+        //bgView.backgroundColor = darkerThemeColor
+        
+        //        if appData.isNightMode {
+        //            //NightNight.theme = .night
+        //        } else {
+        //            //NightNight.theme = .normal
+        //        }
+        //
+        if appData.darknessCheck(for: darkerThemeColor) {
+            
+            for textField in textFieldArray {
+                setTextFieldColor(for: textField, as: .white)
+            }
+            occurrenceLabel.textColor = .white
+            rolloverRateLabel.textColor = .white
+            rolloverSliderValueLabel.textColor = .white
+            //            setStatusBarStyle(.lightContent)
+            
+        } else {
+            
+            for textField in textFieldArray {
+                setTextFieldColor(for: textField, as: .black)
+            }
+            occurrenceLabel.textColor = .black
+            rolloverRateLabel.textColor = .black
+            rolloverSliderValueLabel.textColor = .black
+            //            setStatusBarStyle(.default)
+            
+        }
+        
+    }
+    
+    func setTextFieldColor(for textField: SkyFloatingLabelTextField, as color: UIColor) {
+        textField.textColor = color
+        textField.titleColor = color
+        textField.selectedTitleColor = color
+    }
+    
+    func prepareDayButtons(for button: UIButton) {
+        button.layer.borderWidth = 1
+        button.layer.borderColor = appData.appColor.cgColor
+        button.tag = 0
     }
     
     func setValues() {
         
-        nameTextField.text = task
-        timeTextField.text = setTaskTime()
-        occurranceTextField.text = String(Int(occurranceRate))
+        originalTime = taskTime
+        originalDays = taskDays
+        originalRate = occurranceRate
+        originalRollever = rolloverMultiplier
         
+        taskNameTextField.text = task
+        taskLengthTextField.text = setTaskTime()
+
+        if Int(occurranceRate) == 1 {
+            occurrenceRateTextField.text = "Every week"
+        } else {
+            let rate = Int(occurranceRate)
+            occurrenceRateTextField.text = "Every " + String(rate) + " weeks"
+        }
+
         rolloverSlider.value = Float(rolloverMultiplier)
         let sliderValueAsString = String(rolloverSlider.value)
-        rolloverSliderValueLabel.text = sliderValueAsString
-        
+        rolloverSliderValueLabel.text = sliderValueAsString + "x of leftover time added to next task"
+        print(rolloverSliderValueLabel.text!)
         for day in taskDays {
             
             switch day {
@@ -194,10 +297,73 @@ class TaskSettingsViewController: UIViewController {
         
     }
     
+    func didValuesChange(added newString: String? = nil, to field: SkyFloatingLabelTextField? = nil) {
+        
+        var nameChanged = false
+        var timeChanged = false
+        var daysChanged = false
+        var frequencyChanged = false
+        var rolloverChanged = false
+        
+        nameChanged = (taskNameTextField.text == task) ? false : true
+        timeChanged = (taskTime == originalTime) ? false : true
+        daysChanged = (taskDays == originalDays) ? false : true
+        frequencyChanged = (occurranceRate == originalRate) ? false : true
+        rolloverChanged = (rolloverMultiplier == originalRollever) ? false : true
+        
+        if let string = newString, let textField = field {
+            
+            let text = textField.text! + string
+            
+            switch textField {
+            case occurrenceRateTextField:
+                frequencyChanged = !compare(occurrenceRateTextField, with: text)
+            case taskNameTextField:
+                nameChanged = !compare(taskLengthTextField, with: text)
+            case taskLengthTextField:
+                timeChanged = !compare(occurrenceRateTextField, with: text)
+            default:
+                break
+            }
+            
+        }
+        
+        let finalCheck = nameChanged || timeChanged || daysChanged || frequencyChanged || rolloverChanged
+        print(finalCheck)
+        
+        if finalCheck {
+            completeButton.setTitle("Save Changes", for: .normal)
+            changeSize(of: completeButtonConstraint, to: 150)
+            valuesChanged = true
+        } else {
+            completeButton.setTitle("Cancel", for: .normal)
+            changeSize(of: completeButtonConstraint, to: 80)
+            valuesChanged = false
+        }
+        
+    }
+    
+    func changeSize(of constraint: NSLayoutConstraint,to size: CGFloat) {
+        UIView.animate(withDuration: 0.3) {
+            constraint.constant = size
+        }
+    }
+    
     func setTaskTime() -> String {
+
+        let hours = Int(taskTime / 3600)
+        let minutes = Int(taskTime.truncatingRemainder(dividingBy: 3600) / 60)
+
+        let timeString: String
         
-        let (timeString, _) = timer.formatTimer(name: task, dataset: taskData)
-        
+        if hours < 1 && minutes > 0 {
+            timeString = String(minutes) + " minutes"
+        } else if hours > 0 && minutes < 1 {
+            timeString = String(hours) + " hours"
+        } else {
+            timeString = String(hours) + " hours " + String(minutes) + " minutes"
+        }
+
         return timeString
         
     }
@@ -208,13 +374,21 @@ class TaskSettingsViewController: UIViewController {
         sender.setValue(Float(toRound) / 10, animated: true)
         print(sender.value)
         
-        rolloverSliderValueLabel.text = String(sender.value)
+        rolloverSliderValueLabel.text = String(sender.value) + "x of leftover time added to next task"
+        rolloverMultiplier = Double(sender.value)
+        didValuesChange()
         
     }
     
     override func viewWillDisappear(_ animated: Bool) {
+        if valuesChanged {
+            saveTaskData()
+        }
+    }
+    
+    func saveTaskData() {
         
-        if let newTaskName = nameTextField.text {
+        if let newTaskName = taskNameTextField.text {
             
             if newTaskName != task {
 
@@ -226,19 +400,25 @@ class TaskSettingsViewController: UIViewController {
             }
         }
         
+        taskData.taskTime = taskTime
         taskData.rolloverMultiplier = Double(rolloverSlider.value)
         taskData.taskDays = taskDays
 
-        if let frequency = occurranceTextField.text {
-            taskData.taskFrequency = Double(frequency)!
-            occurranceRate = Double(frequency)!
-        }
+        taskData.taskFrequency = occurranceRate
+//        if let frequency = occurrenceRateTextField.text {
+//            taskData.taskFrequency = Double(frequency)!
+//            occurranceRate = Double(frequency)!
+//        }
         
         taskData.saveTask(task)
         taskData.save()
         
-        let i = navigationController?.viewControllers.count
-        let vc = navigationController?.viewControllers[i!-1] as! TaskDetailViewController
+        // Some fuckery to get the parent VC
+        let nav = self.presentingViewController as? UINavigationController
+        let i = nav?.viewControllers.count
+        let vc = nav?.viewControllers[i! - 1] as! TaskDetailViewController
+
+        vc.title = task
         vc.task = task
         vc.taskDays = taskDays
         vc.rolloverMultiplier = rolloverMultiplier
@@ -249,28 +429,31 @@ class TaskSettingsViewController: UIViewController {
     //MARK: - Button Actions/Functions
     
     func setButtonOn(for button: UIButton) {
-    
         button.layer.backgroundColor = self.appData.appColor.cgColor
         button.setTitleColor(UIColor.white, for: .normal)
-        
     }
     
     func buttonAction(for button: UIButton) {
         
+        let themeColor = appData.appColor
+        let darkerThemeColor = themeColor.darken(byPercentage: 0.25)
+        
         if button.tag == 0 {
             UIView.animate(withDuration: 0.5, animations: { () -> Void in
-                button.layer.backgroundColor = self.appData.appColor.cgColor
+                button.layer.backgroundColor = themeColor.cgColor
                 button.setTitleColor(UIColor.white, for: .normal)
             })
             button.tag = 1
         } else {
             UIView.animate(withDuration: 0.5, animations: { () -> Void in
-                button.layer.backgroundColor = UIColor.white.cgColor
+                button.layer.backgroundColor = darkerThemeColor?.cgColor
                 button.setTitleColor(UIColor.black, for: .normal)
             })
             button.tag = 0
         }
         
+        didValuesChange()
+
     }
     
     @IBAction func sundayTapped(_ sender: UIButton) {
@@ -357,6 +540,66 @@ class TaskSettingsViewController: UIViewController {
         
     }
     
+    @IBAction func editTask(_ sender: Any) {
+        
+        let taskNameWasEntered = taskNameTextField.hasText
+        let taskTimeWasEntered = taskLengthTextField.hasText
+        let frequencyWasEntered = occurrenceRateTextField.hasText
+        let taskDaysWereEntered = !taskDays.isEmpty
+        
+        if tasks.index(of: taskNameTextField.text!) != nil {
+            
+            taskNameTextField.errorMessage = "This name already exists"
+            popAlert(alertType: .duplicate)
+            
+        } else if taskNameWasEntered && taskTimeWasEntered && frequencyWasEntered && taskDaysWereEntered {
+            
+            dismiss(animated: true, completion: nil)
+            //performSegue(withIdentifier: "createdTaskUnwindSegue", sender: self)
+            
+        } else {
+            
+            if !taskNameWasEntered {
+                taskNameTextField.errorMessage = "Need a Name"
+            }
+            
+            if !taskTimeWasEntered {
+                taskLengthTextField.errorMessage = "Need a Time"
+            }
+            
+            if !frequencyWasEntered {
+                occurrenceRateTextField.errorMessage = "Need frequency"
+            }
+            
+            popAlert(alertType: .empty)
+            
+        }
+        
+    }
+    
+    func popAlert(alertType: AlertType) {
+        
+        let message: String
+        if alertType == .empty {
+            message = "Please fill out all fields before creating task"
+        } else {
+            message = "A task with this name already exists"
+        }
+        
+        let alertController = UIAlertController(title: "Warning",
+                                                message: message,
+                                                preferredStyle: UIAlertControllerStyle.alert)
+        
+        let okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.default){ (action: UIAlertAction) in
+            print("Hello")
+        }
+        
+        alertController.addAction(okAction)
+        
+        present(alertController,animated: true,completion: nil)
+        
+    }
+    
     //MARK: - Keyoard Functions
     
     func registerForKeyboardNotifications(){
@@ -371,16 +614,16 @@ class TaskSettingsViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
     }
     
-    func keyboardWasShown(notification: NSNotification){
+    @objc func keyboardWasShown(notification: NSNotification){
         //Need to calculate keyboard exact size due to Apple suggestions
 
-        self.scrollView.isScrollEnabled = true
+        //self.scrollView.isScrollEnabled = true
         var info = notification.userInfo!
         let keyboardSize = (info[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue.size
         let contentInsets : UIEdgeInsets = UIEdgeInsetsMake(0.0, 0.0, keyboardSize!.height, 0.0)
         
-        self.scrollView.contentInset = contentInsets
-        self.scrollView.scrollIndicatorInsets = contentInsets
+        //self.scrollView.contentInset = contentInsets
+        //self.scrollView.scrollIndicatorInsets = contentInsets
         
         var aRect : CGRect = self.view.frame
         aRect.size.height -= keyboardSize!.height
@@ -388,22 +631,22 @@ class TaskSettingsViewController: UIViewController {
             if (!aRect.contains(activeTextField.frame.origin)){
                 print(!aRect.contains(activeTextField.frame.origin))
                 
-                self.scrollView.scrollRectToVisible(activeTextField.frame, animated: true)
+                //self.scrollView.scrollRectToVisible(activeTextField.frame, animated: true)
                 
             }
         }
         
     }
     
-    func keyboardWillBeHidden(notification: NSNotification){
+    @objc func keyboardWillBeHidden(notification: NSNotification){
         //Once keyboard disappears, restore original positions
         var info = notification.userInfo!
         let keyboardSize = (info[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue.size
         let contentInsets : UIEdgeInsets = UIEdgeInsetsMake(0.0, 0.0, -keyboardSize!.height, 0.0)
-        self.scrollView.contentInset = contentInsets
-        self.scrollView.scrollIndicatorInsets = contentInsets
+        //self.scrollView.contentInset = contentInsets
+        //self.scrollView.scrollIndicatorInsets = contentInsets
         self.view.endEditing(true)
-        self.scrollView.isScrollEnabled = false
+        //self.scrollView.isScrollEnabled = false
         
     }
 
@@ -429,23 +672,44 @@ class TaskSettingsViewController: UIViewController {
 
 extension TaskSettingsViewController: UITextFieldDelegate {
     
+    func compare(_ textField: SkyFloatingLabelTextField, with string: String) -> Bool{
+        return textField.text == string
+    }
+    
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         
-        if textField == occurranceTextField {
+        didValuesChange(added: string, to: textField as? SkyFloatingLabelTextField)
+        
+        if let floatingText = textField as? SkyFloatingLabelTextField {
             
-            // We only want the last character input to be in this field
-            // current characters will be removed and the last input character will be added
+            if textField.text == "" {
+                floatingText.errorMessage = ""
+            }
             
-            if string == "." {
-                return false
-            } else {
-                textField.text = ""
-                print(textField.text!)
+            if floatingText == occurrenceRateTextField {
+                
+                // We only want the last character input to be in this field
+                // current characters will be removed and the last input character will be added
+                
+                if string == "." || string == "0" {
+                    return false
+                } else {
+                    if string == "1" {
+                        textField.text = "Every week"
+                    } else {
+                        textField.text = "Every " + string + " weeks"
+                    }
+                    print(textField.text!)
+                    occurranceRate = Double(string)!
+                    return false
+                }
+                
             }
         }
         
         return true
         
+
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -461,8 +725,8 @@ extension TaskSettingsViewController: UITextFieldDelegate {
         activeTextField = nil
     }
     
-    func doneOccurrence() {
-        occurranceTextField.resignFirstResponder()
+    @objc func doneOccurrence() {
+        occurrenceRateTextField.resignFirstResponder()
     }
     
 }
@@ -481,16 +745,19 @@ extension TaskSettingsViewController: UIPickerViewDataSource, UIPickerViewDelega
         selectedMinutes = pickerData[1][timePickerView.selectedRow(inComponent: 1)]
         
         if selectedHours == "0" && selectedMinutes != "0" {
-            timeTextField.text = selectedMinutes + " minutes"
+            taskLengthTextField.text = selectedMinutes + " minutes"
         } else if selectedHours != "0" && selectedMinutes  == "0" {
-            timeTextField.text = selectedHours + " hours"
+            taskLengthTextField.text = selectedHours + " hours"
         } else if selectedHours != "0" && selectedMinutes != "0" {
-            timeTextField.text = selectedHours + " hours " + selectedMinutes + " minutes"
+            taskLengthTextField.text = selectedHours + " hours " + selectedMinutes + " minutes"
         }
         
+        taskTime = Double((Int(selectedHours)! * 3600) + (Int(selectedMinutes)! * 60))
         selectedFromPicker = pickerView.view(forRow: row, forComponent: component) as! UILabel
         
         pickerView.reloadAllComponents()
+        
+        didValuesChange()
         
     }
     
@@ -538,13 +805,15 @@ extension TaskSettingsViewController: UIPickerViewDataSource, UIPickerViewDelega
         
     }
     
-    func donePicker() {
-        timeTextField.resignFirstResponder()
+    @objc func donePicker() {
+        didValuesChange()
+        taskLengthTextField.resignFirstResponder()
     }
     
-    func cancelPicker() {
-        timeTextField.resignFirstResponder()
-        timeTextField.text = ""
+    @objc func cancelPicker() {
+        didValuesChange()
+        taskLengthTextField.resignFirstResponder()
+        taskLengthTextField.text = ""
     }
     
 }

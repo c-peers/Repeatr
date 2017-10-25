@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13528" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13526"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="h2I-zD-f5p">
+            <rect key="frame" x="0.0" y="0.0" width="190" height="228"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO">
+                <rect key="frame" x="0.0" y="0.0" width="190" height="228"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="C79-iS-nQh">
+                        <rect key="frame" x="21" y="8" width="150" height="40"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="40" id="n3E-nu-HXX"/>
+                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="150" id="zhl-dF-ZUF"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jq4-Gx-zrA" customClass="KDCircularProgress" customModule="KDCircularProgress">
+                        <rect key="frame" x="0.0" y="58" width="190" height="162"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="giu-mc-ygA">
+                                <rect key="frame" x="55" y="23" width="80" height="80"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="80" id="SXe-Os-8fh"/>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="80" id="eqX-vW-n6h"/>
+                                </constraints>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="It5-Ny-8G4">
+                                <rect key="frame" x="45" y="107" width="100" height="20"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="MWT-pm-I5x"/>
+                                    <constraint firstAttribute="height" constant="20" id="YKh-Cd-AFX"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="bottomMargin" secondItem="It5-Ny-8G4" secondAttribute="bottom" constant="27" id="1hj-fE-Dsi"/>
+                            <constraint firstItem="It5-Ny-8G4" firstAttribute="centerX" secondItem="jq4-Gx-zrA" secondAttribute="centerX" id="IhX-7t-lTK"/>
+                            <constraint firstAttribute="width" constant="190" id="VgU-AN-YHW"/>
+                            <constraint firstItem="giu-mc-ygA" firstAttribute="centerX" secondItem="jq4-Gx-zrA" secondAttribute="centerX" id="fii-ZY-zK1"/>
+                            <constraint firstItem="giu-mc-ygA" firstAttribute="centerY" secondItem="jq4-Gx-zrA" secondAttribute="centerY" constant="-18" id="iwB-rV-7mT"/>
+                            <constraint firstItem="It5-Ny-8G4" firstAttribute="top" secondItem="giu-mc-ygA" secondAttribute="bottom" constant="4" id="lF7-W9-03H"/>
+                        </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="number" keyPath="angle">
+                                <real key="value" value="0.0"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="number" keyPath="startAngle">
+                                <real key="value" value="-90"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="number" keyPath="glowAmount">
+                                <real key="value" value="0.0"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="number" keyPath="trackThickness">
+                                <real key="value" value="0.10000000000000001"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="number" keyPath="progressThickness">
+                                <real key="value" value="0.29999999999999999"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
+                    </view>
+                </subviews>
+            </view>
+            <constraints>
+                <constraint firstItem="C79-iS-nQh" firstAttribute="top" secondItem="h2I-zD-f5p" secondAttribute="top" constant="8" id="77t-gO-wSG"/>
+                <constraint firstItem="jq4-Gx-zrA" firstAttribute="top" secondItem="C79-iS-nQh" secondAttribute="bottom" constant="10" id="TWY-U3-Ngc"/>
+                <constraint firstItem="jq4-Gx-zrA" firstAttribute="leading" secondItem="h2I-zD-f5p" secondAttribute="leading" id="bW8-un-x7E"/>
+                <constraint firstItem="C79-iS-nQh" firstAttribute="leading" secondItem="h2I-zD-f5p" secondAttribute="leading" constant="21" id="iOc-gp-Ob4"/>
+            </constraints>
+            <viewLayoutGuide key="safeArea" id="snF-FM-edx"/>
+            <size key="customSize" width="190" height="228"/>
+            <point key="canvasLocation" x="71" y="129"/>
+        </collectionViewCell>
+    </objects>
+</document>

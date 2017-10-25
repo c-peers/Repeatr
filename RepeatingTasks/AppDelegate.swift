@@ -9,6 +9,8 @@
 import UIKit
 import CoreData
 import Chameleon
+import GoogleMobileAds
+import UserNotifications
     
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -28,6 +30,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //setTheme(as: appData.appColor)
         
         print("appData color in Appdelegate is \(appData.appColor)")
+        
+        GADMobileAds.configure(withApplicationID: "ca-app-pub-3446210370651273~3666875676")
+        
+        // iOS 10-> support
+        if #available(iOS 10, *) {
+            UNUserNotificationCenter.current().requestAuthorization(options:[.badge, .alert, .sound]){ (granted, error) in }
+            application.registerForRemoteNotifications()
+        }
+            // iOS 8-9 support
+        else {
+            UIApplication.shared.registerUserNotificationSettings(UIUserNotificationSettings(types: [.badge, .sound, .alert], categories: nil))
+            UIApplication.shared.registerForRemoteNotifications()
+        }
         
         return true
     }

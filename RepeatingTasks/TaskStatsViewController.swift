@@ -16,13 +16,14 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
     @IBOutlet weak var missedTimeHistory: BarChartView!
     @IBOutlet weak var completedTimeHistory: BarChartView!
     @IBOutlet weak var scrollView: UIScrollView!
+    @IBOutlet weak var bgView: UIView!
     @IBOutlet weak var taskTimeHistoryLabel: UILabel!
     @IBOutlet weak var missedTimeHistoryLabel: UILabel!
     @IBOutlet weak var completedTimeHistoryLabel: UILabel!
+    @IBOutlet weak var statisticsTitleLabel: UILabel!
     @IBOutlet var statsNameLabels: [UILabel]!
     @IBOutlet var statsValueLabels: [UILabel]!
-    
-    
+        
     //var taskHistory
     var statCharts: [UIView: String] {
         return [taskTimeHistory: "Task Time Line Chart", missedTimeHistory: "Missed Time Bar Chart", completedTimeHistory: "Completed Time Bar Chart"]
@@ -43,6 +44,17 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        let darkerThemeColor = appData.appColor.darken(byPercentage: 0.25)
+        view.backgroundColor = darkerThemeColor
+        scrollView.backgroundColor = darkerThemeColor
+        bgView.backgroundColor = darkerThemeColor
+        navigationController?.toolbar.isHidden = true
+        
+        setLabelColor(for: taskTimeHistoryLabel)
+        setLabelColor(for: missedTimeHistoryLabel)
+        setLabelColor(for: completedTimeHistoryLabel)
+        setLabelColor(for: statisticsTitleLabel)
+        
         scrollView.delegate = self
         scrollView.contentSize.width = view.bounds.width
         scrollView.contentSize.height = CGFloat(1000)
@@ -70,13 +82,25 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
 
     }
     
+    func setLabelColor(for label: UILabel) {
+        
+        let darkerThemeColor = appData.appColor.darken(byPercentage: 0.25)
+        if appData.darknessCheck(for: darkerThemeColor) {
+            label.textColor = UIColor.white
+        } else {
+            label.textColor = UIColor.black
+        }
+        
+    }
+    
     func setStatNameLabels() {
         
         for label in statsNameLabels {
             
             let index = statsNameLabels.index(of: label)
             label.text = nameLabels[index!]
-            
+            setLabelColor(for: label)
+
         }
         
     }
@@ -91,6 +115,8 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         
         for label in statsValueLabels {
 
+            setLabelColor(for: label)
+            
             for (key, value) in taskStats {
             
                 switch key {
@@ -155,6 +181,14 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         leftAxis.axisMinimum = 0.0
         rightAxis.axisMinimum = 0.0
     
+        let darkerThemeColor = appData.appColor.darken(byPercentage: 0.25)
+        if appData.darknessCheck(for: darkerThemeColor) {
+            xAxis.labelTextColor = UIColor.white
+            rightAxis.labelTextColor = UIColor.white
+        } else {
+            xAxis.labelTextColor = UIColor.black
+            rightAxis.labelTextColor = UIColor.black
+        }
     
     }
     
@@ -188,7 +222,16 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         leftAxis.axisMinimum = 0.0
         rightAxis.axisMinimum = 0.0
 
-        
+        let darkerThemeColor = appData.appColor.darken(byPercentage: 0.25)
+        if appData.darknessCheck(for: darkerThemeColor) {
+            xAxis.labelTextColor = UIColor.white
+            rightAxis.labelTextColor = UIColor.white
+        } else {
+            xAxis.labelTextColor = UIColor.black
+            rightAxis.labelTextColor = UIColor.black
+            completedTimeHistory.tintColor = UIColor.black
+        }
+
     }
     
 //    func setXAxis(for chartView: Any, as type: String) {
@@ -357,6 +400,7 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
             
             value = BarChartDataEntry(x: Double(i), y: dataSet[i])
             //value = BarChartDataEntry(x: Double(i), y: Double(testData[i]))
+            
             barChartEntry.append(value) // here we add it to the data set
             
         }
@@ -364,6 +408,13 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         let bar = BarChartDataSet(values: barChartEntry, label: "") //Here we convert lineChartEntry to a LineChartDataSet
         
         bar.colors = ChartColorTemplates.pastel()
+        
+        let darkerThemeColor = appData.appColor.darken(byPercentage: 0.25)
+        if appData.darknessCheck(for: darkerThemeColor) {
+            bar.valueColors = [UIColor.white]
+        } else {
+            bar.valueColors = [UIColor.black]
+        }
         
         let data = BarChartData() //This is the object that will be added to the chart
         

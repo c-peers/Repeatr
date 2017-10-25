@@ -9,15 +9,19 @@
 import UIKit
 import Chameleon
 import Charts
+import GoogleMobileAds
+import Presentr
 
-class TaskDetailViewController: UIViewController {
+class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
 
     //MARK: - Outlets
     
     @IBOutlet weak var taskTimeLabel: UILabel!
     @IBOutlet weak var taskStartButton: UIButton!
     @IBOutlet weak var recentTaskHistory: BarChartView!
-    
+    @IBOutlet weak var bannerView: GADBannerView!
+    @IBOutlet weak var recentProgressLabel: UILabel!
+
     //MARK: - Properties
     
     var timer = Timer()
@@ -44,17 +48,46 @@ class TaskDetailViewController: UIViewController {
     
     var taskData = TaskData()
     var appData = AppData()
-    var taskTimer = CountdownTimer()
+    @objc var taskTimer = CountdownTimer()
     
     var startTime = Date()
     var endTime = Date()
+    
+    let addPresenter: Presentr = {
+        let width = ModalSize.fluid(percentage: 0.8)
+        let height = ModalSize.fluid(percentage: 0.8)
+        let center = ModalCenterPosition.center
+        let customType = PresentationType.custom(width: width, height: height, center: center)
+        
+        let customPresenter = Presentr(presentationType: customType)
+        //let customPresenter = Presentr(presentationType: .popup)
+        
+        customPresenter.transitionType = .coverVertical
+        customPresenter.dismissTransitionType = .coverVertical
+        customPresenter.roundCorners = true
+        customPresenter.cornerRadius = 10.0
+        customPresenter.backgroundColor = UIColor.lightGray
+        customPresenter.backgroundOpacity = 0.5
+        customPresenter.dismissOnSwipe = false
+        customPresenter.blurBackground = true
+        customPresenter.blurStyle = .regular
+        customPresenter.keyboardTranslationType = .moveUp
+        
+        let opacity: Float = 0.5
+        let offset = CGSize(width: 2.0, height: 2.0)
+        let radius = CGFloat(3.0)
+        let shadow = PresentrShadow(shadowColor: .black, shadowOpacity: opacity, shadowOffset: offset, shadowRadius: radius)
+        customPresenter.dropShadow = shadow
+        
+        return customPresenter
+    }()
     
     //MARK: - View and Basic Functions
     
     override func viewWillAppear(_ animated: Bool) {
  
         self.title = task
-        
+        navigationController?.toolbar.isHidden = false
         prepareNavBar()
         
     }
@@ -64,6 +97,12 @@ class TaskDetailViewController: UIViewController {
         
         startButtonSetup()
 
+        bannerView.adUnitID = "ca-app-pub-3446210370651273/3283732299"
+        bannerView.rootViewController = self
+        let request = GADRequest()
+        request.testDevices = [kGADSimulatorID]
+        bannerView.load(request)
+        
         elapsedTime = completedTime
         
         taskChartSetup()
@@ -237,7 +276,7 @@ class TaskDetailViewController: UIViewController {
         
     }
     
-    func timerRunning() {
+    @objc func timerRunning() {
         
         let (_, timeRemaining) = formatTimer()
         
@@ -304,17 +343,25 @@ class TaskDetailViewController: UIViewController {
         let navigationBar = navigationController?.navigationBar
         let bgColor = navigationBar?.barTintColor
         
+        let darkerThemeColor = appData.appColor.darken(byPercentage: 0.25)
+        view.backgroundColor = darkerThemeColor
+
         if appData.darknessCheck(for: bgColor) {
-            
-            navigationBar?.tintColor = UIColor.white
-            navigationBar?.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white]
+            navigationBar?.tintColor = .white
+            navigationBar?.titleTextAttributes = [NSAttributedStringKey.foregroundColor: UIColor.white]
             setStatusBarStyle(.lightContent)
-            
         } else {
-            
-            navigationBar?.tintColor = UIColor.black
-            navigationBar?.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.black]
+            navigationBar?.tintColor = .black
+            navigationBar?.titleTextAttributes = [NSAttributedStringKey.foregroundColor: UIColor.black]
             setStatusBarStyle(.default)
+        }
+        
+        if appData.darknessCheck(for: darkerThemeColor) {
+            taskTimeLabel.textColor = .white
+            recentProgressLabel.textColor = .white
+        } else {
+            taskTimeLabel.textColor = .black
+            recentProgressLabel.textColor = .black
         }
         
     }
@@ -356,6 +403,9 @@ class TaskDetailViewController: UIViewController {
             taskTimer.run = Timer.scheduledTimer(timeInterval: 1.0, target: self,
                                              selector: #selector(timerRunning), userInfo: nil, repeats: true)
             
+            let (_, remainingTime) = taskTimer.formatTimer(name: task, dataset: taskData)
+            taskTimer.setFinishedNotification(for: task, atTime: remainingTime)
+
         } else {
             
             timerStopped(for: task)
@@ -366,7 +416,7 @@ class TaskDetailViewController: UIViewController {
             //taskStartButton.setImage(#imageLiteral(resourceName: "Play"), for: .normal)
             
             NotificationCenter.default.post(name: Notification.Name("StopTimerNotification"), object: nil)
-            
+            taskTimer.cancelFinishedNotification(for: task)
             
             
 //            if willResetTimer {
@@ -377,21 +427,22 @@ class TaskDetailViewController: UIViewController {
         
     }
     
-    func settingsTapped() {
+    @objc func settingsTapped() {
         
         print("Go to Settings")
-        performSegue(withIdentifier: "taskSettingsSegue", sender: self)
+        //performSegue(withIdentifier: "taskSettingsSegue", sender: self)
+        presentTaskSettingsVC()
         
     }
 
-    func statsTapped() {
+    @objc func statsTapped() {
         
         print("Go to Stats")
         performSegue(withIdentifier: "taskStatsSegue", sender: self)
         
     }
 
-    func trashTapped() {
+    @objc func trashTapped() {
         
         print("Erase Task")
         popAlert()
@@ -490,6 +541,15 @@ class TaskDetailViewController: UIViewController {
         xAxis.drawGridLinesEnabled = false
         xAxis.centerAxisLabelsEnabled = false
         
+        let darkerThemeColor = appData.appColor.darken(byPercentage: 0.25)
+        if appData.darknessCheck(for: darkerThemeColor) {
+            xAxis.labelTextColor = UIColor.white
+            rightAxis.labelTextColor = UIColor.white
+        } else {
+            xAxis.labelTextColor = UIColor.black
+            rightAxis.labelTextColor = UIColor.black
+        }
+
         taskData.setTaskAccess(for: task)
         
         var recentAccess: [Date]?
@@ -610,6 +670,13 @@ class TaskDetailViewController: UIViewController {
             
             bar.colors = ChartColorTemplates.pastel()
             
+            let darkerThemeColor = appData.appColor.darken(byPercentage: 0.25)
+            if appData.darknessCheck(for: darkerThemeColor) {
+                bar.valueColors = [UIColor.white]
+            } else {
+                bar.valueColors = [UIColor.black]
+            }
+
             let data = BarChartData() //This is the object that will be added to the chart
             
             data.addDataSet(bar) //Adds the line to the dataSet
@@ -689,15 +756,55 @@ class TaskDetailViewController: UIViewController {
         taskData.save()
         
     }
-    
-    /*
+
     // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+    func presentTaskSettingsVC() {
+        let taskSettingsViewController = self.storyboard?.instantiateViewController(withIdentifier: "TaskSettingsVC") as! TaskSettingsViewController
+
+        taskSettingsViewController.taskData = taskData
+        taskSettingsViewController.appData = appData
+        
+        var tasks = taskData.taskNameList
+        let taskIndex = tasks.index(of: task)
+        tasks.remove(at: taskIndex!)
+        taskSettingsViewController.tasks = tasks
+
+        taskSettingsViewController.task = task
+        taskSettingsViewController.taskTime = taskTime
+        taskSettingsViewController.taskDays = taskDays
+        taskSettingsViewController.occurranceRate = taskFrequency
+        taskSettingsViewController.rolloverMultiplier = rolloverMultiplier
+        
+        switch appData.deviceType {
+        case .legacy:
+            preparePresenter(ofHeight: 0.9, ofWidth: 0.9)
+        case .normal:
+            preparePresenter(ofHeight: 0.8, ofWidth: 0.8)
+        case .large:
+            preparePresenter(ofHeight: 0.7, ofWidth: 0.8)
+        case .X:
+            preparePresenter(ofHeight: 0.7, ofWidth: 0.8)
+        }
+        
+        customPresentViewController(addPresenter, viewController: taskSettingsViewController, animated: true, completion: nil)
     }
-    */
+    
+    func preparePresenter(ofHeight height: Float, ofWidth width: Float) {
+        let width = ModalSize.fluid(percentage: width)
+        let height = ModalSize.fluid(percentage: height)
+        let center = ModalCenterPosition.center
+        let customType = PresentationType.custom(width: width, height: height, center: center)
+        
+        addPresenter.presentationType = customType
+        
+    }
+    
+    @IBAction func editTaskUnwind(segue: UIStoryboardSegue) {
+        
+        print("Task edited")
+        saveData()
+        
+    }
 
 }

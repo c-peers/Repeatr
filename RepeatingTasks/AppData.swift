@@ -9,6 +9,13 @@
 import Foundation
 import Chameleon
 
+enum DeviceType {
+    case legacy
+    case normal
+    case large
+    case X
+}
+
 class AppData: NSObject, NSCoding {
 
     //MARK: - Properties
@@ -26,6 +33,27 @@ class AppData: NSObject, NSCoding {
     // App settings
     var isNightMode = false
     var usesCircularProgress = false
+    var deviceType: DeviceType = {
+        let screenSize = UIScreen.main.bounds
+        let screenHeight = screenSize.height
+        let type: DeviceType
+        
+        switch screenHeight {
+        case ...600 :
+            type = .legacy
+        case 601...700 :
+            type = .normal
+        case 701...800 :
+            type = .large
+        case 801... :
+            type = .X
+        default:
+            type = .normal
+        }
+        
+        return type
+
+    }()
     
     // Vars that holds all task data
     // Used for saving
@@ -96,7 +124,7 @@ class AppData: NSObject, NSCoding {
         
     }
     
-    func darknessCheck(for color:UIColor? = nil) -> Bool {
+    func darknessCheckOLD(for color:UIColor? = nil) -> Bool {
         
         var r: CGFloat = 0.0, g: CGFloat = 0.0, b: CGFloat = 0.0, a: CGFloat = 0.0
         
@@ -109,6 +137,19 @@ class AppData: NSObject, NSCoding {
         } else {
             return false
         }
+        
+    }
+    
+    func darknessCheck(for color: UIColor?) -> Bool {
+        
+        var r: CGFloat = 0.0, g: CGFloat = 0.0, b: CGFloat = 0.0, a: CGFloat = 0.0
+
+        color?.getRed(&r, green: &g, blue: &b, alpha: &a)
+
+        // Counting the perceptive luminance - human eye favors green color...
+        let darkness = 1 - ( 0.299 * r + 0.587 * g + 0.114 * b)
+        
+        return darkness > 0.5
         
     }
     
@@ -167,7 +208,7 @@ class AppData: NSObject, NSCoding {
         misc["ResetOffset"] = resetOffset
 
     }
-
+    
     //MARK: - NSCoding
     
     func encode(with aCoder: NSCoder) {

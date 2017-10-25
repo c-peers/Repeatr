@@ -8,16 +8,30 @@
 
 import UIKit
 import Chameleon
+import SkyFloatingLabelTextField
+
+enum AlertType {
+    case empty
+    case duplicate
+}
 
 class NewTasksViewController: UIViewController, UIScrollViewDelegate {
 
     //MARK: - Outlets
 
-    @IBOutlet weak var scrollView: UIScrollView!
-    @IBOutlet weak var newTaskView: UIView!
-    @IBOutlet weak var statusBarView: UIView!
+    //@IBOutlet weak var scrollView: UIScrollView!
+    //@IBOutlet weak var newTaskView: UIView!
+    //@IBOutlet weak var statusBarView: UIView!
+    @IBOutlet weak var occurrenceLabel: UILabel!
     
-    @IBOutlet weak var taskNameTextField: UITextField!
+    @IBOutlet weak var taskNameTextField: SkyFloatingLabelTextField!
+    @IBOutlet weak var taskLengthTextField: SkyFloatingLabelTextField!
+    @IBOutlet weak var occurrenceRateTextField: SkyFloatingLabelTextField!
+    
+    //@IBOutlet weak var taskNameTextField: UITextField!
+    //@IBOutlet weak var occurrenceRateTextField: UITextField!
+    //@IBOutlet weak var taskLengthTextField: UITextField!
+    
     @IBOutlet weak var sunday: UIButton!
     @IBOutlet weak var monday: UIButton!
     @IBOutlet weak var tuesday: UIButton!
@@ -25,16 +39,14 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
     @IBOutlet weak var thursday: UIButton!
     @IBOutlet weak var friday: UIButton!
     @IBOutlet weak var saturday: UIButton!
-    @IBOutlet weak var occurrenceRateTextField: UITextField!
     
-    @IBOutlet weak var taskLengthTextField: UITextField!
-    
-    @IBOutlet weak var createTaskButton: UIButton!
+    @IBOutlet weak var createButton: UIButton!
     
     //MARK: - Properties
     
     // Used to corretly show the keyboard and scroll the view into place
-    var activeTextField: UITextField?
+    var activeTextField: SkyFloatingLabelTextField?
+    var textFieldArray = [SkyFloatingLabelTextField]()
     
     // For occurrence
     var taskDays = [String]()
@@ -46,6 +58,9 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
     var selectedMinutes = "0"
     var pickerData: [[String]] = []
     var selectedFromPicker: UILabel!
+    
+    var tasks = [String]()
+    var taskFrequency = 0.0
     
     var timePickerView = UIPickerView()
     let pickerViewDatasource = TaskTimePicker()
@@ -60,13 +75,12 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
         
         super.viewDidLoad()
         
-        scrollView.delegate = self
-        scrollView.contentSize.width = view.bounds.width
+        // Array of textfields for easier setup and color changing
+        textFieldArray = [taskNameTextField, taskLengthTextField, occurrenceRateTextField]
         
-        // Themeing made the buttons blue. This 
-        //self.setThemeUsingPrimaryColor(appData.appColor, withSecondaryColor: UIColor.clear, andContentStyle: .contrast)
-        
-        taskNameTextField.delegate = self
+        for textField in textFieldArray {
+            autoResizePlaceholderText(for: textField)
+        }
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWasShown), name: NSNotification.Name.UIKeyboardDidShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillBeHidden), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
@@ -75,7 +89,8 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
         // Notification Bar
         //******************************
         
-        prepareNavBar()
+        //prepareNavBar()
+        setTheme()
         
         //******************************
         // Occurrence rate start
@@ -87,7 +102,7 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
         let decimalDoneButton = UIBarButtonItem.init(barButtonSystemItem: .done, target: self, action: #selector(doneOccurrence))
         decimalPadToolBar.items = [decimalDoneButton]
         
-        occurrenceRateTextField.keyboardType = .numberPad
+        occurrenceRateTextField.keyboardType = .decimalPad
         occurrenceRateTextField.inputAccessoryView = decimalPadToolBar
         occurrenceRateTextField.delegate = self
         
@@ -131,13 +146,16 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
         taskLengthTextField.inputView = timePickerView
         taskLengthTextField.inputAccessoryView = pickerToolBar
         
+        taskNameTextField.delegate = self
+        //taskNameTextField.keyboardType = .default
+        
         //******************************
         // Pickerview initialization finished
         //******************************
 
-        let bgColor = navigationBar?.barTintColor
+        let themeColor = appData.appColor
         
-        if appData.darknessCheck(for: bgColor) {
+        if appData.darknessCheck(for: themeColor) {
             
             pickerToolBar.tintColor = UIColor.white
             decimalPadToolBar.tintColor = UIColor.white
@@ -153,29 +171,6 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
         // Day selection start
         //******************************
 
-//        sunday.layer.borderWidth = 1
-//        sunday.layer.borderColor = appData.appColor.cgColor
-//        monday.layer.borderWidth = 1
-//        monday.layer.borderColor = appData.appColor.cgColor
-//        tuesday.layer.borderWidth = 1
-//        tuesday.layer.borderColor = appData.appColor.cgColor
-//        wednesday.layer.borderWidth = 1
-//        wednesday.layer.borderColor = appData.appColor.cgColor
-//        thursday.layer.borderWidth = 1
-//        thursday.layer.borderColor = appData.appColor.cgColor
-//        friday.layer.borderWidth = 1
-//        friday.layer.borderColor = appData.appColor.cgColor
-//        saturday.layer.borderWidth = 1
-//        saturday.layer.borderColor = appData.appColor.cgColor
-//
-//        sunday.tag = 0
-//        monday.tag = 0
-//        tuesday.tag = 0
-//        wednesday.tag = 0
-//        thursday.tag = 0
-//        friday.tag = 0
-//        saturday.tag = 0
-        
         prepareDayButtons(for: sunday)
         prepareDayButtons(for: monday)
         prepareDayButtons(for: tuesday)
@@ -184,11 +179,11 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
         prepareDayButtons(for: friday)
         prepareDayButtons(for: saturday)
         
-        createTaskButton.layer.borderColor = appData.appColor.cgColor
-        createTaskButton.layer.borderWidth = 2
-        createTaskButton.layer.cornerRadius = 10.0
+        createButton.layer.borderColor = appData.appColor.cgColor
+        createButton.layer.borderWidth = 2
+        createButton.layer.cornerRadius = 10.0
         
-        createTaskButton.setTitleColor(appData.appColor, for: .normal)
+        createButton.setTitleColor(appData.appColor, for: .normal)
         
     }
     
@@ -200,63 +195,52 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
         
     }
     
-    func prepareNavBar() {
-        
-        navigationBar = UINavigationBar(frame: CGRect(x: 0, y: 20, width: view.frame.width, height: 44))
-        self.view.addSubview(navigationBar!);
-        let navItem = UINavigationItem(title: "Add Task");
-        
-        let cancelBarButton = UIBarButtonItem(title: "Cancel", style: .done, target: self, action: #selector(cancelTask))
-        navItem.leftBarButtonItems = [cancelBarButton]
-        
-        navigationBar?.setItems([navItem], animated: false);
-        
-        setTheme()
-        
-    }
-    
-    func scrollViewDidScroll(scrollView: UIScrollView) {
-        if scrollView.contentOffset.x != 0 {
-            scrollView.contentOffset.x = 0
+    func autoResizePlaceholderText(for textField: SkyFloatingLabelTextField) {
+        for  subView in textField.subviews {
+            if let label = subView as? UILabel {
+                label.minimumScaleFactor = 0.3
+                label.adjustsFontSizeToFitWidth = true
+            }
         }
     }
     
     func setTheme() {
         
-        statusBarView.backgroundColor = appData.appColor
-        statusBarView.alpha = 0.85 // Needed to match translucent navBar
+        let themeColor = appData.appColor
+        let darkerThemeColor = themeColor.darken(byPercentage: 0.25)
         
-        //let statusBarView = UIView(frame: UIApplication.shared.statusBarFrame)
-        //navBar.isTranslucent = false
+        view.backgroundColor = darkerThemeColor
+        
+//        if appData.isNightMode {
+//            //NightNight.theme = .night
+//        } else {
+//            //NightNight.theme = .normal
+//        }
+//
+        if appData.darknessCheck(for: darkerThemeColor) {
 
-        navigationBar?.barTintColor = appData.appColor
-        
-        let toolbar = navigationController?.toolbar
-        toolbar?.barTintColor = appData.appColor
-        
-        if appData.isNightMode {
-            //NightNight.theme = .night
-        } else {
-            //NightNight.theme = .normal
-        }
-        
-        let bgColor = navigationBar?.barTintColor
-        
-        if appData.darknessCheck(for: bgColor) {
-            
-            navigationBar?.tintColor = UIColor.white
-            navigationBar?.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white]
-            toolbar?.tintColor = UIColor.white
-            setStatusBarStyle(.lightContent)
-            
+            for textField in textFieldArray {
+                setTextFieldColor(for: textField, as: .white)
+            }
+            occurrenceLabel.textColor = .white
+            //            setStatusBarStyle(.lightContent)
+
         } else {
             
-            navigationBar?.tintColor = UIColor.black
-            navigationBar?.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.black]
-            toolbar?.tintColor = UIColor.black
-            setStatusBarStyle(.default)
+            for textField in textFieldArray {
+                setTextFieldColor(for: textField, as: .black)
+            }
+            occurrenceLabel.textColor = .black
+//            setStatusBarStyle(.default)
+
         }
-        
+
+    }
+    
+    func setTextFieldColor(for textField: SkyFloatingLabelTextField, as color: UIColor) {
+        textField.textColor = color
+        textField.titleColor = color
+        textField.selectedTitleColor = color
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -268,10 +252,10 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
             let taskName = taskNameTextField.text!
             //let completedTime = 0
             //let taskDaysBinary = TaskData().taskDaysAsBinary(from: taskDays)
-            var taskFrequency = 0.0
-            if let frequencyValue = Double(occurrenceRateTextField.text!) {
-                taskFrequency = frequencyValue
-            }
+            
+            //if let frequencyValue = Double(occurrenceRateTextField.text!) {
+            //    taskFrequency = frequencyValue
+            //}
             
             var taskTime = 0.0
             
@@ -302,15 +286,18 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
     
     func buttonAction(for button: UIButton) {
         
+        let themeColor = appData.appColor
+        let darkerThemeColor = themeColor.darken(byPercentage: 0.25)
+        
         if button.tag == 0 {
             UIView.animate(withDuration: 0.5, animations: { () -> Void in
-                button.layer.backgroundColor = self.appData.appColor.cgColor
+                button.layer.backgroundColor = themeColor.cgColor
                 button.setTitleColor(UIColor.white, for: .normal)
             })
             button.tag = 1
         } else {
             UIView.animate(withDuration: 0.5, animations: { () -> Void in
-                button.layer.backgroundColor = UIColor.white.cgColor
+                button.layer.backgroundColor = darkerThemeColor?.cgColor
                 button.setTitleColor(UIColor.black, for: .normal)
             })
             button.tag = 0
@@ -409,23 +396,47 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
         let taskTimeWasEntered = taskLengthTextField.hasText
         let frequencyWasEntered = occurrenceRateTextField.hasText
         let taskDaysWereEntered = !taskDays.isEmpty
-        
-        if taskNameWasEntered && taskTimeWasEntered && frequencyWasEntered && taskDaysWereEntered {
+
+        if tasks.index(of: taskNameTextField.text!) != nil {
+            
+            taskNameTextField.errorMessage = "This name already exists"
+            popAlert(alertType: .duplicate)
+            
+        } else if taskNameWasEntered && taskTimeWasEntered && frequencyWasEntered && taskDaysWereEntered {
             
             performSegue(withIdentifier: "createdTaskUnwindSegue", sender: self)
-
+            
         } else {
             
-            popAlert()
+            if !taskNameWasEntered {
+                taskNameTextField.errorMessage = "Need a Name"
+            }
+            
+            if !taskTimeWasEntered {
+                taskLengthTextField.errorMessage = "Need a Time"
+            }
+            
+            if !frequencyWasEntered {
+                occurrenceRateTextField.errorMessage = "Need frequency"
+            }
+            
+            popAlert(alertType: .empty)
             
         }
 
     }
     
-    func popAlert() {
+    func popAlert(alertType: AlertType) {
+        
+        let message: String
+        if alertType == .empty {
+            message = "Please fill out all fields before creating task"
+        } else {
+            message = "A task with this name already exists"
+        }
         
         let alertController = UIAlertController(title: "Warning",
-                                                message: "Please fill out all fields to add your task",
+                                                message: message,
                                                 preferredStyle: UIAlertControllerStyle.alert)
         
         let okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.default){ (action: UIAlertAction) in
@@ -452,16 +463,15 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
     }
     
-    func keyboardWasShown(notification: NSNotification){
+    @objc func keyboardWasShown(notification: NSNotification){
         //Need to calculate keyboard exact size due to Apple suggestions
         print("Keyboard was shown")
-        self.scrollView.isScrollEnabled = true
         var info = notification.userInfo!
         let keyboardSize = (info[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue.size
         let contentInsets : UIEdgeInsets = UIEdgeInsetsMake(0.0, 0.0, keyboardSize!.height, 0.0)
         
-        self.scrollView.contentInset = contentInsets
-        self.scrollView.scrollIndicatorInsets = contentInsets
+        //self.scrollView.contentInset = contentInsets
+        //self.scrollView.scrollIndicatorInsets = contentInsets
         
         print(taskLengthTextField.isFirstResponder)
         
@@ -471,22 +481,21 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
             if (!aRect.contains(activeTextField.frame.origin)){
                 print(!aRect.contains(activeTextField.frame.origin))
                     
-                self.scrollView.scrollRectToVisible(activeTextField.frame, animated: true)
+                //self.scrollView.scrollRectToVisible(activeTextField.frame, animated: true)
 
             }
         }
         
     }
     
-    func keyboardWillBeHidden(notification: NSNotification){
+    @objc func keyboardWillBeHidden(notification: NSNotification){
         //Once keyboard disappears, restore original positions
         var info = notification.userInfo!
         let keyboardSize = (info[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue.size
         let contentInsets : UIEdgeInsets = UIEdgeInsetsMake(0.0, 0.0, -keyboardSize!.height, 0.0)
-        self.scrollView.contentInset = contentInsets
-        self.scrollView.scrollIndicatorInsets = contentInsets
+        //self.scrollView.contentInset = contentInsets
+        //self.scrollView.scrollIndicatorInsets = contentInsets
         self.view.endEditing(true)
-        self.scrollView.isScrollEnabled = false
         
     }
     
@@ -557,17 +566,19 @@ extension NewTasksViewController: UIPickerViewDelegate, UIPickerViewDataSource {
                 selectedFromPicker.text = text + " minutes"
             }
             
+            // This textfield is never "edited" so I have to remove the error message here
+            taskLengthTextField.errorMessage = ""
         }
         
         return pickerLabel
         
     }
     
-    func donePicker() {
+    @objc func donePicker() {
         taskLengthTextField.resignFirstResponder()
     }
     
-    func cancelPicker() {
+    @objc func cancelPicker() {
         taskLengthTextField.resignFirstResponder()
         taskLengthTextField.text = ""
     }
@@ -584,21 +595,35 @@ extension NewTasksViewController: UITextFieldDelegate {
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         
-        if textField == occurrenceRateTextField {
+        if let floatingText = textField as? SkyFloatingLabelTextField {
+    
+            if textField.text == "" {
+                floatingText.errorMessage = ""
+            }
             
-            // We only want the last character input to be in this field
-            // current characters will be removed and the last input character will be added
-            
-            if string == "." {
-                return false
-            } else {
-                textField.text = ""
-                print(textField.text!)
+            if floatingText == occurrenceRateTextField {
+                
+                // We only want the last character input to be in this field
+                // current characters will be removed and the last input character will be added
+                
+                if string == "." || string == "0" {
+                    return false
+                } else {
+                    if string == "1" {
+                        textField.text = "Every week"
+                    } else {
+                        textField.text = "Every " + string + " weeks"
+                    }
+                    print(textField.text!)
+                    taskFrequency = Double(string)!
+                    return false
+                }
+                
             }
         }
         
         return true
-        
+            
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -607,18 +632,18 @@ extension NewTasksViewController: UITextFieldDelegate {
     }
     
     func textFieldDidBeginEditing(_ textField: UITextField){
-        activeTextField = textField
+        activeTextField = textField as? SkyFloatingLabelTextField
     }
     
     func textFieldDidEndEditing(_ textField: UITextField){
         activeTextField = nil
     }
     
-    func doneOccurrence() {
+    @objc func doneOccurrence() {
         occurrenceRateTextField.resignFirstResponder()
     }
     
-    func cancelTask() {
+    @objc func cancelTask() {
         //navigationController?.popViewController(animated: true)
         //self.removeFromParentViewController()
         //navigationController?.popToRootViewController(animated: true)

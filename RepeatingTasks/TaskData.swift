@@ -15,7 +15,7 @@ class TaskData: NSObject, NSCoding {
     // Basic task information
     var taskName = String()
     var taskTime = 0.0
-    dynamic var completedTime = 0.0
+    @objc dynamic var completedTime = 0.0
     var taskDays = [String]()
     var taskFrequency = 1.0
     var rolloverMultiplier = 1.0
