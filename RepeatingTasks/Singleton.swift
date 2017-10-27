@@ -25,7 +25,7 @@ class CountdownTimer: NSObject {
     
     @objc dynamic var elapsedTime = 0.0
     
-    var taskData = TaskData()
+    //var taskData = TaskData()
     
     func startTimer(for view: Any?) {
         
@@ -37,78 +37,46 @@ class CountdownTimer: NSObject {
     }
     
     func stopTimer(for view: Any?) {
-        run.invalidate()
-        
-        //Task.instance.data.save()
+        run.invalidate()        
     }
     
     @objc func timerRunning() {
         
-//        //let userData = timer.userInfo as Array
-//        //let cellz = userData[0] as! RepeatingTasksCollectionCell
-//        
-//        let cell = countdownTimer.userInfo as! RepeatingTasksCollectionCell
-//        let taskName = cell.taskNameField.text!
-//        
-//        let (_, timeRemaining) = formatTimer(for: taskName, from: cell, decrement: true)
-//        
-//        print("Time remaining is \(timeRemaining)")
-//        
-//        Task.instance.data.setTask(as: taskName)
-//        
-//        Task.instance.data.taskDictionary[taskName]?["completedTime"]! += 1
-//        
-//        let competedTime = Task.instance.data.taskDictionary[taskName]?["completedTime"]!
-//        let taskTime = Task.instance.data.taskDictionary[taskName]?["taskTime"]!
-//        
-//        if timeRemaining == 0 || (competedTime == taskTime) {
-//            countdownTimer.invalidate()
-//            
-//            //timerEnabled = false
-//            
-//            cell.taskTimeRemaining.text = "Complete"
-//            cell.playStopButton.setTitle("Start", for: .normal)
-//            cell.playStopButton.isEnabled = false
-//            
-//            Task.instance.data.save()
-//            //saveData()
-//            
-//        }
-        
     }
     
-    func formatTimer(name task: String, from cell: TaskCollectionViewCell? = nil, ofType type: CellType? = nil, dataset: TaskData) -> (String, Double) {
+    func formatTimer(for task: Task, from cell: TaskCollectionViewCell? = nil, ofType type: CellType? = nil) -> (String, Double) {
         // Used for initialization and when the task timer is updated
 
-        taskData = dataset
-        
-        taskData.setTask(as: task)
-        
-        let (_, weightedTaskTime) = getWeightedTime(for: task)
+        //taskData = dataset
+        //taskData.setTask(as: task)
+        //let (_, weightedTaskTime) = getWeightedTime(for: task.name)
 
         currentTime = Date().timeIntervalSince1970
-        print(taskData.completedTime)
-        elapsedTime = taskData.completedTime
+        print(task.completed)
+        elapsedTime = task.completed
+        //print(taskData.completedTime)
+        //elapsedTime = taskData.completedTime
 
         if self.isEnabled {
             elapsedTime += (currentTime - startTime)
         }
         
-        let remainingTaskTime = weightedTaskTime - elapsedTime
+        let weightedTime = task.weightedTime
+        let remainingTime = weightedTime - elapsedTime
         
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.hour, .minute, .second]
         formatter.unitsStyle = .positional
         
-        var remainingTimeAsString = formatter.string(from: TimeInterval(remainingTaskTime.rounded()))!
+        var remainingTimeAsString = formatter.string(from: TimeInterval(remainingTime.rounded()))!
         
-        if remainingTaskTime <= 0 {
+        if remainingTime <= 0 {
             remainingTimeAsString = "Complete"
         }
         
         if (cell != nil) {
             
-            let currentProgress = 1 - Float(remainingTaskTime)/Float(weightedTaskTime)
+            let currentProgress = 1 - Float(remainingTime)/Float(weightedTime)
             
             if type == .line {
                 //TaskViewController.calculateProgress()
@@ -124,19 +92,19 @@ class CountdownTimer: NSObject {
             
         }
         
-        return (remainingTimeAsString, remainingTaskTime)
+        return (remainingTimeAsString, remainingTime)
         
     }
 
-    func getWeightedTime(for task: String) -> (Double, Double) {
-        
-        let taskTime = taskData.taskTime
-        let rolloverMultiplier = taskData.rolloverMultiplier
-        let rolloverTime = taskData.rolloverTime
-        
-        return (taskTime, taskTime + (rolloverTime * rolloverMultiplier))
-        
-    }
+//    func getWeightedTime(for task: String) -> (Double, Double) {
+//
+//        let taskTime = taskData.taskTime
+//        let rolloverMultiplier = taskData.rolloverMultiplier
+//        let rolloverTime = taskData.rolloverTime
+//
+//        return (taskTime, taskTime + (rolloverTime * rolloverMultiplier))
+//
+//    }
     
     // MARK: - Notification Functions
     

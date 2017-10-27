@@ -33,10 +33,11 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
 
     var valueLabels = ["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0"]
     
-    var task = ""
+    var task = Task()
+    //var task = ""
     var accessDates = [String]()
     
-    var taskData = TaskData()
+    //var taskData = TaskData()
     var appData = AppData()
 
     var testData = [300, 300, 150, 200, 450, 600, 300, 600, 450, 480]
@@ -70,15 +71,18 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
     
     func getAccessDates() {
 
-        if let taskAccess = taskData.taskAccess {
-            
-            for x in 0..<taskAccess.count {
-                let date = taskAccess[x]
-                let formattedDate = taskData.set(date: date, as: "MM/dd")
-                accessDates.append(formattedDate)
+        //if let taskAccess = taskData.taskAccess {
+        
+        let taskDates = task.previousDates
+        var dates = [String]()
+        
+            for x in 0..<taskDates.count {
+                let date = taskDates[x]
+                let formattedDate = task.set(date: date, as: "MM/dd")
+                dates.append(formattedDate)
             }
             
-        }
+        //}
 
     }
     
@@ -107,47 +111,63 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
     
     func setStatValues() {
         
-        var taskStats = [String: Double]()
-        
-        if let statsCheck = taskData.taskStatsDictionary[task] {
-            taskStats = statsCheck
-        }
-        
-        for label in statsValueLabels {
+        valueLabels[0] = String(task.totalTime) + " Seconds"
+        valueLabels[1] = String(task.completedTime) + " Seconds"
+        valueLabels[2] = String(task.missedTime) + " Seconds"
+        valueLabels[3] = String(task.totalDays) + " Days"
+        valueLabels[4] = String(task.fullDays) + " Days"
+        valueLabels[5] = String(task.partialDays) + " Days"
+        valueLabels[6] = String(task.missedDays) + " Days"
+        valueLabels[7] = String(task.currentStreak) + " Days"
+        valueLabels[8] = String(task.bestStreak) + " Days"
 
+        for label in statsValueLabels {
             setLabelColor(for: label)
-            
-            for (key, value) in taskStats {
-            
-                switch key {
-                case TaskData.totalTaskTimeKey:
-                    valueLabels[0] = String(value) + " Seconds"
-                case TaskData.completedTaskTimeKey:
-                    valueLabels[1] = String(value) + " Seconds"
-                case TaskData.missedTaskTimeKey:
-                    valueLabels[2] = String(value) + " Seconds"
-                case TaskData.totalTaskDaysKey:
-                    valueLabels[3] = String(Int(value)) + " Days"
-                case TaskData.fullTaskDaysKey:
-                    valueLabels[4] = String(Int(value)) + " Days"
-                case TaskData.partialTaskDaysKey:
-                    valueLabels[5] = String(Int(value)) + " Days"
-                case TaskData.missedTaskDaysKey:
-                    valueLabels[6] = String(Int(value)) + " Days"
-                case TaskData.currentStreakKey:
-                    valueLabels[7] = String(Int(value)) + " Days"
-                case TaskData.bestStreakKey:
-                    valueLabels[8] = String(Int(value)) + " Days"
-                default:
-                    print("Error")
-                }
-            
-                let index = statsValueLabels.index(of: label)
-                label.text = String(valueLabels[index!])
-                
-            }
-            
+            let index = statsValueLabels.index(of: label)
+            label.text = String(valueLabels[index!])
         }
+        
+//        var taskStats = [String: Double]()
+//
+//        if let statsCheck = taskData.taskStatsDictionary[task] {
+//            taskStats = statsCheck
+//        }
+//
+//        for label in statsValueLabels {
+//
+//            setLabelColor(for: label)
+//
+//            for (key, value) in taskStats {
+//
+//                switch key {
+//                case TaskData.totalTaskTimeKey:
+//                    valueLabels[0] = String(value) + " Seconds"
+//                case TaskData.completedTaskTimeKey:
+//                    valueLabels[1] = String(value) + " Seconds"
+//                case TaskData.missedTaskTimeKey:
+//                    valueLabels[2] = String(value) + " Seconds"
+//                case TaskData.totalTaskDaysKey:
+//                    valueLabels[3] = String(Int(value)) + " Days"
+//                case TaskData.fullTaskDaysKey:
+//                    valueLabels[4] = String(Int(value)) + " Days"
+//                case TaskData.partialTaskDaysKey:
+//                    valueLabels[5] = String(Int(value)) + " Days"
+//                case TaskData.missedTaskDaysKey:
+//                    valueLabels[6] = String(Int(value)) + " Days"
+//                case TaskData.currentStreakKey:
+//                    valueLabels[7] = String(value) + " Days"
+//                case TaskData.bestStreakKey:
+//                    valueLabels[8] = String(value) + " Days"
+//                default:
+//                    print("Error")
+//                }
+//
+//                let index = statsValueLabels.index(of: label)
+//                label.text = String(valueLabels[index!])
+//
+//            }
+//
+//        }
         
     }
     
@@ -371,23 +391,25 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
     func loadBarChartData(chart: BarChartView, as type: String) {
         
         var barChartEntry  = [BarChartDataEntry]() //this is the Array that will eventually be displayed on the graph.
-                
-        var taskAccess: [Date]?
         
-        if let access = taskData.taskAccess {
-            taskAccess = access
-        }
+        var taskAccess = task.previousDates
+        //var taskAccess: [Date]?
+//        if let access = taskData.taskAccess {
+//            taskAccess = access
+//        }
         
         var dataSet = [Double]()
         
-        for date in taskAccess! {
+        for date in taskAccess {
 
             var entry = 0.0
             
             if type.contains("Missed") {
-                    entry = taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]!
+                entry = task.missedTimeHistory[date]!
+                //entry = taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]!
             } else if type.contains("Complete") {
-                entry = taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]!
+                entry = task.completedTimeHistory[date]!
+                //entry = taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]!
             }
          
             dataSet.append(entry)
@@ -420,7 +442,7 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         
         data.addDataSet(bar) //Adds the line to the dataSet
         
-        if taskAccess?.count == 1 {
+        if taskAccess.count == 1 {
             data.barWidth = 0.4
         }
 

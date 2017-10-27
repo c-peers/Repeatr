@@ -46,6 +46,8 @@
 		C44C220D1F59467200BC9833 /* ProgressViewSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C44C220C1F59467200BC9833 /* ProgressViewSettingsViewController.swift */; };
 		C4540F381F4E704C00B2D1F3 /* TimePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4540F371F4E704C00B2D1F3 /* TimePicker.swift */; };
 		C45664AF1F57F3290040387E /* ResetTimeSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C45664AE1F57F3290040387E /* ResetTimeSettingsViewController.swift */; };
+		C461B8721FA1937F0014B33D /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = C461B8711FA1937F0014B33D /* Task.swift */; };
+		C461B8741FA2C4200014B33D /* DataHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C461B8731FA2C4200014B33D /* DataHandler.swift */; };
 		C46444411F6B8F5600D4EC8E /* GoogleMobileAds.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C464443B1F6B8EB900D4EC8E /* GoogleMobileAds.framework */; };
 		C46DD2101F667AC0005FF68A /* TaskStatsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C46DD20F1F667AC0005FF68A /* TaskStatsViewController.swift */; };
 		C47285701F60C43B00AE7C01 /* StatsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = C472856F1F60C43B00AE7C01 /* StatsView.xib */; };
@@ -289,6 +291,8 @@
 		C4540F371F4E704C00B2D1F3 /* TimePicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimePicker.swift; sourceTree = "<group>"; };
 		C45664AE1F57F3290040387E /* ResetTimeSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResetTimeSettingsViewController.swift; sourceTree = "<group>"; };
 		C461B8531FA06E3D0014B33D /* NotificationCenter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NotificationCenter.framework; path = System/Library/Frameworks/NotificationCenter.framework; sourceTree = SDKROOT; };
+		C461B8711FA1937F0014B33D /* Task.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
+		C461B8731FA2C4200014B33D /* DataHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataHandler.swift; sourceTree = "<group>"; };
 		C464443B1F6B8EB900D4EC8E /* GoogleMobileAds.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = GoogleMobileAds.framework; sourceTree = "<group>"; };
 		C46DD20F1F667AC0005FF68A /* TaskStatsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskStatsViewController.swift; sourceTree = "<group>"; };
 		C472856F1F60C43B00AE7C01 /* StatsView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StatsView.xib; sourceTree = "<group>"; };
@@ -370,7 +374,8 @@
 				C49C8D0D1EF35F91007F1069 /* NewTasksViewController.swift */,
 				C4540F371F4E704C00B2D1F3 /* TimePicker.swift */,
 				C435F8C21F94390E00A46D0D /* Backup and Chaff */,
-				C40AABE11F2B07270061BFE3 /* TaskData.swift */,
+				C461B8711FA1937F0014B33D /* Task.swift */,
+				C461B8731FA2C4200014B33D /* DataHandler.swift */,
 				C4A28F4E1F34583400B9D79A /* AppData.swift */,
 				C403E3181EF034E5001EE78D /* Main.storyboard */,
 				C4100B5A1F9071560067B7A8 /* TaskCollectionViewCell.swift */,
@@ -455,6 +460,7 @@
 		C435F8C21F94390E00A46D0D /* Backup and Chaff */ = {
 			isa = PBXGroup;
 			children = (
+				C40AABE11F2B07270061BFE3 /* TaskData.swift */,
 				C43A50BF1F3E67E700BEAA97 /* Holding FIle.swift */,
 				C472856F1F60C43B00AE7C01 /* StatsView.xib */,
 				C4100B581F906F2D0067B7A8 /* RepeatingTaskCircleProgressCollectionCell.xib */,
@@ -784,6 +790,8 @@
 				C45664AF1F57F3290040387E /* ResetTimeSettingsViewController.swift in Sources */,
 				C46DD2101F667AC0005FF68A /* TaskStatsViewController.swift in Sources */,
 				C4540F381F4E704C00B2D1F3 /* TimePicker.swift in Sources */,
+				C461B8741FA2C4200014B33D /* DataHandler.swift in Sources */,
+				C461B8721FA1937F0014B33D /* Task.swift in Sources */,
 				C44C220D1F59467200BC9833 /* ProgressViewSettingsViewController.swift in Sources */,
 				C403E3171EF034E5001EE78D /* ViewController.swift in Sources */,
 				C43A509D1F3BFB0600BEAA97 /* Singleton.swift in Sources */,

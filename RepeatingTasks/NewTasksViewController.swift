@@ -56,6 +56,9 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
     var minutes: [String] = ["0"]
     var selectedHours = "0"
     var selectedMinutes = "0"
+    
+    var frequency = [1: "week", 2: "other week", 3: "3rd week", 4: "4th week", 5: "5th week", 6: "6th week", 7: "7th week", 8: "8th week"]
+
     var pickerData: [[String]] = []
     var selectedFromPicker: UILabel!
     
@@ -63,6 +66,7 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
     var taskFrequency = 0.0
     
     var timePickerView = UIPickerView()
+    var frequencyPickerView = UIPickerView()
     let pickerViewDatasource = TaskTimePicker()
     
     var appData = AppData()
@@ -91,25 +95,6 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
         
         //prepareNavBar()
         setTheme()
-        
-        //******************************
-        // Occurrence rate start
-        //******************************
-
-        let decimalPadToolBar = UIToolbar.init()
-        decimalPadToolBar.sizeToFit()
-        decimalPadToolBar.barTintColor = appData.appColor
-        let decimalDoneButton = UIBarButtonItem.init(barButtonSystemItem: .done, target: self, action: #selector(doneOccurrence))
-        decimalPadToolBar.items = [decimalDoneButton]
-        
-        occurrenceRateTextField.keyboardType = .decimalPad
-        occurrenceRateTextField.inputAccessoryView = decimalPadToolBar
-        occurrenceRateTextField.delegate = self
-        
-        //******************************
-        // Occurrence rate initialization finished
-        //******************************
-
         
         //******************************
         // Pickerview initialization start
@@ -151,6 +136,28 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
         
         //******************************
         // Pickerview initialization finished
+        //******************************
+
+        //******************************
+        // Occurrence rate start
+        //******************************
+        
+        let decimalPadToolBar = UIToolbar.init()
+        decimalPadToolBar.sizeToFit()
+        let decimalDoneButton = UIBarButtonItem.init(barButtonSystemItem: .done, target: self, action: #selector(doneOccurrence))
+        decimalPadToolBar.items = [decimalDoneButton]
+        
+        //occurrenceRateTextField.keyboardType = .numberPad
+        frequencyPickerView.dataSource = self
+        frequencyPickerView.delegate = self
+        frequencyPickerView.tag = 1
+        occurrenceRateTextField.delegate = self
+        occurrenceRateTextField.inputView = frequencyPickerView
+        occurrenceRateTextField.inputAccessoryView = pickerToolBar
+        //occurrenceRateTextField.inputAccessoryView = decimalPadToolBar
+        
+        //******************************
+        // Occurrence rate initialization finished
         //******************************
 
         let themeColor = appData.appColor
@@ -274,11 +281,14 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
                 taskTime = Double(minutesAsInt! * 60)
             }
             
-            vc.taskData.newTask(name: taskName, time: taskTime, days: taskDays, frequency: taskFrequency)
-            vc.taskData.newStatsDictionaryEntry(name: taskName)
+            let newTask = Task(name: taskName, time: taskTime, days: taskDays, multiplier: 1.0, rollover: 0.0, frequency: taskFrequency, completed: 0.0, currentWeek: 0)
+            vc.tasks.append(newTask)
+            vc.taskNames.append(taskName)
+
+            //vc.taskData.newTask(name: taskName, time: taskTime, days: taskDays, frequency: taskFrequency)
+            //vc.taskData.newStatsDictionaryEntry(name: taskName)
             
-            vc.tasks.append(taskName)
-            vc.taskData.setTask(as: taskName)
+            //vc.taskData.setTask(as: taskName)
         }
     }
     
@@ -511,25 +521,43 @@ extension NewTasksViewController: UIPickerViewDelegate, UIPickerViewDataSource {
 
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         
-        selectedHours = pickerData[0][timePickerView.selectedRow(inComponent: 0)]
-        selectedMinutes = pickerData[1][timePickerView.selectedRow(inComponent: 1)]
-        
-        if selectedHours == "0" && selectedMinutes != "0" {
-            taskLengthTextField.text = selectedMinutes + " minutes"
-        } else if selectedHours != "0" && selectedMinutes  == "0" {
-            taskLengthTextField.text = selectedHours + " hours"
-        } else if selectedHours != "0" && selectedMinutes != "0" {
-            taskLengthTextField.text = selectedHours + " hours " + selectedMinutes + " minutes"
+        if pickerView.tag == 0 {
+            
+            selectedHours = pickerData[0][timePickerView.selectedRow(inComponent: 0)]
+            selectedMinutes = pickerData[1][timePickerView.selectedRow(inComponent: 1)]
+            
+            if selectedHours == "0" && selectedMinutes != "0" {
+                taskLengthTextField.text = selectedMinutes + " minutes"
+            } else if selectedHours != "0" && selectedMinutes  == "0" {
+                taskLengthTextField.text = selectedHours + " hours"
+            } else if selectedHours != "0" && selectedMinutes != "0" {
+                taskLengthTextField.text = selectedHours + " hours " + selectedMinutes + " minutes"
+            }
+            
+            selectedFromPicker = pickerView.view(forRow: row, forComponent: component) as! UILabel
+            
+            pickerView.reloadAllComponents()
+            
+        } else {
+            
+            taskFrequency = Double(row + 1)
+            occurrenceRateTextField.text = "Every " + frequency[row + 1]!
+            selectedFromPicker = pickerView.view(forRow: row, forComponent: component) as! UILabel
+            
         }
         
-        selectedFromPicker = pickerView.view(forRow: row, forComponent: component) as! UILabel
-        
-        pickerView.reloadAllComponents()
-
     }
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return pickerData[component].count
+        if pickerView.tag == 0 {
+            return pickerData[component].count
+        } else {
+            if component == 0 {
+                return 1
+            } else {
+                return frequency.count
+            }
+        }
     }
     
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
@@ -537,7 +565,15 @@ extension NewTasksViewController: UIPickerViewDelegate, UIPickerViewDataSource {
     }
     
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return pickerData[component][row]
+        if pickerView.tag == 0 {
+            return pickerData[component][row]
+        } else {
+            if component == 0 {
+                return "Every"
+            } else {
+                return frequency[row + 1]
+            }
+        }
     }
     
     func pickerView(_ pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
@@ -546,28 +582,52 @@ extension NewTasksViewController: UIPickerViewDelegate, UIPickerViewDataSource {
     
     func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
         
+        
         let pickerLabel = UILabel()
-        let text = pickerData[component][row]
         
-        pickerLabel.text = text
-        //pickerLabel.textAlignment = NSTextAlignment.center
-        pickerLabel.frame = CGRect(x: 0, y: 0, width: 100, height: 40)
-        pickerLabel.layer.masksToBounds = true
-        pickerLabel.layer.cornerRadius = 5.0
-        
-        if let lb = pickerView.view(forRow: row, forComponent: component) as? UILabel {
+        if pickerView.tag == 0 {
             
-            selectedFromPicker = lb
-            //selectedFromPicker.backgroundColor = UIColor.orange
-            //selectedFromPicker.textColor = UIColor.white
-            if component == 0 {
-                selectedFromPicker.text = text + " hours"
-            } else if component == 1 {
-                selectedFromPicker.text = text + " minutes"
+            let text = pickerData[component][row]
+            
+            pickerLabel.text = text
+            //pickerLabel.textAlignment = NSTextAlignment.center
+            pickerLabel.frame = CGRect(x: 0, y: 0, width: 100, height: 40)
+            pickerLabel.layer.masksToBounds = true
+            pickerLabel.layer.cornerRadius = 5.0
+            
+            if let lb = pickerView.view(forRow: row, forComponent: component) as? UILabel {
+                
+                selectedFromPicker = lb
+                //selectedFromPicker.backgroundColor = UIColor.orange
+                //selectedFromPicker.textColor = UIColor.white
+                if component == 0 {
+                    selectedFromPicker.text = text + " hours"
+                } else if component == 1 {
+                    selectedFromPicker.text = text + " minutes"
+                }
+                
             }
             
-            // This textfield is never "edited" so I have to remove the error message here
-            taskLengthTextField.errorMessage = ""
+        } else {
+            
+            if component == 0 {
+                pickerLabel.text = "Every"
+            } else {
+                let text = frequency[row + 1]!
+                pickerLabel.text = text
+            }
+            
+            //            if let lb = pickerView.view(forRow: row, forComponent: component) as? UILabel {
+            //
+            //                let text = frequency[row + 1]!
+            //                selectedFromPicker = lb
+            //                if component == 0 {
+            //                    selectedFromPicker.text = "Every"
+            //                } else if component == 1 {
+            //                    selectedFromPicker.text = text
+            //                }
+            //
+            //            }
         }
         
         return pickerLabel
@@ -575,14 +635,48 @@ extension NewTasksViewController: UIPickerViewDelegate, UIPickerViewDataSource {
     }
     
     @objc func donePicker() {
-        taskLengthTextField.resignFirstResponder()
+        if activeTextField == occurrenceRateTextField && occurrenceRateTextField.text == "" {
+            taskFrequency = 1
+            occurrenceRateTextField.text = "Every week"
+        }
+        resignResponder()
     }
     
     @objc func cancelPicker() {
-        taskLengthTextField.resignFirstResponder()
-        taskLengthTextField.text = ""
+        resignResponder()
+        cancelTextField()
     }
     
+    func resignResponder() {
+        
+        if let currentTextField = activeTextField {
+            switch currentTextField {
+            case taskLengthTextField:
+                taskLengthTextField.resignFirstResponder()
+            case occurrenceRateTextField:
+                occurrenceRateTextField.resignFirstResponder()
+            default:
+                break
+            }
+        }
+        
+    }
+    
+    func cancelTextField() {
+        
+        if let currentTextField = activeTextField {
+            switch currentTextField {
+            case taskLengthTextField:
+                taskLengthTextField.text = ""
+            case occurrenceRateTextField:
+                occurrenceRateTextField.text = ""
+            default:
+                break
+            }
+        }
+        
+    }
+
 }
 
 //******************************

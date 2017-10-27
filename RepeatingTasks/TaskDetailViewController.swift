@@ -27,14 +27,17 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
     var timer = Timer()
     var timerEnabled = false
     
-    var task = "*"
-    var taskTime = 0.0
-    var completedTime = 0.0
-    var taskDays = [String]()
-    var taskFrequency = 1.0
-    var rolloverMultiplier = 1.0
-    var rolloverTime = 0.0
-    var weightedTime = 0.0
+    var taskNames = [String]()
+    var tasks = [Task]()
+    var task = Task()
+//    var task = "*"
+//    var taskTime = 0.0
+//    var completedTime = 0.0
+//    var taskDays = [String]()
+//    var taskFrequency = 1.0
+//    var rolloverMultiplier = 1.0
+//    var rolloverTime = 0.0
+//    var weightedTime = 0.0
     
     var elapsedTime = 0.0
     
@@ -86,7 +89,7 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
  
-        self.title = task
+        self.title = task.name
         navigationController?.toolbar.isHidden = false
         prepareNavBar()
         
@@ -103,7 +106,7 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
         request.testDevices = [kGADSimulatorID]
         bannerView.load(request)
         
-        elapsedTime = completedTime
+        elapsedTime = task.completed
         
         taskChartSetup()
         
@@ -116,11 +119,6 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
         }
         
         self.addObserver(self, forKeyPath: #keyPath(taskTimer.elapsedTime), options: .new, context: nil)
-        
-
-        //(_, _) = countdownTimer.formatTimer(for: task, decrement: false)
-        
-        //let x = countdownTimer.remainingTime
         
         //taskTimeLabel.text = formatter.string(from: TimeInterval(countdownTimer.remainingTime))!
 
@@ -136,6 +134,10 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             //                                 repeats: true)
             
         }
+        
+        //var tasks = taskData.taskNameList
+        let taskIndex = taskNames.index(of: task.name)
+        taskNames.remove(at: taskIndex!)
 
     }
     
@@ -148,7 +150,7 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
         if taskTimer.isEnabled {
             
             //vc.taskData.taskDictionary[task]?["completedTime"] = completedTime
-            vc.runningCompletionTime = taskData.completedTime
+            vc.runningCompletionTime = task.completed
             
         }
         
@@ -180,9 +182,9 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
     
     //MARK: - Timer Related Functions
     
-    func taskDayCheck(for task: String) -> Bool {
+    func taskDayCheck(for task: Task) -> Bool {
         
-        taskData.setTask(as: task)
+        //taskData.setTask(as: task)
         
         let now = Date()
         
@@ -192,7 +194,7 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
         dayOfWeekString = dateFormatter.string(from: now)
         print("Today is \(dayOfWeekString)")
         
-        return taskData.taskDays.contains(dayOfWeekString)
+        return task.days.contains(dayOfWeekString) //taskData.taskDays.contains(dayOfWeekString)
         
     }
     
@@ -208,15 +210,15 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
     
     func synchedTimer(for completedTime: Double) -> String {
         
-        let remainingTaskTime = weightedTime - completedTime
+        let remainingTime = task.weightedTime - task.completed
         
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.hour, .minute, .second]
         formatter.unitsStyle = .positional
         
-        let remainingTimeAsString = formatter.string(from: TimeInterval(remainingTaskTime))!
+        let remainingTimeAsString = formatter.string(from: TimeInterval(remainingTime))!
         
-        if remainingTaskTime != 0 {
+        if remainingTime != 0 {
             taskTimeLabel.text = remainingTimeAsString
             taskStartButton.isEnabled = true
         } else {
@@ -233,17 +235,17 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
         
         //let (remainingTimeAsString, remainingTaskTime) = taskTimer.formatTimer(name: task, dataset: taskData)
         
-        taskData.setTask(as: task)
+        //taskData.setTask(as: task)
         
         let currentTime = Date().timeIntervalSince1970
 
-        elapsedTime = completedTime
+        elapsedTime = task.completed
         
         if taskTimer.isEnabled {
             elapsedTime += (currentTime - taskTimer.startTime)
         }
         
-        let remainingTaskTime = weightedTime - elapsedTime
+        let remainingTaskTime = task.weightedTime - elapsedTime
         
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.hour, .minute, .second]
@@ -282,9 +284,9 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
         
         print("Time remaining is \(timeRemaining)")
         
-        if timeRemaining <= 0 || (completedTime == weightedTime) {
+        if timeRemaining <= 0 || (task.completed == task.weightedTime) {
             
-            timerStopped(for: task)
+            timerStopped() //(for: task.name)
             
             let stencil = #imageLiteral(resourceName: "Play").withRenderingMode(.alwaysTemplate)
             taskStartButton.setImage(stencil, for: .normal)
@@ -295,31 +297,35 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
         }
     }
     
-    func timerStopped(for task: String) {
+    func timerStopped() { //for taskName: String) {
         
         taskTimer.run.invalidate()
         
-        taskData.setTask(as: task)
+        //taskData.setTask(as: task)
         
         taskTimer.endTime = Date().timeIntervalSince1970
         
         var elapsedTime = taskTimer.endTime - taskTimer.startTime
         
-        if elapsedTime > taskData.weightedTime {
-            elapsedTime = taskData.weightedTime
+        if elapsedTime > task.weightedTime {
+            elapsedTime = task.weightedTime
         }
         
-        taskData.taskDictionary[task]![TaskData.completedTimeKey]! += elapsedTime
+        task.completed += elapsedTime
+        //taskData.taskDictionary[task]![TaskData.completedTimeKey]! += elapsedTime
         
-        if let date = taskData.getAccessDate(for: task, lengthFromEnd: 0) {
-            taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]! += elapsedTime
+        if let date = task.getAccessDate(lengthFromEnd: 0) {
+            task.completedTimeHistory[date]! += elapsedTime
+            //taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]! += elapsedTime
             
-            let unfinishedTime = taskData.taskTime - elapsedTime
+            let unfinishedTime = task.time - elapsedTime
             
             if unfinishedTime >= 0 {
-                taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]! = unfinishedTime
+                task.missedTimeHistory[date] = unfinishedTime
+                //taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]! = unfinishedTime
             } else {
-                taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]! = 0.0
+                task.missedTimeHistory[date] = 0
+                //taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]! = 0.0
             }
             //setMissedTime(for: task, at: date)
             
@@ -403,12 +409,13 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             taskTimer.run = Timer.scheduledTimer(timeInterval: 1.0, target: self,
                                              selector: #selector(timerRunning), userInfo: nil, repeats: true)
             
-            let (_, remainingTime) = taskTimer.formatTimer(name: task, dataset: taskData)
-            taskTimer.setFinishedNotification(for: task, atTime: remainingTime)
+            //let (_, remainingTime) = taskTimer.formatTimer(for: task.name, from: taskData)
+            let (_, remainingTime) = taskTimer.formatTimer(for: task)
+            taskTimer.setFinishedNotification(for: task.name, atTime: remainingTime)
 
         } else {
             
-            timerStopped(for: task)
+            timerStopped() //(for: task.name)
             
             let stencil = #imageLiteral(resourceName: "Play").withRenderingMode(.alwaysTemplate)
             taskStartButton.setImage(stencil, for: .normal)
@@ -416,7 +423,7 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             //taskStartButton.setImage(#imageLiteral(resourceName: "Play"), for: .normal)
             
             NotificationCenter.default.post(name: Notification.Name("StopTimerNotification"), object: nil)
-            taskTimer.cancelFinishedNotification(for: task)
+            taskTimer.cancelFinishedNotification(for: task.name)
             
             
 //            if willResetTimer {
@@ -522,8 +529,6 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
         recentTaskHistory.leftAxis.enabled = false
         recentTaskHistory.drawGridBackgroundEnabled = false
         
-        
-        
         let leftAxis = recentTaskHistory.getAxis(.left)
         let rightAxis = recentTaskHistory.getAxis(.right)
         let xAxis = recentTaskHistory.xAxis
@@ -550,16 +555,16 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             rightAxis.labelTextColor = UIColor.black
         }
 
-        taskData.setTaskAccess(for: task)
+        //taskData.setTaskAccess(for: task)
         
         var recentAccess: [Date]?
         
-        if let taskAccess = taskData.taskAccess {
+        //if let taskAccess = taskData.taskAccess {
             
-            if taskAccess.count > 3 {
-                recentAccess = Array(taskAccess.suffix(3))
+            if task.previousDates.count > 3 {
+                recentAccess = Array( task.previousDates.suffix(3))
             } else {
-                recentAccess = taskAccess
+                recentAccess =  task.previousDates
             }
 
             var recentAccessStringArray: [String] = []
@@ -567,14 +572,14 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             for x in 0..<recentAccess!.count {
                 
                 let date = recentAccess![x]
-                let formattedDate = taskData.set(date: date, as: "yyyy-MM-dd")
+                let formattedDate = task.set(date: date, as: "yyyy-MM-dd")
                 recentAccessStringArray.append(formattedDate)
                 
             }
 
             xAxis.valueFormatter = IndexAxisValueFormatter(values: recentAccessStringArray)
             
-        }
+        //}
         
         //xAxis.valueFormatter = IndexAxisValueFormatter(values: ["Monday", "Wednesday", "Friday"])
 
@@ -582,7 +587,8 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
         
         for date in recentAccess! {
             
-            let nextValue = taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]
+            let nextValue = task.completedTimeHistory[date]
+            //let nextValue = taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]
             
             if nextValue! > axisMaximum {
                 axisMaximum = nextValue!
@@ -638,7 +644,12 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
         
         var taskAccess: [Date]?
         
-        if let access = taskData.taskAccess {
+        let dates = task.previousDates
+
+        //if let access = taskData.taskAccess {
+        if dates.count >= 1 {
+        
+            let access = task.previousDates
             
             if access.count > 3 {
                 taskAccess = Array(access.suffix(3))
@@ -650,7 +661,8 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             
             for date in taskAccess! {
                 
-                let completedTime = taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]
+                let completedTime = task.completedTimeHistory[date]
+                //let completedTime = taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]
                 taskTimeHistory.append(completedTime!)
                 
             }
@@ -712,22 +724,24 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
         if segue.identifier == "taskDeletedUnwindSegue" {
             
             let vc = segue.destination as! TaskViewController
-            vc.tasks = vc.tasks.filter { $0 != task }
+            vc.taskNames = vc.taskNames.filter { $0 != task.name }
             print(" Deleting \(vc.tasks)")
             
-            vc.taskData.removeTask(name: task)
+            let index = vc.tasks.index(of: task)
+            vc.tasks.remove(at: index!)
+            //vc.taskData.removeTask(name: task)
             
         } else if segue.identifier == "taskSettingsSegue" {
             
             let vc = segue.destination as! TaskSettingsViewController
             
             vc.task = task
-            vc.taskTime = taskTime
-            vc.taskDays = taskDays
-            vc.occurranceRate = taskFrequency
-            vc.rolloverMultiplier = rolloverMultiplier
+//            vc.taskTime = taskTime
+//            vc.taskDays = taskDays
+//            vc.occurranceRate = taskFrequency
+//            vc.rolloverMultiplier = rolloverMultiplier
             
-            vc.taskData = taskData
+            //vc.taskData = taskData
             vc.appData = appData
             
         } else if segue.identifier == "taskStatsSegue" {
@@ -736,45 +750,42 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             
             vc.task = task
             
-            vc.taskData = taskData
+            //vc.taskData = taskData
             vc.appData = appData
             
         }
         
     }
     
-    func loadData() {
-        
-        appData.load()
-        taskData.load()
-        
-    }
-    
     func saveData() {
         
         appData.save()
-        taskData.save()
+        //taskData.save()
+        
+        let index = tasks.index(of: task)
+        tasks[index!] = task
+        
+        let data = DataHandler()
+        data.save(tasks)
         
     }
 
     // MARK: - Navigation
 
     func presentTaskSettingsVC() {
-        let taskSettingsViewController = self.storyboard?.instantiateViewController(withIdentifier: "TaskSettingsVC") as! TaskSettingsViewController
+        let taskSettingsVC = self.storyboard?.instantiateViewController(withIdentifier: "TaskSettingsVC") as! TaskSettingsViewController
 
-        taskSettingsViewController.taskData = taskData
-        taskSettingsViewController.appData = appData
+        taskSettingsVC.task = task
+        //taskSettingsVC.taskData = taskData
+        taskSettingsVC.appData = appData
         
-        var tasks = taskData.taskNameList
-        let taskIndex = tasks.index(of: task)
-        tasks.remove(at: taskIndex!)
-        taskSettingsViewController.tasks = tasks
+        taskSettingsVC.taskNames = taskNames
 
-        taskSettingsViewController.task = task
-        taskSettingsViewController.taskTime = taskTime
-        taskSettingsViewController.taskDays = taskDays
-        taskSettingsViewController.occurranceRate = taskFrequency
-        taskSettingsViewController.rolloverMultiplier = rolloverMultiplier
+//        taskSettingsViewController.task = task
+//        taskSettingsViewController.taskTime = taskTime
+//        taskSettingsViewController.taskDays = taskDays
+//        taskSettingsViewController.occurranceRate = taskFrequency
+//        taskSettingsViewController.rolloverMultiplier = rolloverMultiplier
         
         switch appData.deviceType {
         case .legacy:
@@ -787,7 +798,7 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             preparePresenter(ofHeight: 0.7, ofWidth: 0.8)
         }
         
-        customPresentViewController(addPresenter, viewController: taskSettingsViewController, animated: true, completion: nil)
+        customPresentViewController(addPresenter, viewController: taskSettingsVC, animated: true, completion: nil)
     }
     
     func preparePresenter(ofHeight height: Float, ofWidth width: Float) {
