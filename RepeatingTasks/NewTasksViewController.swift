@@ -28,10 +28,6 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
     @IBOutlet weak var taskLengthTextField: SkyFloatingLabelTextField!
     @IBOutlet weak var occurrenceRateTextField: SkyFloatingLabelTextField!
     
-    //@IBOutlet weak var taskNameTextField: UITextField!
-    //@IBOutlet weak var occurrenceRateTextField: UITextField!
-    //@IBOutlet weak var taskLengthTextField: UITextField!
-    
     @IBOutlet weak var sunday: UIButton!
     @IBOutlet weak var monday: UIButton!
     @IBOutlet weak var tuesday: UIButton!
@@ -90,10 +86,9 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillBeHidden), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
 
         //******************************
-        // Notification Bar
+        // Theme
         //******************************
         
-        //prepareNavBar()
         setTheme()
         
         //******************************
@@ -132,11 +127,6 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
         taskLengthTextField.inputAccessoryView = pickerToolBar
         
         taskNameTextField.delegate = self
-        //taskNameTextField.keyboardType = .default
-        
-        //******************************
-        // Pickerview initialization finished
-        //******************************
 
         //******************************
         // Occurrence rate start
@@ -257,12 +247,6 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
             let vc = segue.destination as! TaskViewController
             
             let taskName = taskNameTextField.text!
-            //let completedTime = 0
-            //let taskDaysBinary = TaskData().taskDaysAsBinary(from: taskDays)
-            
-            //if let frequencyValue = Double(occurrenceRateTextField.text!) {
-            //    taskFrequency = frequencyValue
-            //}
             
             var taskTime = 0.0
             
@@ -276,6 +260,7 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
                 } else {
                     taskTime = Double(hoursAsInt! * 3600)
                 }
+                
             } else if selectedMinutes != "0" {
                 let minutesAsInt = Int(selectedMinutes)
                 taskTime = Double(minutesAsInt! * 60)
@@ -285,10 +270,6 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
             vc.tasks.append(newTask)
             vc.taskNames.append(taskName)
 
-            //vc.taskData.newTask(name: taskName, time: taskTime, days: taskDays, frequency: taskFrequency)
-            //vc.taskData.newStatsDictionaryEntry(name: taskName)
-            
-            //vc.taskData.setTask(as: taskName)
         }
     }
     
@@ -735,13 +716,6 @@ extension NewTasksViewController: UITextFieldDelegate {
     
     @objc func doneOccurrence() {
         occurrenceRateTextField.resignFirstResponder()
-    }
-    
-    @objc func cancelTask() {
-        //navigationController?.popViewController(animated: true)
-        //self.removeFromParentViewController()
-        //navigationController?.popToRootViewController(animated: true)
-        dismiss(animated: true, completion: nil)
     }
     
 }

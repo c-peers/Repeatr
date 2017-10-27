@@ -135,7 +135,6 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             
         }
         
-        //var tasks = taskData.taskNameList
         let taskIndex = taskNames.index(of: task.name)
         taskNames.remove(at: taskIndex!)
 
@@ -184,8 +183,6 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
     
     func taskDayCheck(for task: Task) -> Bool {
         
-        //taskData.setTask(as: task)
-        
         let now = Date()
         
         let dateFormatter = DateFormatter()
@@ -232,10 +229,6 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
     
     func formatTimer() -> (String, Double) {
         // Used for initialization and when the task timer is updated
-        
-        //let (remainingTimeAsString, remainingTaskTime) = taskTimer.formatTimer(name: task, dataset: taskData)
-        
-        //taskData.setTask(as: task)
         
         let currentTime = Date().timeIntervalSince1970
 
@@ -300,8 +293,6 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
     func timerStopped() { //for taskName: String) {
         
         taskTimer.run.invalidate()
-        
-        //taskData.setTask(as: task)
         
         taskTimer.endTime = Date().timeIntervalSince1970
         
@@ -409,7 +400,6 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             taskTimer.run = Timer.scheduledTimer(timeInterval: 1.0, target: self,
                                              selector: #selector(timerRunning), userInfo: nil, repeats: true)
             
-            //let (_, remainingTime) = taskTimer.formatTimer(for: task.name, from: taskData)
             let (_, remainingTime) = taskTimer.formatTimer(for: task)
             taskTimer.setFinishedNotification(for: task.name, atTime: remainingTime)
 
@@ -437,7 +427,6 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
     @objc func settingsTapped() {
         
         print("Go to Settings")
-        //performSegue(withIdentifier: "taskSettingsSegue", sender: self)
         presentTaskSettingsVC()
         
     }
@@ -539,9 +528,6 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
         leftAxis.axisMinimum = 0.0
         rightAxis.axisMinimum = 0.0
         
-        //rightAxis.axisMaximum = taskData.taskTime
-        //leftAxis.axisMaximum = taskData.taskTime
-        
         xAxis.granularity = 1.0
         xAxis.drawGridLinesEnabled = false
         xAxis.centerAxisLabelsEnabled = false
@@ -555,34 +541,24 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             rightAxis.labelTextColor = UIColor.black
         }
 
-        //taskData.setTaskAccess(for: task)
-        
         var recentAccess: [Date]?
         
-        //if let taskAccess = taskData.taskAccess {
-            
-            if task.previousDates.count > 3 {
-                recentAccess = Array( task.previousDates.suffix(3))
-            } else {
-                recentAccess =  task.previousDates
-            }
-
-            var recentAccessStringArray: [String] = []
-            
-            for x in 0..<recentAccess!.count {
-                
-                let date = recentAccess![x]
-                let formattedDate = task.set(date: date, as: "yyyy-MM-dd")
-                recentAccessStringArray.append(formattedDate)
-                
-            }
-
-            xAxis.valueFormatter = IndexAxisValueFormatter(values: recentAccessStringArray)
-            
-        //}
+        if task.previousDates.count > 3 {
+            recentAccess = Array( task.previousDates.suffix(3))
+        } else {
+            recentAccess =  task.previousDates
+        }
         
-        //xAxis.valueFormatter = IndexAxisValueFormatter(values: ["Monday", "Wednesday", "Friday"])
-
+        var recentAccessStringArray: [String] = []
+        
+        for x in 0..<recentAccess!.count {
+            let date = recentAccess![x]
+            let formattedDate = task.set(date: date, as: "yyyy-MM-dd")
+            recentAccessStringArray.append(formattedDate)
+        }
+        
+        xAxis.valueFormatter = IndexAxisValueFormatter(values: recentAccessStringArray)
+        
         axisMaximum = 0.0
         
         for date in recentAccess! {
@@ -638,15 +614,10 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
         
         var barChartEntry  = [BarChartDataEntry]() //this is the Array that will eventually be displayed on the graph.
         
-        //let chartDataSet = BarChartDataSet(yVals: dataEntries, label: "Units Sold")
-        //let chartData = BarChartData(xVals: months, dataSet: chartDataSet)
-        //barChartView.data = chartData
-        
         var taskAccess: [Date]?
         
         let dates = task.previousDates
 
-        //if let access = taskData.taskAccess {
         if dates.count >= 1 {
         
             let access = task.previousDates
@@ -729,19 +700,12 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             
             let index = vc.tasks.index(of: task)
             vc.tasks.remove(at: index!)
-            //vc.taskData.removeTask(name: task)
             
         } else if segue.identifier == "taskSettingsSegue" {
             
             let vc = segue.destination as! TaskSettingsViewController
             
             vc.task = task
-//            vc.taskTime = taskTime
-//            vc.taskDays = taskDays
-//            vc.occurranceRate = taskFrequency
-//            vc.rolloverMultiplier = rolloverMultiplier
-            
-            //vc.taskData = taskData
             vc.appData = appData
             
         } else if segue.identifier == "taskStatsSegue" {
@@ -749,8 +713,6 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             let vc = segue.destination as! TaskStatsViewController
             
             vc.task = task
-            
-            //vc.taskData = taskData
             vc.appData = appData
             
         }
@@ -760,8 +722,7 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
     func saveData() {
         
         appData.save()
-        //taskData.save()
-        
+
         let index = tasks.index(of: task)
         tasks[index!] = task
         
@@ -776,17 +737,10 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
         let taskSettingsVC = self.storyboard?.instantiateViewController(withIdentifier: "TaskSettingsVC") as! TaskSettingsViewController
 
         taskSettingsVC.task = task
-        //taskSettingsVC.taskData = taskData
         taskSettingsVC.appData = appData
         
         taskSettingsVC.taskNames = taskNames
 
-//        taskSettingsViewController.task = task
-//        taskSettingsViewController.taskTime = taskTime
-//        taskSettingsViewController.taskDays = taskDays
-//        taskSettingsViewController.occurranceRate = taskFrequency
-//        taskSettingsViewController.rolloverMultiplier = rolloverMultiplier
-        
         switch appData.deviceType {
         case .legacy:
             preparePresenter(ofHeight: 0.9, ofWidth: 0.9)
@@ -812,10 +766,8 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
     }
     
     @IBAction func editTaskUnwind(segue: UIStoryboardSegue) {
-        
         print("Task edited")
         saveData()
-        
     }
 
 }

@@ -17,10 +17,6 @@ class TaskSettingsViewController: UIViewController {
     //@IBOutlet weak var scrollView: UIScrollView!
     //@IBOutlet weak var bgView: UIView!
     
-    //@IBOutlet weak var nameTextField: UITextField!
-    //@IBOutlet weak var timeTextField: UITextField!
-    //@IBOutlet weak var occurranceTextField: UITextField!
-    
     @IBOutlet weak var taskNameTextField: SkyFloatingLabelTextField!
     @IBOutlet weak var taskLengthTextField: SkyFloatingLabelTextField!
     @IBOutlet weak var occurrenceRateTextField: SkyFloatingLabelTextField!
@@ -59,7 +55,7 @@ class TaskSettingsViewController: UIViewController {
     var valuesChanged = false
     
     var appData = AppData()
-    //var taskData = TaskData()
+
     let timer = CountdownTimer()
     
     // Used to corretly show the keyboard and scroll the view into place
@@ -93,8 +89,6 @@ class TaskSettingsViewController: UIViewController {
         
         setTheme()
 
-        //taskData.setTask(as: task)
-        
         taskNameTextField.delegate = self
         taskLengthTextField.delegate = self
         occurrenceRateTextField.delegate = self
@@ -155,10 +149,6 @@ class TaskSettingsViewController: UIViewController {
         
         //timePickerView.selectRow(0, inComponent: 0, animated: true)
         //timePickerView.selectRow(0, inComponent: 1, animated: true)
-        
-        //******************************
-        // Pickerview initialization finished
-        //******************************
         
         //******************************
         // Occurrence rate start
@@ -261,13 +251,7 @@ class TaskSettingsViewController: UIViewController {
         if let newTaskName = taskNameTextField.text {
             
             if newTaskName != task.name {
-
                 task.name = newTaskName
-                //taskData.changeTaskName(from: task, to: newTaskName)
-                
-                //taskData.taskName = newTaskName
-                task.name = newTaskName
-                
             }
         }
         
@@ -275,20 +259,11 @@ class TaskSettingsViewController: UIViewController {
         task.multiplier = Double(rolloverSlider.value)
         task.days = taskDays
         task.frequency = frequency
-        //taskData.taskTime = taskTime
-        //taskData.rolloverMultiplier = Double(rolloverSlider.value)
-        //taskData.taskDays = taskDays
-        //taskData.taskFrequency = occurranceRate
         
 //        if let frequency = occurrenceRateTextField.text {
 //            taskData.taskFrequency = Double(frequency)!
 //            occurranceRate = Double(frequency)!
 //        }
-        
-        task.save()
-        
-        //taskData.saveTask(task)
-        //taskData.save()
         
         // Some fuckery to get the parent VC
         let nav = self.presentingViewController as? UINavigationController
@@ -297,9 +272,6 @@ class TaskSettingsViewController: UIViewController {
 
         vc.title = task.name
         vc.task = task
-//        vc.taskDays = taskDays
-//        vc.rolloverMultiplier = rolloverMultiplier
-//        vc.taskFrequency = occurranceRate
 
     }
     
@@ -453,7 +425,6 @@ class TaskSettingsViewController: UIViewController {
             saveTaskData()
         }
     }
-    
 
     func setButtonOn(for button: UIButton) {
         button.layer.backgroundColor = self.appData.appColor.cgColor
@@ -582,7 +553,6 @@ class TaskSettingsViewController: UIViewController {
         } else if taskNameWasEntered && taskTimeWasEntered && frequencyWasEntered && taskDaysWereEntered {
             
             dismiss(animated: true, completion: nil)
-            //performSegue(withIdentifier: "createdTaskUnwindSegue", sender: self)
             
         } else {
             
@@ -678,18 +648,6 @@ class TaskSettingsViewController: UIViewController {
         //self.scrollView.isScrollEnabled = false
         
     }
-
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }
 

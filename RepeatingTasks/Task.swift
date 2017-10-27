@@ -44,7 +44,6 @@ class Task: NSObject, NSCoding {
     var completedTimeHistory = [Date: Double]()
     
     // List of dates the task was/should've run
-    //var previousDates: [Date]//?
     var previousDates: [Date] {
             let dates = Array(taskTimeHistory.keys)
             let sortedArray = dates.sorted(by: {$0.timeIntervalSince1970 < $1.timeIntervalSince1970})
@@ -52,218 +51,40 @@ class Task: NSObject, NSCoding {
     }
     
     //MARK: - Keys
-    static let nameKey = "nameKey"
-    static let timeKey = "timeKey"
-    static let daysKey = "daysKey"
-    static let multiplierKey = "multiplierKey"
-    static let rolloverKey = "rolloverKey"
-    static let frequencyKey = "frequencyKey"
-    static let completedKey = "completedKey"
-    static let currentWeekKey = "currentWeekKey"
-    
-    // Cumulative statistics
-    static let totalTimeKey = "totalTimeKey"
-    static let missedTimeKey = "missedTimeKey"
-    static let completedTimeKey = "completedTimeKey"
-    static let totalDaysKey = "totalDaysKey"
-    static let fullDaysKey = "fullDaysKey"
-    static let partialDaysKey = "partialDaysKey"
-    static let missedDaysKey = "missedDaysKey"
-    static let currentStreakKey = "currentStreakKey"
-    static let bestStreakKey = "bestStreakKey"
+    struct Key {
+        static let nameKey = "nameKey"
+        static let timeKey = "timeKey"
+        static let daysKey = "daysKey"
+        static let multiplierKey = "multiplierKey"
+        static let rolloverKey = "rolloverKey"
+        static let frequencyKey = "frequencyKey"
+        static let completedKey = "completedKey"
+        static let currentWeekKey = "currentWeekKey"
+        
+        // Cumulative statistics
+        static let totalTimeKey = "totalTimeKey"
+        static let missedTimeKey = "missedTimeKey"
+        static let completedTimeKey = "completedTimeKey"
+        static let totalDaysKey = "totalDaysKey"
+        static let fullDaysKey = "fullDaysKey"
+        static let partialDaysKey = "partialDaysKey"
+        static let missedDaysKey = "missedDaysKey"
+        static let currentStreakKey = "currentStreakKey"
+        static let bestStreakKey = "bestStreakKey"
+        
+        // History
+        static let taskTimeHistoryKey = "taskTimeHistoryKey"
+        static let missedTimeHistoryKey = "missedTimeHistoryKey"
+        static let completedTimeHistoryKey = "completedTimeHistoryKey"
+        //static let previousDatesKey = "previousDatesKey"
 
-    // History
-    static let taskTimeHistoryKey = "taskTimeHistoryKey"
-    static let missedTimeHistoryKey = "missedTimeHistoryKey"
-    static let completedTimeHistoryKey = "completedTimeHistoryKey"
-    static let previousDatesKey = "previousDatesKey"
+    }
 
-    
     //MARK: - Archiving Paths
     
     static let documentsDirectory = FileManager().urls(for: .documentDirectory, in: .userDomainMask).first!
     static let taskURL = documentsDirectory.appendingPathComponent("tasks")
-//    static let nameURL = documentsDirectory.appendingPathComponent("name")
-//    static let timeURL = documentsDirectory.appendingPathComponent("time")
-//    static let daysURL = documentsDirectory.appendingPathComponent("days")
-//    static let multiplierURL = documentsDirectory.appendingPathComponent("multiplier")
-//    static let rolloverURL = documentsDirectory.appendingPathComponent("rollover")
-//    static let frequencyURL = documentsDirectory.appendingPathComponent("frequency")
-//    static let completedURL = documentsDirectory.appendingPathComponent("completed")
-//    static let currentWeekURL = documentsDirectory.appendingPathComponent("currentWeek")
-//
-//    // Cumulative statistics
-//    static let totalTimeURL = documentsDirectory.appendingPathComponent("totalTime")
-//    static let missedTimeURL = documentsDirectory.appendingPathComponent("missedTime")
-//    static let completedTimeURL = documentsDirectory.appendingPathComponent("completedTime")
-//    static let totalDaysURL = documentsDirectory.appendingPathComponent("totalDays")
-//    static let fullDaysURL = documentsDirectory.appendingPathComponent("fullDays")
-//    static let partialDaysURL = documentsDirectory.appendingPathComponent("partialDays")
-//    static let missedDaysURL = documentsDirectory.appendingPathComponent("missedDays")
-//    static let currentStreakURL = documentsDirectory.appendingPathComponent("currentStreak")
-//    static let bestStreakURL = documentsDirectory.appendingPathComponent("bestStreak")
-//
-//    // History
-//    static let taskTimeHistoryURL = documentsDirectory.appendingPathComponent("taskTimeHistory")
-//    static let missedTimeHistoryURL = documentsDirectory.appendingPathComponent("missedTimeHistory")
-//    static let completedTimeHistoryURL = documentsDirectory.appendingPathComponent("completedTimeHistory")
-//    static let previousDatesURL = documentsDirectory.appendingPathComponent("previousDates")
 
-    //MARK: - Save/Load functions
-    
-    func save() {
-        
-//        let nameSaveSuccessful = NSKeyedArchiver.archiveRootObject(name, toFile: Task.nameURL.path)
-//        let timeSaveSuccessful = NSKeyedArchiver.archiveRootObject(time, toFile: Task.timeURL.path)
-//        let daysSaveSuccessful = NSKeyedArchiver.archiveRootObject(days, toFile: Task.daysURL.path)
-//        let multiplierSaveSuccessful = NSKeyedArchiver.archiveRootObject(multiplier, toFile: Task.multiplierURL.path)
-//        let rolloverSaveSuccessful = NSKeyedArchiver.archiveRootObject(rollover, toFile: Task.rolloverURL.path)
-//        let frequencySaveSuccessful = NSKeyedArchiver.archiveRootObject(frequency, toFile: Task.frequencyURL.path)
-//        let completedSaveSuccessful = NSKeyedArchiver.archiveRootObject(completed, toFile: Task.completedURL.path)
-//        let currentWeekSaveSuccessful = NSKeyedArchiver.archiveRootObject(currentWeek, toFile: Task.currentWeekURL.path)
-//
-//        // Cumulative statistics
-//        let totalTimeSaveSuccessful = NSKeyedArchiver.archiveRootObject(totalTime, toFile: Task.totalTimeURL.path)
-//        let missedTimeSaveSuccessful = NSKeyedArchiver.archiveRootObject(missedTime, toFile: Task.missedTimeURL.path)
-//        let completedTimeSaveSuccessful = NSKeyedArchiver.archiveRootObject(completedTime, toFile: Task.completedTimeURL.path)
-//        let totalDaysSaveSuccessful = NSKeyedArchiver.archiveRootObject(totalDays, toFile: Task.totalDaysURL.path)
-//        let fullDaysSaveSuccessful = NSKeyedArchiver.archiveRootObject(fullDays, toFile: Task.fullDaysURL.path)
-//        let partialDaysSaveSuccessful = NSKeyedArchiver.archiveRootObject(partialDays, toFile: Task.partialDaysURL.path)
-//        let missedDaysSaveSuccessful = NSKeyedArchiver.archiveRootObject(missedDays, toFile: Task.missedDaysURL.path)
-//        let currentStreakSaveSuccessful = NSKeyedArchiver.archiveRootObject(currentStreak, toFile: Task.currentStreakURL.path)
-//        let bestStreakSaveSuccessful = NSKeyedArchiver.archiveRootObject(bestStreak, toFile: Task.bestStreakURL.path)
-//
-//        // History
-//        let taskTimeHistorySaveSuccessful = NSKeyedArchiver.archiveRootObject(taskTimeHistory, toFile: Task.taskTimeHistoryURL.path)
-//        let missedTimeHistorySaveSuccessful = NSKeyedArchiver.archiveRootObject(missedTimeHistory, toFile: Task.missedTimeHistoryURL.path)
-//        let completedTimeHistorySaveSuccessful = NSKeyedArchiver.archiveRootObject(completedTimeHistory, toFile: Task.completedTimeHistoryURL.path)
-//        let previousDatesSaveSuccessful = NSKeyedArchiver.archiveRootObject(previousDates, toFile: Task.previousDatesURL.path)
-//
-//        print(nameSaveSuccessful)
-//        print(timeSaveSuccessful)
-//        print(daysSaveSuccessful)
-//        print(multiplierSaveSuccessful)
-//        print(rolloverSaveSuccessful)
-//        print(frequencySaveSuccessful)
-//        print(completedSaveSuccessful)
-//        print(currentWeekSaveSuccessful)
-//
-//        print(totalTimeSaveSuccessful)
-//        print(missedTimeSaveSuccessful)
-//        print(completedTimeSaveSuccessful)
-//        print(totalDaysSaveSuccessful)
-//        print(fullDaysSaveSuccessful)
-//        print(partialDaysSaveSuccessful)
-//        print(missedDaysSaveSuccessful)
-//        print(currentStreakSaveSuccessful)
-//        print(bestStreakSaveSuccessful)
-//
-//        print(taskTimeHistorySaveSuccessful)
-//        print(missedTimeHistorySaveSuccessful)
-//        print(completedTimeHistorySaveSuccessful)
-//        print(previousDatesSaveSuccessful)
-
-        
-        //print("Saved task names: \(tasksSaveSuccessful)")
-        //print("Saved task settings: \(taskSettingsSaveSuccessful)")
-        //print("Saved task stats: \(taskStatsSaveSuccessful)")
-        //print("Saved task history: \(taskHistorySaveSuccessful)")
-        
-        //print("Printing saved data")
-        //print("Tasks: \(taskNameList)")
-        
-    }
-    
-    func load() {
-        
-//        if let loadName = NSKeyedUnarchiver.unarchiveObject(withFile: Task.nameURL.path) as? String {
-//            name = loadName
-//        }
-//
-//        if let loadTime = NSKeyedUnarchiver.unarchiveObject(withFile: Task.timeURL.path) as? Double {
-//            time = loadTime
-//        }
-//
-//        if let loadDays = NSKeyedUnarchiver.unarchiveObject(withFile: Task.daysURL.path) as? [String] {
-//            days = loadDays
-//        }
-//
-//        if let loadMultiplier = NSKeyedUnarchiver.unarchiveObject(withFile: Task.multiplierURL.path) as? Double {
-//            multiplier = loadMultiplier
-//        }
-//
-//        if let loadRollover = NSKeyedUnarchiver.unarchiveObject(withFile: Task.rolloverURL.path) as? Double {
-//            rollover = loadRollover
-//        }
-//
-//        if let loadFrequency = NSKeyedUnarchiver.unarchiveObject(withFile: Task.frequencyURL.path) as? Double {
-//            frequency = loadFrequency
-//        }
-//
-//        if let loadCompleted = NSKeyedUnarchiver.unarchiveObject(withFile: Task.completedURL.path) as? Double {
-//            completed = loadCompleted
-//        }
-//
-//        if let loadCurrentWeek = NSKeyedUnarchiver.unarchiveObject(withFile: Task.currentWeekURL.path) as? Int {
-//            currentWeek = loadCurrentWeek
-//        }
-//
-//        // Cumulative statistics
-//        if let loadTotalTime = NSKeyedUnarchiver.unarchiveObject(withFile: Task.totalTimeURL.path) as? Double {
-//            totalTime = loadTotalTime
-//        }
-//
-//        if let loadMissedTime = NSKeyedUnarchiver.unarchiveObject(withFile: Task.missedTimeURL.path) as? Double {
-//            missedTime = loadMissedTime
-//        }
-//
-//        if let loadCompletedTime = NSKeyedUnarchiver.unarchiveObject(withFile: Task.completedTimeURL.path) as? Double {
-//            completedTime = loadCompletedTime
-//        }
-//
-//        if let loadTotalDays = NSKeyedUnarchiver.unarchiveObject(withFile: Task.totalDaysURL.path) as? Double {
-//            totalDays = loadTotalDays
-//        }
-//
-//        if let loadFullDays = NSKeyedUnarchiver.unarchiveObject(withFile: Task.fullDaysURL.path) as? Double {
-//            fullDays = loadFullDays
-//        }
-//
-//        if let loadPartialDays = NSKeyedUnarchiver.unarchiveObject(withFile: Task.partialDaysURL.path) as? Double {
-//            partialDays = loadPartialDays
-//        }
-//
-//        if let loadMissedDays = NSKeyedUnarchiver.unarchiveObject(withFile: Task.missedDaysURL.path) as? Double {
-//            missedDays = loadMissedDays
-//        }
-//
-//        if let loadCurrentStreak = NSKeyedUnarchiver.unarchiveObject(withFile: Task.currentStreakURL.path) as? Int {
-//            currentStreak = loadCurrentStreak
-//        }
-//
-//        if let loadBestStreak = NSKeyedUnarchiver.unarchiveObject(withFile: Task.bestStreakURL.path) as? Int {
-//            bestStreak = loadBestStreak
-//        }
-//
-//        // History
-//        if let loadTaskTimeHistory = NSKeyedUnarchiver.unarchiveObject(withFile: Task.taskTimeHistoryURL.path) as? [Date: Double] {
-//            taskTimeHistory = loadTaskTimeHistory
-//        }
-//
-//        if let loadMissedTimeHistory = NSKeyedUnarchiver.unarchiveObject(withFile: Task.missedTimeHistoryURL.path) as? [Date: Double] {
-//            missedTimeHistory = loadMissedTimeHistory
-//        }
-//
-//        if let loadCompletedTimeHistory = NSKeyedUnarchiver.unarchiveObject(withFile: Task.completedTimeHistoryURL.path) as? [Date: Double] {
-//            completedTimeHistory = loadCompletedTimeHistory
-//        }
-//
-//        if let loadPreviousDates = NSKeyedUnarchiver.unarchiveObject(withFile: Task.previousDatesURL.path) as? [Date] {
-//            previousDates = loadPreviousDates
-//        }
-
-    }
-    
     //MARK: - Helper Functions
     
     func set(date: Date, as format: String) -> String {
@@ -277,19 +98,14 @@ class Task: NSObject, NSCoding {
     
     func getAccessDate(lengthFromEnd count: Int) -> Date? {
         
-        previousDates.sorted(){$0 < $1}
-        //let sortedArray = taskAccess!.sorted(by: {$0.timeIntervalSince1970 < $1.timeIntervalSince1970})
-
-        let length = previousDates.count
+        let sortedDates = previousDates.sorted(){$0 < $1}
+        
+        let length = sortedDates.count
         
         if length < 1 {
-            
-            return previousDates.last!
-            
+            return sortedDates.last!
         } else if length >= count + 1 {
-            
-            return previousDates[length - count - 1]
-            
+            return sortedDates[length - count - 1]
         }
             
         return nil
@@ -305,73 +121,69 @@ class Task: NSObject, NSCoding {
     //MARK: - NSCoding
     
     func encode(with aCoder: NSCoder) {
-        aCoder.encode(name, forKey: Task.nameKey)
-        aCoder.encode(time, forKey: Task.timeKey)
-        aCoder.encode(days, forKey: Task.daysKey)
-        aCoder.encode(multiplier, forKey: Task.multiplierKey)
-        aCoder.encode(rollover, forKey: Task.rolloverKey)
-        aCoder.encode(frequency, forKey: Task.frequencyKey)
-        aCoder.encode(completed, forKey: Task.completedKey)
-        aCoder.encode(currentWeek, forKey: Task.currentWeekKey)
-        aCoder.encode(totalTime, forKey: Task.totalTimeKey)
-        aCoder.encode(missedTime, forKey: Task.missedTimeKey)
-        aCoder.encode(completedTime, forKey: Task.completedTimeKey)
-        aCoder.encode(totalDays, forKey: Task.totalDaysKey)
-        aCoder.encode(fullDays, forKey: Task.fullDaysKey)
-        aCoder.encode(partialDays, forKey: Task.partialDaysKey)
-        aCoder.encode(missedDays, forKey: Task.missedDaysKey)
-        aCoder.encode(currentStreak, forKey: Task.currentStreakKey)
-        aCoder.encode(bestStreak, forKey: Task.bestStreakKey)
-        aCoder.encode(taskTimeHistory, forKey: Task.taskTimeHistoryKey)
-        aCoder.encode(missedTimeHistory, forKey: Task.missedTimeHistoryKey)
-        aCoder.encode(completedTimeHistory, forKey: Task.completedTimeHistoryKey)
-        aCoder.encode(previousDates, forKey: Task.previousDatesKey)
+        aCoder.encode(name, forKey: Key.nameKey)
+        aCoder.encode(time, forKey: Key.timeKey)
+        aCoder.encode(days, forKey: Key.daysKey)
+        aCoder.encode(multiplier, forKey: Key.multiplierKey)
+        aCoder.encode(rollover, forKey: Key.rolloverKey)
+        aCoder.encode(frequency, forKey: Key.frequencyKey)
+        aCoder.encode(completed, forKey: Key.completedKey)
+        aCoder.encode(currentWeek, forKey: Key.currentWeekKey)
+        aCoder.encode(totalTime, forKey: Key.totalTimeKey)
+        aCoder.encode(missedTime, forKey: Key.missedTimeKey)
+        aCoder.encode(completedTime, forKey: Key.completedTimeKey)
+        aCoder.encode(totalDays, forKey: Key.totalDaysKey)
+        aCoder.encode(fullDays, forKey: Key.fullDaysKey)
+        aCoder.encode(partialDays, forKey: Key.partialDaysKey)
+        aCoder.encode(missedDays, forKey: Key.missedDaysKey)
+        aCoder.encode(currentStreak, forKey: Key.currentStreakKey)
+        aCoder.encode(bestStreak, forKey: Key.bestStreakKey)
+        aCoder.encode(taskTimeHistory, forKey: Key.taskTimeHistoryKey)
+        aCoder.encode(missedTimeHistory, forKey: Key.missedTimeHistoryKey)
+        aCoder.encode(completedTimeHistory, forKey: Key.completedTimeHistoryKey)
+        //aCoder.encode(previousDates, forKey: Key.previousDatesKey)
 
     }
     
     required convenience init?(coder aDecoder: NSCoder) {
         
-        guard let name = aDecoder.decodeObject(forKey: Task.nameKey) as? String else {
+        guard let name = aDecoder.decodeObject(forKey: Key.nameKey) as? String else {
             return nil
         }
 
-        guard let days = aDecoder.decodeObject(forKey: Task.daysKey) as? [String] else {
+        guard let days = aDecoder.decodeObject(forKey: Key.daysKey) as? [String] else {
             return nil
         }
         
-        let time = aDecoder.decodeDouble(forKey: Task.timeKey)
-        let multiplier = aDecoder.decodeDouble(forKey: Task.multiplierKey)
-        let rollover = aDecoder.decodeDouble(forKey: Task.rolloverKey)
-        let frequency = aDecoder.decodeDouble(forKey: Task.frequencyKey)
-        let completed = aDecoder.decodeDouble(forKey: Task.completedKey)
-        let currentWeek = aDecoder.decodeInteger(forKey: Task.currentWeekKey)
-        //guard let currentWeek = aDecoder.decodeObject(forKey: Task.currentWeekKey) as? Int else {
+        let time = aDecoder.decodeDouble(forKey: Key.timeKey)
+        let multiplier = aDecoder.decodeDouble(forKey: Key.multiplierKey)
+        let rollover = aDecoder.decodeDouble(forKey: Key.rolloverKey)
+        let frequency = aDecoder.decodeDouble(forKey: Key.frequencyKey)
+        let completed = aDecoder.decodeDouble(forKey: Key.completedKey)
+        let currentWeek = aDecoder.decodeInteger(forKey: Key.currentWeekKey)
+        //guard let currentWeek = aDecoder.decodeObject(forKey: Key.currentWeekKey) as? Int else {
         //    return nil
         //}
         
         // Cumulative statistics
-        let totalTime = aDecoder.decodeDouble(forKey: Task.totalTimeKey)
-        let missedTime = aDecoder.decodeDouble(forKey: Task.missedTimeKey)
-        let completedTime = aDecoder.decodeDouble(forKey: Task.completedTimeKey)
-        let totalDays = aDecoder.decodeInteger(forKey: Task.totalDaysKey)
-        let fullDays = aDecoder.decodeInteger(forKey: Task.fullDaysKey)
-        let partialDays = aDecoder.decodeInteger(forKey: Task.partialDaysKey)
-        let missedDays = aDecoder.decodeInteger(forKey: Task.missedDaysKey)
-        let currentStreak = aDecoder.decodeInteger(forKey: Task.currentStreakKey)
-        let bestStreak = aDecoder.decodeInteger(forKey: Task.bestStreakKey)
+        let totalTime = aDecoder.decodeDouble(forKey: Key.totalTimeKey)
+        let missedTime = aDecoder.decodeDouble(forKey: Key.missedTimeKey)
+        let completedTime = aDecoder.decodeDouble(forKey: Key.completedTimeKey)
+        let totalDays = aDecoder.decodeInteger(forKey: Key.totalDaysKey)
+        let fullDays = aDecoder.decodeInteger(forKey: Key.fullDaysKey)
+        let partialDays = aDecoder.decodeInteger(forKey: Key.partialDaysKey)
+        let missedDays = aDecoder.decodeInteger(forKey: Key.missedDaysKey)
+        let currentStreak = aDecoder.decodeInteger(forKey: Key.currentStreakKey)
+        let bestStreak = aDecoder.decodeInteger(forKey: Key.bestStreakKey)
 
         // History
-        let taskTimeHistory = aDecoder.decodeObject(forKey: Task.taskTimeHistoryKey) as? [Date: Double] ?? [Date: Double]()
-        let missedTimeHistory = aDecoder.decodeObject(forKey: Task.missedTimeHistoryKey) as? [Date: Double] ?? [Date: Double]()
-        let completedTimeHistory = aDecoder.decodeObject(forKey: Task.completedTimeHistoryKey) as? [Date: Double] ?? [Date: Double]()
-        let previousDates = aDecoder.decodeObject(forKey: Task.previousDatesKey) as? [Date] ?? [Date]()
+        let taskTimeHistory = aDecoder.decodeObject(forKey: Key.taskTimeHistoryKey) as? [Date: Double] ?? [Date: Double]()
+        let missedTimeHistory = aDecoder.decodeObject(forKey: Key.missedTimeHistoryKey) as? [Date: Double] ?? [Date: Double]()
+        let completedTimeHistory = aDecoder.decodeObject(forKey: Key.completedTimeHistoryKey) as? [Date: Double] ?? [Date: Double]()
+        //let previousDates = aDecoder.decodeObject(forKey: Key.previousDatesKey) as? [Date] ?? [Date]()
         
         // Must call designated initializer.
-        //self.init(name: name, time: time, days: days, multiplier: multiplier, rollover: rollover, frequency: frequency, completed: completed, currentWeek: currentWeek)
-        //self.init(totalTime: totalTime, missedTime: missedTime, completedTime: completedTime, totalDays: totalDays, fullDays: fullDays, partialDays: partialDays, missedDays: missedDays, currentStreak: currentStreak, bestStreak: bestStreak)
-        //self.init(taskTimeHistory: taskTimeHistory, missedTimeHistory: missedTimeHistory, completedTimeHistory: completedTimeHistory, previousDates: previousDates)
-        
-        self.init(name: name, time: time, days: days, multiplier: multiplier, rollover: rollover, frequency: frequency, completed: completed, currentWeek: currentWeek, totalTime: totalTime, missedTime: missedTime, completedTime: completedTime, totalDays: totalDays, fullDays: fullDays, partialDays: partialDays, missedDays: missedDays, currentStreak: currentStreak, bestStreak: bestStreak, taskTimeHistory: taskTimeHistory, missedTimeHistory: missedTimeHistory, completedTimeHistory: completedTimeHistory, previousDates: previousDates)
+        self.init(name: name, time: time, days: days, multiplier: multiplier, rollover: rollover, frequency: frequency, completed: completed, currentWeek: currentWeek, totalTime: totalTime, missedTime: missedTime, completedTime: completedTime, totalDays: totalDays, fullDays: fullDays, partialDays: partialDays, missedDays: missedDays, currentStreak: currentStreak, bestStreak: bestStreak, taskTimeHistory: taskTimeHistory, missedTimeHistory: missedTimeHistory, completedTimeHistory: completedTimeHistory)
 
         
     }
@@ -379,16 +191,16 @@ class Task: NSObject, NSCoding {
     //MARK: - Init
     
     convenience override init() {
-        self.init(name: "", time: 0.0, days: [], multiplier: 0.0, rollover: 0.0, frequency: 0.0, completed: 0.0, currentWeek: 0, totalTime: 0.0, missedTime: 0.0, completedTime: 0.0, totalDays: 0, fullDays: 0, partialDays: 0, missedDays: 0, currentStreak: 0, bestStreak: 0, taskTimeHistory: [Date: Double](), missedTimeHistory: [Date: Double](), completedTimeHistory: [Date: Double](), previousDates: [Date]())
+        self.init(name: "", time: 0.0, days: [], multiplier: 0.0, rollover: 0.0, frequency: 0.0, completed: 0.0, currentWeek: 0, totalTime: 0.0, missedTime: 0.0, completedTime: 0.0, totalDays: 0, fullDays: 0, partialDays: 0, missedDays: 0, currentStreak: 0, bestStreak: 0, taskTimeHistory: [Date: Double](), missedTimeHistory: [Date: Double](), completedTimeHistory: [Date: Double]())
     }
     
     convenience init(name: String, time: Double, days: [String], multiplier: Double, rollover: Double, frequency: Double, completed: Double, currentWeek: Int) {
         
-        self.init(name: name, time: time, days: days, multiplier: multiplier, rollover: rollover, frequency: frequency, completed: completed, currentWeek: currentWeek, totalTime: 0.0, missedTime: 0.0, completedTime: 0.0, totalDays: 0, fullDays: 0, partialDays: 0, missedDays: 0, currentStreak: 0, bestStreak: 0, taskTimeHistory: [Date: Double](), missedTimeHistory: [Date: Double](), completedTimeHistory: [Date: Double](), previousDates: [Date]())
+        self.init(name: name, time: time, days: days, multiplier: multiplier, rollover: rollover, frequency: frequency, completed: completed, currentWeek: currentWeek, totalTime: 0.0, missedTime: 0.0, completedTime: 0.0, totalDays: 0, fullDays: 0, partialDays: 0, missedDays: 0, currentStreak: 0, bestStreak: 0, taskTimeHistory: [Date: Double](), missedTimeHistory: [Date: Double](), completedTimeHistory: [Date: Double]())
         
     }
     
-    init(name: String, time: Double, days: [String], multiplier: Double, rollover: Double, frequency: Double, completed: Double, currentWeek: Int, totalTime: Double, missedTime: Double, completedTime: Double, totalDays: Int, fullDays: Int, partialDays: Int, missedDays: Int, currentStreak: Int, bestStreak: Int, taskTimeHistory: [Date: Double], missedTimeHistory: [Date: Double], completedTimeHistory: [Date: Double], previousDates: [Date]) {
+    init(name: String, time: Double, days: [String], multiplier: Double, rollover: Double, frequency: Double, completed: Double, currentWeek: Int, totalTime: Double, missedTime: Double, completedTime: Double, totalDays: Int, fullDays: Int, partialDays: Int, missedDays: Int, currentStreak: Int, bestStreak: Int, taskTimeHistory: [Date: Double], missedTimeHistory: [Date: Double], completedTimeHistory: [Date: Double]) {
         
         self.name = name
         self.time = time

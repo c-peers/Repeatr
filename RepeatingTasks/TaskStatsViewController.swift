@@ -33,11 +33,9 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
 
     var valueLabels = ["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0"]
     
-    var task = Task()
-    //var task = ""
     var accessDates = [String]()
     
-    //var taskData = TaskData()
+    var task = Task()
     var appData = AppData()
 
     var testData = [300, 300, 150, 200, 450, 600, 300, 600, 450, 480]
@@ -71,19 +69,15 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
     
     func getAccessDates() {
 
-        //if let taskAccess = taskData.taskAccess {
-        
         let taskDates = task.previousDates
         var dates = [String]()
         
-            for x in 0..<taskDates.count {
-                let date = taskDates[x]
-                let formattedDate = task.set(date: date, as: "MM/dd")
-                dates.append(formattedDate)
-            }
-            
-        //}
-
+        for x in 0..<taskDates.count {
+            let date = taskDates[x]
+            let formattedDate = task.set(date: date, as: "MM/dd")
+            dates.append(formattedDate)
+        }
+        
     }
     
     func setLabelColor(for label: UILabel) {
@@ -345,38 +339,6 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
             }
             
         }
- 
-        //xAxis.valueFormatter = IndexAxisValueFormatter(values: ["Monday", "Wednesday", "Friday"])
-        
-        //        xAxis.
-        //
-        //        _chartView.delegate = self;
-        //
-        //        _chartView.extraTopOffset = -30.f;
-        //        _chartView.extraBottomOffset = 10.f;
-        //        _chartView.extraLeftOffset = 70.f;
-        //        _chartView.extraRightOffset = 70.f;
-        //
-        //        _chartView.drawBarShadowEnabled = NO;
-        //        _chartView.drawValueAboveBarEnabled = YES;
-        //
-        //        // scaling can now only be done on x- and y-axis separately
-        //        _chartView.pinchZoomEnabled = NO;
-        //
-        //        xAxis.labelPosition = XAxisLabelPositionBottom;
-        //        xAxis.labelFont = [UIFont systemFontOfSize:13.f];
-        //        xAxis.labelTextColor = [UIColor lightGrayColor];
-        //        xAxis.labelCount = 5;
-        //        xAxis.valueFormatter = self;
-        //
-        //        ChartYAxis *leftAxis = _chartView.leftAxis;
-        //        leftAxis.spaceTop = 0.25;
-        //        leftAxis.spaceBottom = 0.25;
-        //        leftAxis.drawAxisLineEnabled = NO;
-        //        leftAxis.drawGridLinesEnabled = NO;
-        //        leftAxis.drawZeroLineEnabled = YES;
-        //        leftAxis.zeroLineColor = UIColor.grayColor;
-        //        leftAxis.zeroLineWidth = 0.7f;
         
     }
     
@@ -393,10 +355,6 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         var barChartEntry  = [BarChartDataEntry]() //this is the Array that will eventually be displayed on the graph.
         
         var taskAccess = task.previousDates
-        //var taskAccess: [Date]?
-//        if let access = taskData.taskAccess {
-//            taskAccess = access
-//        }
         
         var dataSet = [Double]()
         
