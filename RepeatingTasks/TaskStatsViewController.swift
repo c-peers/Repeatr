@@ -26,10 +26,12 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         
     //var taskHistory
     var statCharts: [UIView: String] {
-        return [taskTimeHistory: "Task Time Line Chart", missedTimeHistory: "Missed Time Bar Chart", completedTimeHistory: "Completed Time Bar Chart"]
+        return [/*taskTimeHistory: "Task Time Line Chart",*/ missedTimeHistory: "Missed Time Bar Chart", completedTimeHistory: "Completed Time Bar Chart"]
     }
     
-    let nameLabels = ["Task Time", "Completed Task Time", "Missed Task Time", "Total Days", "Total Days (Complete)", "Total Days (Partial Complete", "Total Days (Missed)", "Current Streak", "Best Streak"]
+    let nameLabels = ["Task Time", "   Completed", "   Missed", "Total Days", "    Complete", "    Partial Complete", "    Missed", "Current Streak", "Best Streak"]
+
+//    let nameLabels = ["Task Time", "Completed Task Time", "Missed Task Time", "Total Days", "Total Days (Complete)", "Total Days (Partial Complete", "Total Days (Missed)", "Current Streak", "Best Streak"]
 
     var valueLabels = ["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0"]
     
@@ -40,6 +42,7 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
 
     var testData = [300, 300, 150, 200, 450, 600, 300, 600, 450, 480]
     
+    // MARK: - View and Init
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -49,14 +52,14 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         bgView.backgroundColor = darkerThemeColor
         navigationController?.toolbar.isHidden = true
         
-        setLabelColor(for: taskTimeHistoryLabel)
+        //setLabelColor(for: taskTimeHistoryLabel)
         setLabelColor(for: missedTimeHistoryLabel)
         setLabelColor(for: completedTimeHistoryLabel)
         setLabelColor(for: statisticsTitleLabel)
         
         scrollView.delegate = self
         scrollView.contentSize.width = view.bounds.width
-        scrollView.contentSize.height = CGFloat(1000)
+        scrollView.contentSize.height = CGFloat(950)
         
         getAccessDates()
         
@@ -77,7 +80,7 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
             let formattedDate = task.set(date: date, as: "MM/dd")
             dates.append(formattedDate)
         }
-        
+        accessDates = dates
     }
     
     func setLabelColor(for label: UILabel) {
@@ -91,6 +94,26 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         
     }
     
+//    func updateFont() {
+//        let ctx = NSStringDrawingContext()
+//        ctx.minimumScaleFactor = 1.0
+//        let startingFont: UIFont? = labelLong.font
+//        let fontName: String? = startingFont?.fontName
+//        let startingSize: CGFloat? = startingFont?.pointSize
+//        var i = startingSize * 10
+//        while i > 1 {
+//            // multiply by 10 so we can adjust font by tenths of a point with each iteration
+//            let font = UIFont(name: fontName!, size: i / 10)
+//            let textRect: CGRect = labelLong.text.boundingRect(with: labelLong.frame.size, options: .truncatesLastVisibleLine, attributes: [.font: font], context: ctx)
+//            if textRect.size.width <= labelLong.textRect(forBounds: labelLong.bounds, limitedToNumberOfLines: 1).size.width {
+//                print("Font size is: \(i / 10)")
+//                labelShort.font = UIFont(name: fontName!, size: i / 10)
+//                break
+//            }
+//            i -= 1
+//        }
+//    }
+
     func setStatNameLabels() {
         
         for label in statsNameLabels {
@@ -165,6 +188,8 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         
     }
     
+    // MARK: - Chart Functions
+
     func setMissedChart() {
     
         missedTimeHistory.scaleYEnabled = false
@@ -191,6 +216,9 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         
         leftAxis.drawLabelsEnabled = false
         rightAxis.drawLabelsEnabled = true
+        
+        rightAxis.valueFormatter = self
+        rightAxis.granularity = 1.0
         
         leftAxis.axisMinimum = 0.0
         rightAxis.axisMinimum = 0.0
@@ -232,6 +260,9 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         
         leftAxis.drawLabelsEnabled = false
         rightAxis.drawLabelsEnabled = true
+        
+        rightAxis.valueFormatter = self
+        rightAxis.granularity = 1.0
         
         leftAxis.axisMinimum = 0.0
         rightAxis.axisMinimum = 0.0
@@ -344,7 +375,7 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
     
     func loadLineChartData(chart: LineChartView, as type: String) {
         
-        var lineChartEntry = [LineChartDataSet]()
+        //var lineChartEntry = [LineChartDataSet]()
         
         
         
@@ -354,7 +385,7 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         
         var barChartEntry  = [BarChartDataEntry]() //this is the Array that will eventually be displayed on the graph.
         
-        var taskAccess = task.previousDates
+        let taskAccess = task.previousDates
         
         var dataSet = [Double]()
         
@@ -363,10 +394,10 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
             var entry = 0.0
             
             if type.contains("Missed") {
-                entry = task.missedTimeHistory[date]!
+                entry = task.missedTimeHistory[date]! / 60
                 //entry = taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]!
             } else if type.contains("Complete") {
-                entry = task.completedTimeHistory[date]!
+                entry = task.completedTimeHistory[date]! / 60
                 //entry = taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]!
             }
          
@@ -399,6 +430,7 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         let data = BarChartData() //This is the object that will be added to the chart
         
         data.addDataSet(bar) //Adds the line to the dataSet
+        data.setValueFormatter(self)
         
         if taskAccess.count == 1 {
             data.barWidth = 0.4
@@ -413,15 +445,43 @@ class TaskStatsViewController: UIViewController, UIScrollViewDelegate {
         //        }
         
     }
+    
+}
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+// MARK: - Bar Value Formatter
+extension TaskStatsViewController: IValueFormatter {
+    
+    func stringForValue(_ value: Double,
+                        entry: ChartDataEntry,
+                        dataSetIndex: Int,
+                        viewPortHandler: ViewPortHandler?) -> String {
+        
+        var stringValue = ""
+        
+        var time = value
+        if time >= 1 {
+            let minutes = String(Int(value))
+            stringValue = minutes + "m "
+            time -= Double(Int(time))
+        }
+        
+        let seconds = String(Int(time*60))
+        stringValue += seconds + "s"
+        
+        return stringValue
     }
-    */
+}
+
+// MARK: - Axis Value Formatter
+extension TaskStatsViewController: IAxisValueFormatter {
+    
+    func stringForValue(_ value: Double, axis: AxisBase?) -> String {
+
+        return String(Int(value)) + "m"
+        
+    }
+    
+
+    
 
 }

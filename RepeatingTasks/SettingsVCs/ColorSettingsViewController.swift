@@ -15,6 +15,7 @@ class ColorSettingsViewController: UITableViewController {
     
     var previousCellIndex: IndexPath?
     var selectedColor: UIColor?
+    var selectedEnum: ThemeColor?
     
     var colors = ["Blue",
                   "Brown",
@@ -22,14 +23,11 @@ class ColorSettingsViewController: UITableViewController {
                   "Forest Green",
                   "Gray",
                   "Green",
-                  "Lime",
                   "Magenta",
                   "Maroon",
                   "Mint",
                   "Navy Blue",
-                  "Orange",
                   "Pink",
-                  "Plum",
                   "Powder Blue",
                   "Purple",
                   "Red",
@@ -38,31 +36,21 @@ class ColorSettingsViewController: UITableViewController {
                   "Teal",
                   "Watermelon",
                   "White",
-                  "Yellow",
                   "Dark Blue",
-                  "Dark Brown",
                   "Dark Coffee",
-                  "Dark Forest Green",
                   "Dark Gray",
                   "Dark Green",
-                  "Dark Lime",
                   "Dark Magenta",
-                  "Dark Maroon",
                   "Dark Mint",
-                  "Dark Navy Blue",
                   "Dark Orange",
                   "Dark Pink",
-                  "Dark Plum",
                   "Dark Powder Blue",
                   "Dark Purple",
                   "Dark Red",
                   "Dark Sand",
                   "Dark Sky Blue",
                   "Dark Teal",
-                  "Dark Watermelon",
-                  "Dark White",
-                  "Dark Yellow",
-                  "Random color"]
+                  "Dark Watermelon"]
     
     // MARK: - UIViewController
     
@@ -72,12 +60,17 @@ class ColorSettingsViewController: UITableViewController {
         
         tableView.sectionIndexColor = UIColor.black
         
+        //tableView.register(UITableViewCell.self, forCellReuseIdentifier: "ColorCell")
+        
+        setCurrentThemeColor()
+        
+    }
+    
+    func setCurrentThemeColor() {
+        //let themeColor = appData.appColor
         let darkerThemeColor = appData.appColor.darken(byPercentage: 0.25)
         tableView.backgroundColor = darkerThemeColor
         tableView.separatorColor = appData.appColor.darken(byPercentage: 0.6)
-        
-        //tableView.register(UITableViewCell.self, forCellReuseIdentifier: "ColorCell")
-        
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -96,11 +89,17 @@ class ColorSettingsViewController: UITableViewController {
                 cell.accessoryType = .checkmark
                 previousCellIndex = indexPath
             }
+            
+            let selectedCellText = cell.textLabel?.text
+            let enumValue = findEnum(for: selectedCellText!)
+            selectedEnum = enumValue
+            selectedColor = enumValue.value
+
         }
         
         tableView.deselectRow(at: indexPath, animated: true)
    
-        setColor(as: colors[indexPath.row])
+        //setColor(as: colors[indexPath.row])
         
         print(colors[indexPath.row])
         
@@ -117,7 +116,16 @@ class ColorSettingsViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ColorCell", for: indexPath)
         
-        cell.textLabel?.text = colors[indexPath.row]
+        let cellText = colors[indexPath.row]
+        cell.textLabel?.text = cellText
+        
+        let camelCase = cellText.wordsToCamelCase()
+        let enumValue = findEnum(for: camelCase)
+        
+        if enumValue.value == appData.appColor {
+            cell.accessoryType = .checkmark
+            previousCellIndex = indexPath
+        }
         
         let darkerThemeColor = appData.appColor.darken(byPercentage: 0.25)
         cell.backgroundColor = darkerThemeColor
@@ -148,8 +156,6 @@ class ColorSettingsViewController: UITableViewController {
                 selectedColor = FlatGray()
             case "Green":
                 selectedColor = FlatGreen()
-            case "Lime":
-                selectedColor = FlatLime()
             case "Magenta":
                 selectedColor = FlatMagenta()
             case "Maroon":
@@ -182,8 +188,6 @@ class ColorSettingsViewController: UITableViewController {
                 selectedColor = FlatWhite()
             case "Yellow":
                 selectedColor = FlatYellow()
-            case "Random color":
-                selectedColor = RandomFlatColor()
             default:
                 selectedColor = FlatBlue()
             }
@@ -203,16 +207,12 @@ class ColorSettingsViewController: UITableViewController {
                 selectedColor = FlatGrayDark()
             case "Dark Green":
                 selectedColor = FlatGreenDark()
-            case "Dark Lime":
-                selectedColor = FlatLimeDark()
             case "Dark Magenta":
                 selectedColor = FlatMagentaDark()
             case "Dark Maroon":
                 selectedColor = FlatMaroonDark()
             case "Dark Mint":
                 selectedColor = FlatMintDark()
-            case "Dark Navy Blue":
-                selectedColor = FlatNavyBlueDark()
             case "Dark Orange":
                 selectedColor = FlatOrangeDark()
             case "Dark Pink":
@@ -233,28 +233,56 @@ class ColorSettingsViewController: UITableViewController {
                 selectedColor = FlatTealDark()
             case "Dark Watermelon":
                 selectedColor = FlatWatermelonDark()
-            case "Dark White":
-                selectedColor = FlatWhiteDark()
-            case "Dark Yellow":
-                selectedColor = FlatYellowDark()
             default:
                 selectedColor = FlatBlue()
             }
             
         }
-    
-        appData.appColor = selectedColor!
-        
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        appDelegate.setTheme(as: selectedColor!)
-
-        appDelegate.appData.appColorName = color
-        appDelegate.appData.saveColorSettingsToDictionary()
-        appDelegate.appData.save()
         
         //appData.saveColorSettingsToDictionary()
         //appData.save()
         
+    }
+    
+    func findEnum(for string: String) -> ThemeColor {
+        
+        let camelCase = string.wordsToCamelCase()
+        print(camelCase)
+        
+        //let enumValue = ThemeColor(rawValue: camelCase)
+        return ThemeColor(rawValue: camelCase)!
+    }
+    
+    func stringValue(forEnum enumValue: ThemeColor) -> String {
+        
+        let rawString = enumValue.rawValue
+        let isDark = rawString.contains("dark")
+        let stringValue: String
+        
+        if isDark {
+            stringValue = rawString.camelCaseToWords()
+         } else {
+            stringValue = rawString.camelCaseToWords()
+        }
+        
+        return stringValue.capitalizingFirstLetter()
+        
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        
+        if let themeColor = selectedColor {
+            appData.appColor = themeColor
+        }
+        
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        appDelegate.setTheme(as: selectedColor!)
+        
+        let colorString = selectedEnum?.rawValue.camelCaseToWords()
+        appDelegate.appData.appColorName = colorString!.capitalizingFirstLetter()
+        appDelegate.appData.saveColorSettingsToDictionary()
+        appDelegate.appData.save()
+
     }
     
 //    override func viewWillAppear(_ animated: Bool) {
@@ -271,6 +299,135 @@ class ColorSettingsViewController: UITableViewController {
         super.willMove(toParentViewController: parent)
     }
     
+}
 
+//MARK: - Theme Color enum
+enum ThemeColor: String {
+    
+    case blue, brown, coffee, forestGreen, gray, green, magenta, maroon, mint, navyBlue, pink, powderBlue, purple, red, sand, skyBlue, teal, watermelon, white
+    case darkBlue, darkCoffee, darkGray, darkGreen, darkMagenta, darkMint, darkOrange, darkPink, darkPowderBlue, darkPurple, darkRed, darkSand, darkSkyBlue, darkTeal, darkWatermelon
+    
+}
+
+extension ThemeColor {
+    var value: UIColor {
+        get {
+            switch self {
+            case .blue:
+                return FlatBlue()
+            case .brown:
+                return FlatBrown()
+            case .coffee:
+                return FlatCoffee()
+            case .forestGreen:
+                return FlatForestGreen()
+            case .gray:
+                return FlatGray()
+            case .green:
+                return FlatGreen()
+            case .magenta:
+                return FlatMagenta()
+            case .maroon:
+                return FlatMaroon()
+            case .mint:
+                return FlatMint()
+            case .navyBlue:
+                return FlatNavyBlue()
+            case .pink:
+                return FlatPink()
+            case .powderBlue:
+                return FlatPowderBlue()
+            case .purple:
+                return FlatPurple()
+            case .red:
+                return FlatRed()
+            case .sand:
+                return FlatSand()
+            case .skyBlue:
+                return FlatSkyBlue()
+            case .teal:
+                return FlatTeal()
+            case .watermelon:
+                return FlatWatermelon()
+            case .white:
+                return FlatWhite()
+            case .darkBlue:
+                return FlatBlueDark()
+            case .darkCoffee:
+                return FlatCoffeeDark()
+            case .darkGray:
+                return FlatGrayDark()
+            case .darkGreen:
+                return FlatGreenDark()
+            case .darkMagenta:
+                return FlatMagentaDark()
+            case .darkMint:
+                return FlatMintDark()
+            case .darkOrange:
+                return FlatOrangeDark()
+            case .darkPink:
+                return FlatPinkDark()
+            case .darkPowderBlue:
+                return FlatPowderBlueDark()
+            case .darkPurple:
+                return FlatPurpleDark()
+            case .darkRed:
+                return FlatRedDark()
+            case .darkSand:
+                return FlatSandDark()
+            case .darkSkyBlue:
+                return FlatSkyBlueDark()
+            case .darkTeal:
+                return FlatTealDark()
+            case .darkWatermelon:
+                return FlatWatermelonDark()
+            }
+        }
+    }
+}
+
+//MARK: - Camel Case Conversion
+extension String {
+    
+    func camelCaseToWords() -> String {
+        return unicodeScalars.reduce("") {
+            if CharacterSet.uppercaseLetters.contains($1) {
+                if $0.count > 0 {
+                    return ($0 + " " + String($1))
+                }
+            }
+            return $0 + String($1)
+        }
+    }
+    
+    func wordsToCamelCase() -> String {
+        guard let first = first else { return "" }
+        let camelCase = unicodeScalars.reduce("") {
+            if CharacterSet.whitespaces.contains($1) {
+                if $0.count > 0 {
+                    return ($0)
+                }
+            }
+            return $0 + String($1)
+        }
+        return String(first).lowercased() + camelCase.dropFirst()
+        
+    }
+    
+}
+
+extension String {
+    func capitalizingFirstLetter() -> String {
+        guard let first = first else { return "" }
+        return String(first).uppercased() + dropFirst()
+
+//        let first = String(prefix(1)).capitalized
+//        let other = String(dropFirst())
+//        return first + other
+    }
+    
+    mutating func capitalizeFirstLetter() {
+        self = self.capitalizingFirstLetter()
+    }
     
 }

@@ -88,8 +88,15 @@ class ResetTimeSettingsViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ResetTimeCell", for: indexPath)
         
-        cell.textLabel?.text = resetTimes[indexPath.row]
+        let text = resetTimes[indexPath.row]
+        cell.textLabel?.text = text
         
+        let offset = appData.resetOffset
+
+        if offset == text {
+            cell.accessoryType = .checkmark
+            previousCellIndex = indexPath
+        }
         let darkerThemeColor = appData.appColor.darken(byPercentage: 0.25)
         cell.backgroundColor = darkerThemeColor
         if appData.darknessCheck(for: darkerThemeColor) {

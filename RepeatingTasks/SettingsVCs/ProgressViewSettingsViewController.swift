@@ -80,8 +80,17 @@ class ProgressViewSettingsViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ProgressViewStyleCell", for: indexPath)
         
-        cell.textLabel?.text = progressStyle[indexPath.row]
+        let text = progressStyle[indexPath.row]
+        cell.textLabel?.text = text
         
+        if appData.usesCircularProgress && text == "Circular" {
+            cell.accessoryType = .checkmark
+            previousCellIndex = indexPath
+        } else if !appData.usesCircularProgress && text == "Flat" {
+            cell.accessoryType = .checkmark
+            previousCellIndex = indexPath
+        }
+
         let darkerThemeColor = appData.appColor.darken(byPercentage: 0.25)
         cell.backgroundColor = darkerThemeColor
         if appData.darknessCheck(for: darkerThemeColor) {

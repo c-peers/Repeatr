@@ -31,9 +31,8 @@ class TaskViewController: UIViewController, GADBannerViewDelegate {
     //@objc dynamic var taskData = TaskData()
     @objc dynamic var tasks = [Task]()
     var appData = AppData()
-    var taskTimer = CountdownTimer()
-    
-    //var taskTimer = Timer()
+    var timer = CountdownTimer()
+    var check = Check()
     
     var timerFiringFromTaskVC = false
     
@@ -97,6 +96,8 @@ class TaskViewController: UIViewController, GADBannerViewDelegate {
         print("loaded Values")
         print(tasks)
         
+        initializeCheck()
+        
         appData.taskCurrentTime = Date()
         
         NotificationCenter.default.addObserver(forName: Notification.Name("StopTimerNotification"), object: nil, queue: nil, using: catchNotification)
@@ -115,28 +116,91 @@ class TaskViewController: UIViewController, GADBannerViewDelegate {
         
         timeCheck()
         
-    }
-    
-    func setCellSize(forType type: CellType) {
-        
-        let cellSize: CGSize
-        
-        if type == .line {
-            cellSize = CGSize(width:333 , height:106)
-        } else {
-            cellSize = CGSize(width:170 , height:220)
+        for task in tasks {
+            if check.changeOfWeek(between: lastUsed, and: currentDay) {
+                
+                let frequency = task.frequency
+                let lastRunWeek = task.runWeek
+                let nextRunWeek = lastRunWeek + Int(frequency)
+
+                if check.currentWeek == nextRunWeek {
+                    task.runWeek = nextRunWeek
+                }
+
+            }
+            
+            check.ifTaskWillRun(task)
+            
         }
         
-        let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .vertical //.horizontal
-        layout.itemSize = cellSize
-        layout.sectionInset = UIEdgeInsets(top: 20, left: 10, bottom: 10, right: 10)
-        layout.minimumLineSpacing = 5.0
-        layout.minimumInteritemSpacing = 5.0
-        taskList.setCollectionViewLayout(layout, animated: true)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
         
-        //taskList.reloadData()
-
+        appData.setColorScheme()
+        
+        setTheme()
+        
+        // Circular progress cells were using the incorrect cell size, reason unknown.
+        // This forces the cells to use the correct size
+        //        if appData.usesCircularProgress {
+        //            setCellSize(forType: .circular)
+        //        } else {
+        //            setCellSize(forType: .line)
+        //        }
+        
+        if runningCompletionTime > 0, let task = selectedTask {
+            if task.isRunning {
+                task.completedTime = runningCompletionTime
+                //taskData.taskDictionary[selectedTask]![TaskData.completedTimeKey] = runningCompletionTime
+            }
+        }
+        
+        DispatchQueue.main.async {
+            self.taskList.collectionViewLayout.invalidateLayout()
+            self.taskList.reloadData()
+        }
+        
+        taskList.reloadData()
+        
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        
+        guard let task = selectedTask else { return }
+        
+        if timer.isEnabled && !timer.firedFromMainVC && task.isRunning {
+            
+            let currentTime = Date().timeIntervalSince1970
+            let timeElapsed = currentTime - timer.startTime
+            print("time elapsed \(timeElapsed)")
+            
+            let wholeNumbers = floor(timeElapsed)
+            let milliseconds = Int((timeElapsed - wholeNumbers) * 1000)
+            
+            DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + .milliseconds(milliseconds)) {
+                
+                print("Wait until next second begins")
+                
+            }
+            
+            let indexPathRow = taskNames.index(of: selectedTask!.name)
+            let indexPath = IndexPath(row: indexPathRow!, section: 0)
+            selectedCell = taskList.cellForItem(at: indexPath) as? TaskCollectionViewCell
+            
+            //_ = timer.formatTimer(name: selectedTask!.name, from: selectedCell, dataset: taskData)
+            _ = timer.formatTimer(for: selectedTask!, from: selectedCell)
+            
+            _ = Timer.scheduledTimer(timeInterval: 1.0, target: self,
+                                     selector: #selector(timerRunning), userInfo: nil,
+                                     repeats: true)
+            
+        }
+        
+    }
+    
+    func initializeCheck() {
+        check.appData = appData
     }
     
     func prepareNavBar() {
@@ -189,291 +253,111 @@ class TaskViewController: UIViewController, GADBannerViewDelegate {
         
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        
-        appData.setColorScheme()
-        
-        setTheme()
-        
-        // Circular progress cells were using the incorrect cell size, reason unknown.
-        // This forces the cells to use the correct size
-//        if appData.usesCircularProgress {
-//            setCellSize(forType: .circular)
-//        } else {
-//            setCellSize(forType: .line)
-//        }
-        
-        if runningCompletionTime > 0, let task = selectedTask {
-            
-            task.completedTime = runningCompletionTime
-            //taskData.taskDictionary[selectedTask]![TaskData.completedTimeKey] = runningCompletionTime
-            
-        }
-        
-        DispatchQueue.main.async {
-            self.taskList.collectionViewLayout.invalidateLayout()
-            self.taskList.reloadData()
-        }
-        
-        taskList.reloadData()
-        
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        
-        if taskTimer.isEnabled && !taskTimer.firedFromMainVC {
-            
-            let currentTime = Date().timeIntervalSince1970
-            let timeElapsed = currentTime - taskTimer.startTime
-            print("time elapsed \(timeElapsed)")
-            
-            let wholeNumbers = floor(timeElapsed)
-            let milliseconds = Int((timeElapsed - wholeNumbers) * 1000)
-            
-            DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + .milliseconds(milliseconds)) {
-                
-                print("Wait until next second begins")
-                
-            }
-            
-            let indexPathRow = taskNames.index(of: selectedTask!.name)
-            let indexPath = IndexPath(row: indexPathRow!, section: 0)
-            selectedCell = taskList.cellForItem(at: indexPath) as? TaskCollectionViewCell
-            
-            //_ = formatTimer(for: selectedTask, from: selectedCell)
-            //_ = taskTimer.formatTimer(name: selectedTask!.name, from: selectedCell, dataset: taskData)
-            _ = taskTimer.formatTimer(for: selectedTask!, from: selectedCell)
-            
-            _ = Timer.scheduledTimer(timeInterval: 1.0, target: self,
-                                     selector: #selector(timerRunning), userInfo: nil,
-                                     repeats: true)
-            
-        }
-        
-    }
-    
-    /*
-     Checks if last time accessed is the same day or not.
-     If it is the same day then do nothing. 
-     Otherwise create history dicionary with today's date.
-    */
-    
-    func accessCheck(for task: Task) {
-        
-        //taskData.setTaskAccess(for: task)
-        
-        let offsetString = appData.resetOffset
-
-        if let previousAccess = task.previousDates.last { //taskData.taskAccess?.last {
-            
-            // Both give day of week as an int. Check if values match
-            let previousAccessDay = getDay(for: previousAccess, with: offsetString)
-            let currentAccessDay = getDay(for: currentDay, with: offsetString)
-            
-            if previousAccessDay != currentAccessDay {
-                task.addHistory(date: currentDay)
-                //taskData.newTaskHistory(for: task, for: currentDay)
-            }
-            
-        } else {
-            //taskData.newTaskHistory(for: task, for: currentDay)
-            task.addHistory(date: currentDay)
-        }
-        
-        
-        saveData()
-    
-    }
-
-    func getDay(for date: Date, with offset: String) -> Int {
-        
-        var resetOffset = DateComponents()
-        resetOffset.hour = -offsetAsInt(for: offset)
-        
-        let date = Calendar.current.date(byAdding: resetOffset, to: date)
-        let offsetDay = Calendar.current.component(.weekday, from: date!)
-
-        return offsetDay
-        
-    }
-
-    func offsetAsInt(for offset: String) -> Int {
-        
-        let offsetTime = offset.components(separatedBy: ":")[0]
-        var offset = Int(offsetTime)
-        if offset == 12 {
-            offset = 0
-        }
-        return offset!
-        
-    }
-    
-    func offsetDates() {
-        
-        let offsetString = appData.resetOffset
-
-        let lastUsed = appData.taskLastTime
-
-        appData.taskLastTime = offsetDate(lastUsed, by: offsetString)
-        
-        
-        
-    }
-    
-    func offsetDate(_ date: Date, by offset: String) -> Date {
-        
-        let offsetInt = offsetAsInt(for: offset)
-        let offsetDate = Calendar.current.date(byAdding: .hour, value: -offsetInt, to: date)
-        
-        return offsetDate!
-        
-    }
-    
-    @objc func settingsButtonTapped() {
-        performSegue(withIdentifier: "appSettingsSegue", sender: self)
-    }
-    
     func setTask(as task: String) -> Task {
         return tasks.first(where: { $0.name == task })!
     }
     
+    func catchNotification(notification:Notification) -> Void {
+        print("Catch notification")
+        
+        timer.run.invalidate()
+        
+    }
+    
     //MARK: - Timer Related Functions
     
-    func taskDayCheck(for task: Task, at date: Date) -> Bool {
+    @objc func timerRunning() {
         
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "EEEE"
-        
-        let dayOfWeekString = dateFormatter.string(from: date)
-        print("Today is \(dayOfWeekString)")
-        
-        return task.days.contains(dayOfWeekString)
-        
-    }
-    
-//    func taskWeekCheck(for task: String, at date: Date) -> Bool {
-//
-//        taskData.setTask(as: task)
-//
-//        let dateFormatter = DateFormatter()
-//        let calendar = Calendar.current
-//        let currentWeekOfYear = calendar.component(.weekOfYear, from: currentDay)
-//        let
-//
-//
-//    }
-    
-    func getHistory(for task: String, at date: Date) -> Date? {
-        
-        let task = setTask(as: task)
-        
-        let accessDateCandidate = task.set(date: date, as: "yyyy-MM-dd")
-        
-            for date in task.previousDates {
-                
-                let formattedDate = task.set(date: date, as: "yyyy-MM-dd")
-                if accessDateCandidate == formattedDate {
-                    return date
-                }
-
-            }
-        
-        return nil
-        
-    }
-    
-    func isHistoryPresent(for date: Date, in task: Task) -> Bool {
-        
-        let completedValue = task.completedTimeHistory[date]
-        let missedValue = task.missedTimeHistory[date]
-        let taskValue = task.taskTimeHistory[date]
-        
-        let completedCheck = (completedValue != nil)
-        let missedCheck = (missedValue != nil)
-        let taskCheck = (taskValue != nil)
-        
-        return completedCheck && missedCheck && taskCheck
-    }
-    
-    func checkForMissedDays(in taskName: String) {
-        
+        let cell = selectedCell!
+        let taskName = cell.taskNameField.text!
         let task = setTask(as: taskName)
+        let id = cell.reuseIdentifier
         
-        var date = getHistory(for: task.name, at: lastUsed)
+        let (_, timeRemaining) = timer.formatTimer(for: task, from: cell)
+        print("Time remaining is \(timeRemaining)")
         
-        let daysBetween = calculateDaysBetweenTwoDates(start: lastUsed, end: currentDay)
-        
-        if daysBetween < 1 {
-            return
+        if id == "taskCollectionCell_Line" {
+            calculateProgress(for: cell, ofType: .line)
         }
         
-        // Run through all the days in between
-        // the previous run and today
-        for day in 0..<daysBetween {
-        
-            // day 0 is the last time the app was ran
-            // so we need to use the correct time in the dictionary
-            if day == 0, let previousDate = date { //}!= nil {
-                let taskTime = task.taskTimeHistory[previousDate]
-                let completedTime = task.completedTimeHistory[previousDate]
-                //let taskTime = taskData.taskHistoryDictionary[task]?[date!]?[TaskData.taskTimeHistoryKey]
-                //let completedTime = taskData.taskHistoryDictionary[task]?[date!]?[TaskData.completedHistoryKey]
-                let unfinishedTime = taskTime! - completedTime!
-
-                if unfinishedTime >= 0 {
-                    task.missedTimeHistory[previousDate] = unfinishedTime
-                    //taskData.taskHistoryDictionary[task]![date!]![TaskData.missedHistoryKey]! = unfinishedTime
-                } else {
-                    task.missedTimeHistory[previousDate] = 0
-                    //taskData.taskHistoryDictionary[task]![date!]![TaskData.missedHistoryKey]! = 0.0
-                }
-
+        if timeRemaining <= 0 {
+            
+            if id == "taskCollectionCell_Line" {
+                timerStopped(for: task, ofType: .line)
             } else {
-                
-                date = Calendar.current.date(byAdding: .day, value: day, to: lastUsed)
-                
-                let dateExistsInDict = isHistoryPresent(for: date!, in: task)//taskData.taskHistoryDictionary[task]?[date!]
-                
-                if taskDayCheck(for: task, at: date!) && dateExistsInDict == true {
-                    
-                    task.addHistory(date: date!)
-                    //taskData.newTaskHistory(for: task, for: date!)
-                    
-                }
-                
-                let taskTime = task.taskTimeHistory[date!]
-                let completedTime = task.completedTimeHistory[date!]
-                //let taskTime = taskData.taskHistoryDictionary[task]?[date!]?[TaskData.taskTimeHistoryKey]
-                //let completedTime = taskData.taskHistoryDictionary[task]?[date!]?[TaskData.completedHistoryKey]
-                
-                if (taskTime != nil) && (completedTime != nil) {
-                    task.missedTimeHistory[date!] = taskTime! - completedTime!
-                    //taskData.taskHistoryDictionary[task]![date!]![TaskData.missedHistoryKey] = taskTime! - completedTime!
-                }
+                timerStopped(for: task, ofType: .circular)
             }
             
+            cell.taskTimeRemaining.text = "Complete"
+            
+            cell.playStopButton.setImage(#imageLiteral(resourceName: "Play"), for: .normal)
+            cell.playStopButton.isEnabled = false
+            
+            timer.cancelMissedTimeNotification(for: taskName)
             
         }
         
     }
     
-    func calculateDaysBetweenTwoDates(start: Date, end: Date) -> Int {
+    func timerStopped(for task: Task, ofType type: CellType) {
         
-        let currentCalendar = Calendar.current
-        guard let start = currentCalendar.ordinality(of: .day, in: .era, for: start) else {
-            return 0
+        timer.run.invalidate()
+        
+        timer.endTime = Date().timeIntervalSince1970
+        
+        var elapsedTime = timer.endTime - timer.startTime
+        //let previousCompletedTime = taskData.taskDictionary[task]?["completedTime"]!
+        
+        if elapsedTime > task.weightedTime {
+            elapsedTime = task.weightedTime
         }
-        guard let end = currentCalendar.ordinality(of: .day, in: .era, for: end) else {
-            return 0
+        
+        if type == .circular {
+            selectedCell?.circleProgressView.pauseAnimation()
         }
-        return end - start
+        
+        task.completed += elapsedTime
+        //taskData.taskDictionary[task]![TaskData.completedTimeKey]! += elapsedTime
+        
+        if let date = task.getAccessDate(lengthFromEnd: 0) {
+            //taskData.getAccessDate(for: task, lengthFromEnd: 0) {
+            //taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]! += elapsedTime
+            
+            task.completedTimeHistory[date]! += elapsedTime
+            
+            let unfinishedTime = task.time - elapsedTime
+            
+            if unfinishedTime >= 0 {
+                task.missedTimeHistory[date]! = unfinishedTime
+                //taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]! = unfinishedTime
+            } else {
+                task.missedTimeHistory[date]! = 0
+                //taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]! = 0.0
+            }
+            //setMissedTime(for: task, at: date)
+            
+        }
+        
+        let resetTime = check.timeToReset(at: nextResetTime)
+        
+        let (remainingTimeString, _) = timer.formatTimer(for: task)
+        timer.setMissedTimeNotification(for: task.name, at: resetTime, withRemaining: remainingTimeString)
+        
+        task.isRunning = false
+        timer.isEnabled = false
+        timer.firedFromMainVC = false
+        
+        saveData()
+        
     }
+
+    //MARK: - App Rollover Related Functions
     
     func timeCheck() {
         
         // Offset times so that reset always occurs at "midnight" for easy calculation
-        let now = offsetDate(appData.taskCurrentTime, by: appData.resetOffset)
-        let then = offsetDate(appData.taskLastTime, by: appData.resetOffset)
+        let now = check.offsetDate(appData.taskCurrentTime, by: appData.resetOffset)
+        let then = check.offsetDate(appData.taskLastTime, by: appData.resetOffset)
         
         currentDay = now
         lastUsed = then
@@ -484,12 +368,11 @@ class TaskViewController: UIViewController, GADBannerViewDelegate {
         var currentTime = getDateComponents(for: now, at: currentTimeZone)
         var lastAppTime = getDateComponents(for: then, at: currentTimeZone)
         
-        
         var reset = DateComponents()
         reset.timeZone = currentTimeZone
         reset.year = currentTime.year
         reset.month = currentTime.month
-        reset.hour = offsetAsInt(for: appData.resetOffset)
+        reset.hour = check.offsetAsInt(for: appData.resetOffset)
         reset.minute = 0
         //reset.minute = calendar.component(.minute, from: appData.taskResetTime)
         
@@ -503,13 +386,13 @@ class TaskViewController: UIViewController, GADBannerViewDelegate {
         
         nextResetTime = calendar.date(from: reset)!
         let lastResetTime = calendar.date(byAdding: .day, value: -1, to: nextResetTime)
-        let timeToReset = calculateTimeToReset(at: nextResetTime)
+        let timeToReset = check.timeToReset(at: nextResetTime)
 
-        let resetOccurred = resetTimePassed(between: then, and: now, with: lastResetTime!)
+        let resetOccurred = check.resetTimePassed(between: then, and: now, with: lastResetTime!)
         
         if resetOccurred {
             
-            if !taskTimer.isEnabled {
+            if !timer.isEnabled {
                 resetTaskTimers()
             } else {
                 willResetTimer = true
@@ -525,29 +408,12 @@ class TaskViewController: UIViewController, GADBannerViewDelegate {
         
         for task in tasks {
             
-            let (remainingTimeString,_) = taskTimer.formatTimer(for: task)
-            taskTimer.setMissedTimeNotification(for: task.name, at: timeToReset, withRemaining: remainingTimeString)
+            let (remainingTimeString,_) = timer.formatTimer(for: task)
+            timer.setMissedTimeNotification(for: task.name, at: timeToReset, withRemaining: remainingTimeString)
         }
 
         appData.taskLastTime = appData.taskCurrentTime
         appData.save()
-        
-    }
-    
-    func calculateTimeToReset(at resetTime: Date) -> TimeInterval {
-        let calendar = Calendar.current
-        let differenceComponents = calendar.dateComponents([.hour, .minute, .second], from: Date(), to: resetTime)
-        let timeDifference = TimeInterval((differenceComponents.hour! * 3600) + (differenceComponents.minute! * 60) + differenceComponents.second!)
-        return timeDifference
-    }
-    
-    func resetTimePassed(between then: Date, and now: Date, with reset: Date) -> Bool {
-        
-        if reset > then && reset < now {
-            return true
-        } else {
-            return false
-        }
         
     }
     
@@ -567,44 +433,6 @@ class TaskViewController: UIViewController, GADBannerViewDelegate {
 
     }
     
-    func calculateStats(for taskName: String) {
-        
-        let task = setTask(as: taskName)
-        
-        task.totalDays += 1
-        task.totalTime += task.time
-        task.completedTime += task.completed
-        
-        if task.completed == task.weightedTime { // Full
-            
-            task.fullDays += 1
-            task.currentStreak += 1
-            
-            if task.currentStreak > task.bestStreak {
-                task.bestStreak = task.currentStreak
-            }
-
-        } else if task.completed > 0 { // Partial
-        
-            task.partialDays += 1
-
-            if task.currentStreak > 0 {
-                task.currentStreak = 0
-            }
-            
-        } else { // Missed
-            
-            task.missedDays += 1
-            task.missedTime += task.time
-            
-            if task.currentStreak > 0 {
-                task.currentStreak = 0
-            }
-
-        }
-        
-    }
-    
     @objc func resetTaskTimers() {
         print("RESET!!!!!!!!")
         
@@ -620,10 +448,10 @@ class TaskViewController: UIViewController, GADBannerViewDelegate {
         //for x in 0...(tasks.count - 1) {
         for task in tasks {
             
-            let daysBetween = calculateDaysBetweenTwoDates(start: self.lastUsed, end: self.currentDay)
+            let daysBetween = check.daysBetweenTwoDates(start: self.lastUsed, end: self.currentDay)
 
             for _ in 0..<daysBetween {
-                self.calculateStats(for: task.name)
+                task.calculateStats() //(for: task.name)
             }
             
             let weightedTime = task.weightedTime
@@ -636,7 +464,7 @@ class TaskViewController: UIViewController, GADBannerViewDelegate {
                 yesterday = date
             }
             
-            if taskDayCheck(for: task, at: yesterday) {
+            if check.taskDays(for: task, at: yesterday) {
                 
                 var rolloverTime = weightedTime - completedTime
                 
@@ -649,13 +477,13 @@ class TaskViewController: UIViewController, GADBannerViewDelegate {
             
             }
             
-            checkForMissedDays(in: task.name)
+            check.missedDays(in: task, between: lastUsed, and: currentDay)
             
             //=====================================
             
-            let lastUsedDate = getHistory(for: task.name, at: lastUsed)
+            let lastUsedDate = task.getHistory(at: lastUsed)
             
-            if taskDayCheck(for: task, at: currentDay), let lastIndex = task.previousDates.index(of: lastUsedDate!) {
+            if task.isToday, let lastIndex = task.previousDates.index(of: lastUsedDate!) {
 
                 let accessArrayLength = task.previousDates.count - 1
                 var rollover = 0.0
@@ -695,6 +523,20 @@ class TaskViewController: UIViewController, GADBannerViewDelegate {
         
     }
 
+    //MARK: - Button Functions
+    
+    @objc func addTask() {
+        print("Do stuff")
+        //performSegue(withIdentifier: "addTaskSegue", sender: nil)
+        
+        presentNewTaskVC()
+
+    }
+    
+    @objc func settingsButtonTapped() {
+        performSegue(withIdentifier: "appSettingsSegue", sender: self)
+    }
+    
     //@IBAction func taskStartStopButtonPressed(_ sender: UIButton) {
     @objc func taskStartStopButtonPressed(sender: UIButton) {
         guard let cell = sender.superview?.superview as? TaskCollectionViewCell else {
@@ -706,19 +548,20 @@ class TaskViewController: UIViewController, GADBannerViewDelegate {
         let taskName = cell.taskNameField.text!
         let task = setTask(as: taskName)
         
-        if !taskTimer.isEnabled {
+        if !timer.isEnabled {
             
-            taskTimer.isEnabled = true
-            taskTimer.firedFromMainVC = true
-
+            task.isRunning = true
+            timer.isEnabled = true
+            timer.firedFromMainVC = true
+            
             //let stencil = #imageLiteral(resourceName: "Pause").withRenderingMode(.alwaysTemplate)
             cell.playStopButton.setImage(#imageLiteral(resourceName: "Pause"), for: .normal)
             //cell.playStopButton.tintColor = UIColor.white
-
+            
             let weightedTime = task.weightedTime
             let elapsedTime = task.completed
             let remainingTime = weightedTime - elapsedTime
-
+            
             if id == "taskCollectionCell_Circle" {
                 
                 let currentProgress = 1 - remainingTime/weightedTime
@@ -727,15 +570,15 @@ class TaskViewController: UIViewController, GADBannerViewDelegate {
                 cell.circleProgressView.animate(fromAngle: currentAngle, toAngle: 359.9, duration: remainingTime as TimeInterval, relativeDuration: true, completion: nil)
             }
             
-            taskTimer.startTime = Date().timeIntervalSince1970
+            timer.startTime = Date().timeIntervalSince1970
             
             selectedCell = cell
             
-            taskTimer.setFinishedNotification(for: task.name, atTime: remainingTime)
-            taskTimer.run = Timer.scheduledTimer(timeInterval: 1.0, target: self,
-                                             selector: #selector(timerRunning), userInfo: nil,
-                                             repeats: true)
-
+            timer.setFinishedNotification(for: task.name, atTime: remainingTime)
+            timer.run = Timer.scheduledTimer(timeInterval: 1.0, target: self,
+                                                 selector: #selector(timerRunning), userInfo: nil,
+                                                 repeats: true)
+            
             
         } else {
             
@@ -747,7 +590,7 @@ class TaskViewController: UIViewController, GADBannerViewDelegate {
                 timerStopped(for: task, ofType: .line)
             }
             
-            taskTimer.cancelFinishedNotification(for: task.name)
+            timer.cancelFinishedNotification(for: task.name)
             
             if willResetTimer {
                 resetTaskTimers()
@@ -755,137 +598,6 @@ class TaskViewController: UIViewController, GADBannerViewDelegate {
             
         }
         
-    }
-    
-    func calculateProgress(for cell: TaskCollectionViewCell, ofType type: CellType) {
-        
-        let taskName = cell.taskNameField.text!
-        let task = setTask(as: taskName)
-
-        // Why do I have to do this here???
-        // Doesn't work from other classes when using .xib
-        let weightedTime = task.weightedTime
-        var elapsedTime = task.completed
-        if taskTimer.isEnabled {
-            elapsedTime += (taskTimer.currentTime - taskTimer.startTime)
-        }
-        let remainingTime = weightedTime - elapsedTime
-        
-        if type == .line {
-            let currentProgress = 1 - Float(remainingTime)/Float(weightedTime)
-            cell.progressView.setProgress(currentProgress, animated: true)
-        } else {
-            let currentProgress = 1 - remainingTime/weightedTime
-            cell.circleProgressView.progress = currentProgress
-        }
-        
-    }
-    
-    @objc func timerRunning() {
-        
-        let cell = selectedCell!
-        let taskName = cell.taskNameField.text!
-        let task = setTask(as: taskName)
-        let id = cell.reuseIdentifier
-        
-        let (_, timeRemaining) = taskTimer.formatTimer(for: task, from: cell)
-        print("Time remaining is \(timeRemaining)")
-
-        if id == "taskCollectionCell_Line" {
-            calculateProgress(for: cell, ofType: .line)
-        }
-        
-        if timeRemaining <= 0 {
-            
-            if id == "taskCollectionCell_Line" {
-                timerStopped(for: task, ofType: .line)
-            } else {
-                timerStopped(for: task, ofType: .circular)
-            }
-            
-            cell.taskTimeRemaining.text = "Complete"
-            
-            cell.playStopButton.setImage(#imageLiteral(resourceName: "Play"), for: .normal)
-            cell.playStopButton.isEnabled = false
-            
-            taskTimer.cancelMissedTimeNotification(for: taskName)
-
-        }
-        
-    }
-    
-    func timerStopped(for task: Task, ofType type: CellType) {
-        
-        taskTimer.run.invalidate()
-        
-        taskTimer.endTime = Date().timeIntervalSince1970
-        
-        var elapsedTime = taskTimer.endTime - taskTimer.startTime
-        //let previousCompletedTime = taskData.taskDictionary[task]?["completedTime"]!
-        
-        if elapsedTime > task.weightedTime {
-            elapsedTime = task.weightedTime
-        }
-        
-        if type == .circular {
-            selectedCell?.circleProgressView.pauseAnimation()
-        }
-        
-        task.completed += elapsedTime
-        //taskData.taskDictionary[task]![TaskData.completedTimeKey]! += elapsedTime
-
-        if let date = task.getAccessDate(lengthFromEnd: 0) {
-            //taskData.getAccessDate(for: task, lengthFromEnd: 0) {
-            //taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]! += elapsedTime
-            
-            task.completedTimeHistory[date]! += elapsedTime
-            
-            let unfinishedTime = task.time - elapsedTime
-            
-            if unfinishedTime >= 0 {
-                task.missedTimeHistory[date]! = unfinishedTime
-                //taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]! = unfinishedTime
-            } else {
-                task.missedTimeHistory[date]! = 0
-                //taskData.taskHistoryDictionary[task]![date]![TaskData.missedHistoryKey]! = 0.0
-            }
-            //setMissedTime(for: task, at: date)
-
-        }
-        
-        let resetTime = calculateTimeToReset(at: nextResetTime)
-
-        let (remainingTimeString, _) = taskTimer.formatTimer(for: task)
-        taskTimer.setMissedTimeNotification(for: task.name, at: resetTime, withRemaining: remainingTimeString)
-
-        taskTimer.isEnabled = false
-        taskTimer.firedFromMainVC = false
-
-        saveData()
-        
-    }
-    
-    func secondsToHoursMinutesSeconds(from seconds: Int) -> (Int, Int, Int) {
-        
-        return (seconds / 3600, (seconds % 3600) / 60, (seconds % 3600) & 60)
-        
-    }
-
-    func catchNotification(notification:Notification) -> Void {
-        print("Catch notification")
-        
-        taskTimer.run.invalidate()
-        
-    }
-
-    //MARK: - Button Functions
-    
-    @objc func addTask() {
-        print("Do stuff")
-        //performSegue(withIdentifier: "addTaskSegue", sender: nil)
-        
-        presentNewTaskVC()
-        //test()
     }
     
    //MARK: - Data Handling
@@ -900,7 +612,7 @@ class TaskViewController: UIViewController, GADBannerViewDelegate {
             taskVC.tasks = tasks
             taskVC.taskNames = taskNames
             
-            taskVC.taskTimer = taskTimer
+            taskVC.timer = timer
             
         } else if segue.identifier == "addTaskSegue" {
             let newTaskVC = segue.destination as! NewTasksViewController
@@ -911,7 +623,7 @@ class TaskViewController: UIViewController, GADBannerViewDelegate {
             let appSettingsVC = segue.destination as! AppSettingsViewController
             
             appSettingsVC.appData = appData
-            taskTimer.run.invalidate()
+            timer.run.invalidate()
             
         }
         
@@ -1059,6 +771,116 @@ extension TaskViewController: UICollectionViewDelegate, UICollectionViewDataSour
         return 10.0
     }
     
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
+        var reuseIdentifier: String?
+        let usesCircularProgress = appData.usesCircularProgress
+        
+        
+        if usesCircularProgress {
+            reuseIdentifier = "taskCollectionCell_Circle"
+
+            let nib: UINib = UINib(nibName: "TaskCircleProgressCollectionViewCell", bundle: nil)
+            
+            taskList.register(nib, forCellWithReuseIdentifier: reuseIdentifier!)
+            
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier!, for: indexPath) as! TaskCollectionViewCell
+            //let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier!, for: indexPath as IndexPath) as! RepeatingTasksCircleProgressCollectionCell
+
+            setupCollectionCell(for: cell, ofType: .circular, at: indexPath)
+
+            collectionView.contentInset = UIEdgeInsets(top: 20, left: 10, bottom: 10, right: 10)
+
+            return cell
+            
+        } else {
+            reuseIdentifier = "taskCollectionCell_Line"
+
+            let nib: UINib = UINib(nibName: "TaskCollectionViewCell", bundle: nil)
+            
+            taskList.register(nib, forCellWithReuseIdentifier: reuseIdentifier!)
+            
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier!, for: indexPath as IndexPath) as! TaskCollectionViewCell
+            
+            setupCollectionCell(for: cell, ofType: .line, at: indexPath)
+            
+            return cell
+            
+        }
+        
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return tasks.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        let taskName = taskNames[indexPath.row]
+        let task = setTask(as: taskName)
+        
+        selectedTask = task
+        
+        print("taskData taskName \(task.name)")
+        
+        performSegue(withIdentifier: "taskDetailSegue", sender: self)
+        
+    }
+    
+    //MARK: CollectionView Helper Functions
+    
+    func setBorder(for layer: CALayer, borderWidth: CGFloat, borderColor: CGColor, radius: CGFloat ) {
+        layer.borderWidth = borderWidth
+        layer.borderColor = borderColor
+        layer.cornerRadius = radius
+    }
+    
+    func setCellSize(forType type: CellType) {
+        
+        let cellSize: CGSize
+        
+        if type == .line {
+            cellSize = CGSize(width:333 , height:106)
+        } else {
+            cellSize = CGSize(width:170 , height:220)
+        }
+        
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical //.horizontal
+        layout.itemSize = cellSize
+        layout.sectionInset = UIEdgeInsets(top: 20, left: 10, bottom: 10, right: 10)
+        layout.minimumLineSpacing = 5.0
+        layout.minimumInteritemSpacing = 5.0
+        taskList.setCollectionViewLayout(layout, animated: true)
+        
+        //taskList.reloadData()
+        
+    }
+    
+    func calculateProgress(for cell: TaskCollectionViewCell, ofType type: CellType) {
+        
+        let taskName = cell.taskNameField.text!
+        let task = setTask(as: taskName)
+        
+        // Why do I have to do this here???
+        // Doesn't work from other classes when using .xib
+        let weightedTime = task.weightedTime
+        var elapsedTime = task.completed
+        if timer.isEnabled {
+            elapsedTime += (timer.currentTime - timer.startTime)
+        }
+        let remainingTime = weightedTime - elapsedTime
+        
+        if type == .line {
+            let currentProgress = 1 - Float(remainingTime)/Float(weightedTime)
+            cell.progressView.setProgress(currentProgress, animated: true)
+        } else {
+            let currentProgress = 1 - remainingTime/weightedTime
+            cell.circleProgressView.progress = currentProgress
+        }
+        
+    }
+    
     func setupCollectionCell(for cell: TaskCollectionViewCell, ofType type: CellType, at indexPath: IndexPath) {
         
         let taskName = taskNames[indexPath.row]
@@ -1066,8 +888,8 @@ extension TaskViewController: UICollectionViewDelegate, UICollectionViewDataSour
         
         cell.taskNameField.text = task.name
         
-        (_, _) = taskTimer.formatTimer(for: task, from: cell, ofType: type)
-
+        (_, _) = timer.formatTimer(for: task, from: cell, ofType: type)
+        
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.hour, .minute, .second]
         formatter.unitsStyle = .positional
@@ -1083,7 +905,7 @@ extension TaskViewController: UICollectionViewDelegate, UICollectionViewDataSour
             cell.playStopButton.isEnabled = true
         }
         
-        if taskTimer.isEnabled, let _ = selectedTask?.name {
+        if timer.isEnabled && task.isRunning, let _ = selectedTask?.name {
             cell.playStopButton.setImage(#imageLiteral(resourceName: "Pause"), for: .normal)
         } else {
             cell.playStopButton.setImage(#imageLiteral(resourceName: "Play"), for: .normal)
@@ -1127,7 +949,7 @@ extension TaskViewController: UICollectionViewDelegate, UICollectionViewDataSour
             
             cell.progressView.isHidden = false
             //cell.circleProgressView.isHidden = true
-
+            
         } else if type == .circular {
             
             //setBorder(for: cell.circleProgressView.layer, borderWidth: 0.2, borderColor: borderColor!, radius: 5.0)
@@ -1139,84 +961,26 @@ extension TaskViewController: UICollectionViewDelegate, UICollectionViewDataSour
             
             //cell.progressView.isHidden = true
             cell.circleProgressView.isHidden = false
-
+            
         }
         
-        if taskDayCheck(for: task, at: currentDay) {
+        if task.isToday {
             //cell.progressView.isHidden = false
             cell.playStopButton.isHidden = false
-            accessCheck(for: task)
+            if check.access(for: task, upTo: currentDay) {
+                saveData()
+            }
         } else {
             cell.playStopButton.isHidden = true
             cell.taskTimeRemaining.text = "No task today"
             //cell.progressView.isHidden = true
         }
-
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
-        var reuseIdentifier: String?
-        let usesCircularProgress = appData.usesCircularProgress
-        
-        
-        if usesCircularProgress {
-            reuseIdentifier = "taskCollectionCell_Circle"
-
-            let nib: UINib = UINib(nibName: "TaskCircleProgressCollectionViewCell", bundle: nil)
-            
-            taskList.register(nib, forCellWithReuseIdentifier: reuseIdentifier!)
-            
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier!, for: indexPath) as! TaskCollectionViewCell
-            //let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier!, for: indexPath as IndexPath) as! RepeatingTasksCircleProgressCollectionCell
-
-            setupCollectionCell(for: cell, ofType: .circular, at: indexPath)
-
-            collectionView.contentInset = UIEdgeInsets(top: 20, left: 10, bottom: 10, right: 10)
-
-            return cell
-            
-        } else {
-            reuseIdentifier = "taskCollectionCell_Line"
-
-            let nib: UINib = UINib(nibName: "TaskCollectionViewCell", bundle: nil)
-            
-            taskList.register(nib, forCellWithReuseIdentifier: reuseIdentifier!)
-            
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier!, for: indexPath as IndexPath) as! TaskCollectionViewCell
-            
-            setupCollectionCell(for: cell, ofType: .line, at: indexPath)
-            
-            return cell
-            
-        }
-        
-    }
-    
-    func setBorder(for layer: CALayer, borderWidth: CGFloat, borderColor: CGColor, radius: CGFloat ) {
-        layer.borderWidth = borderWidth
-        layer.borderColor = borderColor
-        layer.cornerRadius = radius
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return tasks.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        
-        let taskName = taskNames[indexPath.row]
-        let task = setTask(as: taskName)
-        
-        selectedTask = task
-        
-        print("taskData taskName \(task.name)")
-        
-        performSegue(withIdentifier: "taskDetailSegue", sender: self)
         
     }
     
 }
+
+//MARK: - Progress View Height Extension
 
 extension UIProgressView {
     

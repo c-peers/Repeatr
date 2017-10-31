@@ -24,24 +24,13 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
 
     //MARK: - Properties
     
-    var timer = Timer()
-    var timerEnabled = false
-    
+    //var timer = Timer()
+
     var taskNames = [String]()
     var tasks = [Task]()
     var task = Task()
-//    var task = "*"
-//    var taskTime = 0.0
-//    var completedTime = 0.0
-//    var taskDays = [String]()
-//    var taskFrequency = 1.0
-//    var rolloverMultiplier = 1.0
-//    var rolloverTime = 0.0
-//    var weightedTime = 0.0
     
     var elapsedTime = 0.0
-    
-    //let taskHistory = [600, 0, 1200]
     
     var timeString: String = ""
     
@@ -51,7 +40,7 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
     
     var taskData = TaskData()
     var appData = AppData()
-    @objc var taskTimer = CountdownTimer()
+    @objc var timer = CountdownTimer()
     
     var startTime = Date()
     var endTime = Date()
@@ -118,11 +107,11 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             taskStartButton.isEnabled = false
         }
         
-        self.addObserver(self, forKeyPath: #keyPath(taskTimer.elapsedTime), options: .new, context: nil)
+        self.addObserver(self, forKeyPath: #keyPath(timer.elapsedTime), options: .new, context: nil)
         
         //taskTimeLabel.text = formatter.string(from: TimeInterval(countdownTimer.remainingTime))!
 
-        if taskTimer.isEnabled {
+        if timer.isEnabled && task.isRunning {
 
             taskStartButton.setImage(#imageLiteral(resourceName: "Pause"), for: .normal)
             let stencil = #imageLiteral(resourceName: "Pause").withRenderingMode(.alwaysTemplate)
@@ -142,11 +131,11 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
     
     override func viewWillDisappear(_ animated: Bool) {
         
-        timer.invalidate()
+        //timer.invalidate()
         
         let vc = self.navigationController?.viewControllers.first as! TaskViewController
         
-        if taskTimer.isEnabled {
+        if timer.isEnabled && task.isRunning {
             
             //vc.taskData.taskDictionary[task]?["completedTime"] = completedTime
             vc.runningCompletionTime = task.completed
@@ -157,13 +146,13 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
     
     override func viewDidDisappear(_ animated: Bool) {
         
-        timer.invalidate()
+        //timer.invalidate()
         
     }
 
     deinit {
-        self.removeObserver(self, forKeyPath: #keyPath(taskTimer.elapsedTime))
-        timer.invalidate()
+        self.removeObserver(self, forKeyPath: #keyPath(timer.elapsedTime))
+        //timer.invalidate()
     }
     
     func prepareNavBar() {
@@ -234,19 +223,28 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
 
         elapsedTime = task.completed
         
-        if taskTimer.isEnabled {
-            elapsedTime += (currentTime - taskTimer.startTime)
+        if timer.isEnabled && task.isRunning {
+            elapsedTime += (currentTime - timer.startTime)
         }
         
-        let remainingTaskTime = task.weightedTime - elapsedTime
+        let remainingTime = task.weightedTime - elapsedTime
         
         let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = [.hour, .minute, .second]
+//        formatter.allowedUnits = [.hour, .minute, .second]
+//        formatter.zeroFormattingBehavior = .pad
         formatter.unitsStyle = .positional
         
-        let remainingTimeAsString = formatter.string(from: TimeInterval(remainingTaskTime.rounded()))!
+        if remainingTime < 60 {
+            formatter.allowedUnits = [.minute, .second]
+            formatter.zeroFormattingBehavior = .pad
+        } else {
+            formatter.allowedUnits = [.hour, .minute, .second]
+            formatter.zeroFormattingBehavior = .default
+        }
+
+        let remainingTimeAsString = formatter.string(from: TimeInterval(remainingTime.rounded()))!
         
-        if remainingTaskTime > 0 {
+        if remainingTime > 0 {
             taskTimeLabel.text = remainingTimeAsString
             taskStartButton.isEnabled = true
 
@@ -261,7 +259,7 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             taskStartButton.isEnabled = false
         }
         
-        return (remainingTimeAsString, remainingTaskTime)
+        return (remainingTimeAsString, remainingTime)
         
     }
     
@@ -292,11 +290,11 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
     
     func timerStopped() { //for taskName: String) {
         
-        taskTimer.run.invalidate()
+        timer.run.invalidate()
         
-        taskTimer.endTime = Date().timeIntervalSince1970
+        timer.endTime = Date().timeIntervalSince1970
         
-        var elapsedTime = taskTimer.endTime - taskTimer.startTime
+        var elapsedTime = timer.endTime - timer.startTime
         
         if elapsedTime > task.weightedTime {
             elapsedTime = task.weightedTime
@@ -322,8 +320,9 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             
         }
         
-        taskTimer.isEnabled = false
-        taskTimer.firedFromMainVC = false
+        task.isRunning = false
+        timer.isEnabled = false
+        timer.firedFromMainVC = false
         
         saveData()
         
@@ -386,8 +385,9 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
     
     @IBAction func taskButtonTapped(_ sender: UIButton) {
         
-        if taskTimer.isEnabled != true {
-            taskTimer.isEnabled = true
+        if timer.isEnabled != true {
+            task.isRunning = true
+            timer.isEnabled = true
             
             let stencil = #imageLiteral(resourceName: "Pause").withRenderingMode(.alwaysTemplate)
             taskStartButton.setImage(stencil, for: .normal)
@@ -395,13 +395,13 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             
             //taskStartButton.setImage(#imageLiteral(resourceName: "Pause"), for: .normal)
             
-            taskTimer.startTime = Date().timeIntervalSince1970
+            timer.startTime = Date().timeIntervalSince1970
             
-            taskTimer.run = Timer.scheduledTimer(timeInterval: 1.0, target: self,
+            timer.run = Timer.scheduledTimer(timeInterval: 1.0, target: self,
                                              selector: #selector(timerRunning), userInfo: nil, repeats: true)
             
-            let (_, remainingTime) = taskTimer.formatTimer(for: task)
-            taskTimer.setFinishedNotification(for: task.name, atTime: remainingTime)
+            let (_, remainingTime) = timer.formatTimer(for: task)
+            timer.setFinishedNotification(for: task.name, atTime: remainingTime)
 
         } else {
             
@@ -413,7 +413,7 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             //taskStartButton.setImage(#imageLiteral(resourceName: "Play"), for: .normal)
             
             NotificationCenter.default.post(name: Notification.Name("StopTimerNotification"), object: nil)
-            taskTimer.cancelFinishedNotification(for: task.name)
+            timer.cancelFinishedNotification(for: task.name)
             
             
 //            if willResetTimer {
@@ -528,6 +528,14 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
         leftAxis.axisMinimum = 0.0
         rightAxis.axisMinimum = 0.0
         
+        let yAxisFormatter = NumberFormatter()
+        yAxisFormatter.minimumFractionDigits = 0
+        yAxisFormatter.maximumFractionDigits = 1
+        //yAxisFormatter.negativeSuffix = " $"
+        yAxisFormatter.positiveSuffix = " min"
+        
+        rightAxis.valueFormatter = yAxisFormatter as? IAxisValueFormatter
+        
         xAxis.granularity = 1.0
         xAxis.drawGridLinesEnabled = false
         xAxis.centerAxisLabelsEnabled = false
@@ -563,16 +571,16 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
         
         for date in recentAccess! {
             
-            let nextValue = task.completedTimeHistory[date]
+            let nextValue = task.completedTimeHistory[date]! / 60
             //let nextValue = taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]
             
-            if nextValue! > axisMaximum {
-                axisMaximum = nextValue!
+            if nextValue > axisMaximum {
+                axisMaximum = nextValue
             }
             
         }
         
-        leftAxis.axisMaximum = axisMaximum + 100.0
+        leftAxis.axisMaximum = axisMaximum + 5.0
         rightAxis.axisMaximum = leftAxis.axisMaximum
 
         //        xAxis.
@@ -633,18 +641,20 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             for date in taskAccess! {
                 
                 let completedTime = task.completedTimeHistory[date]
+                let completedInMinutes = completedTime! / 60
                 //let completedTime = taskData.taskHistoryDictionary[task]![date]![TaskData.completedHistoryKey]
-                taskTimeHistory.append(completedTime!)
+                taskTimeHistory.append(completedInMinutes)
                 
             }
             
             for i in 0..<taskTimeHistory.count {
                 
                 var value: BarChartDataEntry
-                if i != taskTimeHistory.count - 1 {
+                if i < taskTimeHistory.count - 1 {
                     value = BarChartDataEntry(x: Double(i), y: taskTimeHistory[i]) // here we set the X and Y status in a data chart entry
                 } else {
-                    value = BarChartDataEntry(x: Double(i), y: elapsedTime)
+                    let time = elapsedTime / 60
+                    value = BarChartDataEntry(x: Double(i), y: time)
                 }
                 barChartEntry.append(value) // here we add it to the data set
             }
@@ -663,6 +673,8 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
             let data = BarChartData() //This is the object that will be added to the chart
             
             data.addDataSet(bar) //Adds the line to the dataSet
+            
+            data.setValueFormatter(self)
             
             if taskAccess?.count == 1 {
                 data.barWidth = 0.4
@@ -770,4 +782,37 @@ class TaskDetailViewController: UIViewController, GADBannerViewDelegate {
         saveData()
     }
 
+}
+
+// MARK: - Bar Value Formatter
+extension TaskDetailViewController: IValueFormatter {
+    
+    func stringForValue(_ value: Double,
+                        entry: ChartDataEntry,
+                        dataSetIndex: Int,
+                        viewPortHandler: ViewPortHandler?) -> String {
+        
+        var stringValue = ""
+        
+        // Use if not dividing when setting up chart
+//        if value >= 60 {
+//            let minutes = String(Int(value/60))
+//            stringValue = minutes + "m "
+//        }
+//
+//        let seconds = String(Int(value.truncatingRemainder(dividingBy: 60)))
+//        stringValue = seconds + "s"
+        
+        var time = value
+        if time >= 1 {
+            let minutes = String(Int(value))
+            stringValue = minutes + "m "
+            time -= Double(Int(time))
+        }
+        
+        let seconds = String(Int(time*60))
+        stringValue += seconds + "s"
+
+        return stringValue
+    }
 }

@@ -194,6 +194,12 @@ class TaskSettingsViewController: UIViewController {
 
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        if valuesChanged {
+            saveTaskData()
+        }
+    }
+    
     func didValuesChange(added newString: String? = nil, to field: SkyFloatingLabelTextField? = nil) {
         
         var nameChanged = false
@@ -248,15 +254,19 @@ class TaskSettingsViewController: UIViewController {
     
     func saveTaskData() {
         
+        let multiplier = Double(rolloverSlider.value)
+        
         if let newTaskName = taskNameTextField.text {
-            
             if newTaskName != task.name {
                 task.name = newTaskName
             }
         }
         
-        task.time = taskTime
-        task.multiplier = Double(rolloverSlider.value)
+        if taskTime != originalTime {
+            task.time = taskTime
+            task.weightedTime = taskTime + (task.rollover * multiplier)
+        }
+        task.multiplier = multiplier
         task.days = taskDays
         task.frequency = frequency
         
@@ -420,12 +430,6 @@ class TaskSettingsViewController: UIViewController {
         
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        if valuesChanged {
-            saveTaskData()
-        }
-    }
-
     func setButtonOn(for button: UIButton) {
         button.layer.backgroundColor = self.appData.appColor.cgColor
         button.setTitleColor(UIColor.white, for: .normal)

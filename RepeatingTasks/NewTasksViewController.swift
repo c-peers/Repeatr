@@ -67,6 +67,8 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
     
     var appData = AppData()
     
+    var check = Check()
+    
     var navigationBar: UINavigationBar?
 
     //MARK: - View and Basic Functions
@@ -266,7 +268,10 @@ class NewTasksViewController: UIViewController, UIScrollViewDelegate {
                 taskTime = Double(minutesAsInt! * 60)
             }
             
-            let newTask = Task(name: taskName, time: taskTime, days: taskDays, multiplier: 1.0, rollover: 0.0, frequency: taskFrequency, completed: 0.0, currentWeek: 0)
+            let currentWeek = check.currentWeek
+            let newTask = Task(name: taskName, time: taskTime, days: taskDays, multiplier: 1.0, rollover: 0.0, frequency: taskFrequency, completed: 0.0, runWeek: currentWeek)
+            check.ifTaskWillRun(newTask)
+            
             vc.tasks.append(newTask)
             vc.taskNames.append(taskName)
 

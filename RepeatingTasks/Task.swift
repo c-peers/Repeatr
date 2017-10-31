@@ -24,8 +24,11 @@ class Task: NSObject, NSCoding {
     // Completed is dynamic so that timers on the main and detail page are synched up
     @objc dynamic var completed = 0.0
     
-    var currentWeek = 0
-    var nextOccurringWeek = 0
+    var runWeek = 0
+    
+    var isToday = false
+    
+    var isRunning = false
     
     // Cumulative statistics
     var totalTime = 0.0
@@ -50,6 +53,8 @@ class Task: NSObject, NSCoding {
             return sortedArray
     }
     
+    var check = Check()
+    
     //MARK: - Keys
     struct Key {
         static let nameKey = "nameKey"
@@ -59,7 +64,7 @@ class Task: NSObject, NSCoding {
         static let rolloverKey = "rolloverKey"
         static let frequencyKey = "frequencyKey"
         static let completedKey = "completedKey"
-        static let currentWeekKey = "currentWeekKey"
+        static let runWeekKey = "runWeekKey"
         
         // Cumulative statistics
         static let totalTimeKey = "totalTimeKey"
@@ -99,7 +104,6 @@ class Task: NSObject, NSCoding {
     func getAccessDate(lengthFromEnd count: Int) -> Date? {
         
         let sortedDates = previousDates.sorted(){$0 < $1}
-        
         let length = sortedDates.count
         
         if length < 1 {
@@ -112,10 +116,79 @@ class Task: NSObject, NSCoding {
         
     }
     
+    func calculateStats() {
+        
+        totalDays += 1
+        totalTime += time
+        completedTime += completed
+        
+        if completed == weightedTime { // Full
+            
+            fullDays += 1
+            currentStreak += 1
+            
+            if currentStreak > bestStreak {
+                bestStreak = currentStreak
+            }
+            
+        } else if completed > 0 { // Partial
+            
+            partialDays += 1
+            
+            if currentStreak > 0 {
+                currentStreak = 0
+            }
+            
+        } else { // Missed
+            
+            missedDays += 1
+            missedTime += time
+            
+            if currentStreak > 0 {
+                currentStreak = 0
+            }
+            
+        }
+        
+        completed = 0
+        
+    }
+    
     func addHistory(date: Date) {
         taskTimeHistory[date] = 0.0
         missedTimeHistory[date] = 0.0
         completedTimeHistory[date] = 0.0
+    }
+    
+    func getHistory(at date: Date) -> Date? {
+        
+        let accessDateCandidate = set(date: date, as: "yyyy-MM-dd")
+        
+        for date in previousDates {
+            
+            let formattedDate = set(date: date, as: "yyyy-MM-dd")
+            if accessDateCandidate == formattedDate {
+                return date
+            }
+            
+        }
+        
+        return nil
+        
+    }
+    
+    func isHistoryPresent(for date: Date) -> Bool {
+        
+        let completedValue = completedTimeHistory[date]
+        let missedValue = missedTimeHistory[date]
+        let taskValue = taskTimeHistory[date]
+        
+        let completedCheck = (completedValue != nil)
+        let missedCheck = (missedValue != nil)
+        let taskCheck = (taskValue != nil)
+        
+        return completedCheck && missedCheck && taskCheck
+        
     }
     
     //MARK: - NSCoding
@@ -128,7 +201,7 @@ class Task: NSObject, NSCoding {
         aCoder.encode(rollover, forKey: Key.rolloverKey)
         aCoder.encode(frequency, forKey: Key.frequencyKey)
         aCoder.encode(completed, forKey: Key.completedKey)
-        aCoder.encode(currentWeek, forKey: Key.currentWeekKey)
+        aCoder.encode(runWeek, forKey: Key.runWeekKey)
         aCoder.encode(totalTime, forKey: Key.totalTimeKey)
         aCoder.encode(missedTime, forKey: Key.missedTimeKey)
         aCoder.encode(completedTime, forKey: Key.completedTimeKey)
@@ -160,7 +233,7 @@ class Task: NSObject, NSCoding {
         let rollover = aDecoder.decodeDouble(forKey: Key.rolloverKey)
         let frequency = aDecoder.decodeDouble(forKey: Key.frequencyKey)
         let completed = aDecoder.decodeDouble(forKey: Key.completedKey)
-        let currentWeek = aDecoder.decodeInteger(forKey: Key.currentWeekKey)
+        let runWeek = aDecoder.decodeInteger(forKey: Key.runWeekKey)
         //guard let currentWeek = aDecoder.decodeObject(forKey: Key.currentWeekKey) as? Int else {
         //    return nil
         //}
@@ -183,24 +256,23 @@ class Task: NSObject, NSCoding {
         //let previousDates = aDecoder.decodeObject(forKey: Key.previousDatesKey) as? [Date] ?? [Date]()
         
         // Must call designated initializer.
-        self.init(name: name, time: time, days: days, multiplier: multiplier, rollover: rollover, frequency: frequency, completed: completed, currentWeek: currentWeek, totalTime: totalTime, missedTime: missedTime, completedTime: completedTime, totalDays: totalDays, fullDays: fullDays, partialDays: partialDays, missedDays: missedDays, currentStreak: currentStreak, bestStreak: bestStreak, taskTimeHistory: taskTimeHistory, missedTimeHistory: missedTimeHistory, completedTimeHistory: completedTimeHistory)
+        self.init(name: name, time: time, days: days, multiplier: multiplier, rollover: rollover, frequency: frequency, completed: completed, runWeek: runWeek, totalTime: totalTime, missedTime: missedTime, completedTime: completedTime, totalDays: totalDays, fullDays: fullDays, partialDays: partialDays, missedDays: missedDays, currentStreak: currentStreak, bestStreak: bestStreak, taskTimeHistory: taskTimeHistory, missedTimeHistory: missedTimeHistory, completedTimeHistory: completedTimeHistory)
 
-        
     }
     
     //MARK: - Init
     
     convenience override init() {
-        self.init(name: "", time: 0.0, days: [], multiplier: 0.0, rollover: 0.0, frequency: 0.0, completed: 0.0, currentWeek: 0, totalTime: 0.0, missedTime: 0.0, completedTime: 0.0, totalDays: 0, fullDays: 0, partialDays: 0, missedDays: 0, currentStreak: 0, bestStreak: 0, taskTimeHistory: [Date: Double](), missedTimeHistory: [Date: Double](), completedTimeHistory: [Date: Double]())
+        self.init(name: "", time: 0.0, days: [], multiplier: 0.0, rollover: 0.0, frequency: 0.0, completed: 0.0, runWeek: 0, totalTime: 0.0, missedTime: 0.0, completedTime: 0.0, totalDays: 0, fullDays: 0, partialDays: 0, missedDays: 0, currentStreak: 0, bestStreak: 0, taskTimeHistory: [Date: Double](), missedTimeHistory: [Date: Double](), completedTimeHistory: [Date: Double]())
     }
     
-    convenience init(name: String, time: Double, days: [String], multiplier: Double, rollover: Double, frequency: Double, completed: Double, currentWeek: Int) {
+    convenience init(name: String, time: Double, days: [String], multiplier: Double, rollover: Double, frequency: Double, completed: Double, runWeek: Int) {
         
-        self.init(name: name, time: time, days: days, multiplier: multiplier, rollover: rollover, frequency: frequency, completed: completed, currentWeek: currentWeek, totalTime: 0.0, missedTime: 0.0, completedTime: 0.0, totalDays: 0, fullDays: 0, partialDays: 0, missedDays: 0, currentStreak: 0, bestStreak: 0, taskTimeHistory: [Date: Double](), missedTimeHistory: [Date: Double](), completedTimeHistory: [Date: Double]())
+        self.init(name: name, time: time, days: days, multiplier: multiplier, rollover: rollover, frequency: frequency, completed: completed, runWeek: runWeek, totalTime: 0.0, missedTime: 0.0, completedTime: 0.0, totalDays: 0, fullDays: 0, partialDays: 0, missedDays: 0, currentStreak: 0, bestStreak: 0, taskTimeHistory: [Date: Double](), missedTimeHistory: [Date: Double](), completedTimeHistory: [Date: Double]())
         
     }
     
-    init(name: String, time: Double, days: [String], multiplier: Double, rollover: Double, frequency: Double, completed: Double, currentWeek: Int, totalTime: Double, missedTime: Double, completedTime: Double, totalDays: Int, fullDays: Int, partialDays: Int, missedDays: Int, currentStreak: Int, bestStreak: Int, taskTimeHistory: [Date: Double], missedTimeHistory: [Date: Double], completedTimeHistory: [Date: Double]) {
+    init(name: String, time: Double, days: [String], multiplier: Double, rollover: Double, frequency: Double, completed: Double, runWeek: Int, totalTime: Double, missedTime: Double, completedTime: Double, totalDays: Int, fullDays: Int, partialDays: Int, missedDays: Int, currentStreak: Int, bestStreak: Int, taskTimeHistory: [Date: Double], missedTimeHistory: [Date: Double], completedTimeHistory: [Date: Double]) {
         
         self.name = name
         self.time = time
@@ -209,7 +281,7 @@ class Task: NSObject, NSCoding {
         self.rollover = rollover
         self.frequency = frequency
         self.completed = completed
-        self.currentWeek = currentWeek
+        self.runWeek = runWeek
         
         self.weightedTime = time + (rollover * multiplier)
         

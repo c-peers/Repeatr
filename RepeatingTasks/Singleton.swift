@@ -47,17 +47,11 @@ class CountdownTimer: NSObject {
     func formatTimer(for task: Task, from cell: TaskCollectionViewCell? = nil, ofType type: CellType? = nil) -> (String, Double) {
         // Used for initialization and when the task timer is updated
 
-        //taskData = dataset
-        //taskData.setTask(as: task)
-        //let (_, weightedTaskTime) = getWeightedTime(for: task.name)
-
         currentTime = Date().timeIntervalSince1970
         print(task.completed)
         elapsedTime = task.completed
-        //print(taskData.completedTime)
-        //elapsedTime = taskData.completedTime
 
-        if self.isEnabled {
+        if self.isEnabled && task.isRunning {
             elapsedTime += (currentTime - startTime)
         }
         
@@ -65,8 +59,15 @@ class CountdownTimer: NSObject {
         let remainingTime = weightedTime - elapsedTime
         
         let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = [.hour, .minute, .second]
         formatter.unitsStyle = .positional
+
+        if remainingTime < 60 {
+            formatter.allowedUnits = [.minute, .second]
+            formatter.zeroFormattingBehavior = .pad
+        } else {
+            formatter.allowedUnits = [.hour, .minute, .second]
+            formatter.zeroFormattingBehavior = .default
+        }
         
         var remainingTimeAsString = formatter.string(from: TimeInterval(remainingTime.rounded()))!
         
@@ -159,13 +160,6 @@ class CountdownTimer: NSObject {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id])
         
     }
-
-//        let taskTime = Task.instance.data.taskTime
-//        let leftoverMultiplier = Task.instance.data.leftoverMultiplier
-//        let leftoverTime = Task.instance.data.leftoverTime
-//        
-//        return (taskTime, taskTime + (leftoverTime * leftoverMultiplier))
-        
 
 }
 

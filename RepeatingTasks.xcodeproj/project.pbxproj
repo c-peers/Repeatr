@@ -30,27 +30,22 @@
 		C417DE181F52799C004A649C /* Chameleon.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C417DDF21F5276E6004A649C /* Chameleon.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C417DE1B1F5279A0004A649C /* Charts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C417DE081F527703004A649C /* Charts.framework */; };
 		C417DE1C1F5279A0004A649C /* Charts.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C417DE081F527703004A649C /* Charts.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		C417DE1F1F5279A4004A649C /* Static.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C417DE121F527729004A649C /* Static.framework */; };
-		C417DE201F5279A4004A649C /* Static.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C417DE121F527729004A649C /* Static.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C417DE261F53B860004A649C /* AppSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C417DE251F53B860004A649C /* AppSettingsViewController.swift */; };
 		C417DE281F53CE6C004A649C /* ColorSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C417DE271F53CE6C004A649C /* ColorSettingsViewController.swift */; };
 		C4257AE81F4A97B200AA03B5 /* TaskSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4257AE71F4A97B200AA03B5 /* TaskSettingsViewController.swift */; };
-		C435F8CD1F9439DD00A46D0D /* TaskSettingVCBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = C435F8CC1F9439DD00A46D0D /* TaskSettingVCBackup.swift */; };
 		C4385BD61F8DF48E00A4E1F5 /* Presentr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4385BD31F8DF47D00A4E1F5 /* Presentr.framework */; };
 		C4385BD71F8DF48E00A4E1F5 /* Presentr.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C4385BD31F8DF47D00A4E1F5 /* Presentr.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		C4385BDF1F8DFE4400A4E1F5 /* NewTaskVCBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4385BDE1F8DFE4400A4E1F5 /* NewTaskVCBackup.swift */; };
 		C4385BF91F8EEB1D00A4E1F5 /* SkyFloatingLabelTextField.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4385BF21F8EEB0900A4E1F5 /* SkyFloatingLabelTextField.framework */; };
 		C4385BFA1F8EEB1D00A4E1F5 /* SkyFloatingLabelTextField.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C4385BF21F8EEB0900A4E1F5 /* SkyFloatingLabelTextField.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C43A509D1F3BFB0600BEAA97 /* Singleton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C43A509C1F3BFB0600BEAA97 /* Singleton.swift */; };
-		C43A50C01F3E67E700BEAA97 /* Holding FIle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C43A50BF1F3E67E700BEAA97 /* Holding FIle.swift */; };
 		C44C220D1F59467200BC9833 /* ProgressViewSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C44C220C1F59467200BC9833 /* ProgressViewSettingsViewController.swift */; };
 		C4540F381F4E704C00B2D1F3 /* TimePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4540F371F4E704C00B2D1F3 /* TimePicker.swift */; };
 		C45664AF1F57F3290040387E /* ResetTimeSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C45664AE1F57F3290040387E /* ResetTimeSettingsViewController.swift */; };
 		C461B8721FA1937F0014B33D /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = C461B8711FA1937F0014B33D /* Task.swift */; };
 		C461B8741FA2C4200014B33D /* DataHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C461B8731FA2C4200014B33D /* DataHandler.swift */; };
+		C461B8761FA323A80014B33D /* TaskChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C461B8751FA323A80014B33D /* TaskChecker.swift */; };
 		C46444411F6B8F5600D4EC8E /* GoogleMobileAds.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C464443B1F6B8EB900D4EC8E /* GoogleMobileAds.framework */; };
 		C46DD2101F667AC0005FF68A /* TaskStatsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C46DD20F1F667AC0005FF68A /* TaskStatsViewController.swift */; };
-		C47285701F60C43B00AE7C01 /* StatsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = C472856F1F60C43B00AE7C01 /* StatsView.xib */; };
 		C49C8D0E1EF35F91007F1069 /* NewTasksViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C49C8D0D1EF35F91007F1069 /* NewTasksViewController.swift */; };
 		C4A28F4F1F34583400B9D79A /* AppData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A28F4E1F34583400B9D79A /* AppData.swift */; };
 		C4D64E021F383AA600844404 /* TaskDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D64E011F383AA600844404 /* TaskDetailViewController.swift */; };
@@ -127,27 +122,6 @@
 			remoteGlobalIDString = 06165F2E1D8110E600722320;
 			remoteInfo = ChartsTests;
 		};
-		C417DE111F527729004A649C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C417DE0B1F527729004A649C /* Static.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 21826AAA1B3F51A100AA9641;
-			remoteInfo = "Static-iOS";
-		};
-		C417DE131F527729004A649C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C417DE0B1F527729004A649C /* Static.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 21826AB41B3F51A100AA9641;
-			remoteInfo = StaticTests;
-		};
-		C417DE151F527729004A649C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C417DE0B1F527729004A649C /* Static.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 36748D4F1B5034EC0046F207;
-			remoteInfo = Example;
-		};
 		C417DE191F52799C004A649C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C417DDEA1F5276E6004A649C /* Chameleon.xcodeproj */;
@@ -161,13 +135,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 06165F231D8110E600722320;
 			remoteInfo = Charts;
-		};
-		C417DE211F5279A4004A649C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C417DE0B1F527729004A649C /* Static.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 21826AA91B3F51A100AA9641;
-			remoteInfo = "Static-iOS";
 		};
 		C4385BD21F8DF47D00A4E1F5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -237,7 +204,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				C417DE201F5279A4004A649C /* Static.framework in Embed Frameworks */,
 				C4385BD71F8DF48E00A4E1F5 /* Presentr.framework in Embed Frameworks */,
 				C4385BFA1F8EEB1D00A4E1F5 /* SkyFloatingLabelTextField.framework in Embed Frameworks */,
 				C4100B511F8F53850067B7A8 /* KDCircularProgress.framework in Embed Frameworks */,
@@ -276,26 +242,22 @@
 		C4100B5F1F9071D60067B7A8 /* TaskCircleProgressCollectionViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TaskCircleProgressCollectionViewCell.xib; sourceTree = "<group>"; };
 		C417DDEA1F5276E6004A649C /* Chameleon.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Chameleon.xcodeproj; path = "Chameleon-master/Chameleon.xcodeproj"; sourceTree = "<group>"; };
 		C417DE021F527703004A649C /* Charts.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Charts.xcodeproj; path = "Charts-master/Charts.xcodeproj"; sourceTree = "<group>"; };
-		C417DE0B1F527729004A649C /* Static.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Static.xcodeproj; path = "Static-master/Static.xcodeproj"; sourceTree = "<group>"; };
 		C417DE251F53B860004A649C /* AppSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppSettingsViewController.swift; sourceTree = "<group>"; };
 		C417DE271F53CE6C004A649C /* ColorSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorSettingsViewController.swift; sourceTree = "<group>"; };
 		C4257AE71F4A97B200AA03B5 /* TaskSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskSettingsViewController.swift; sourceTree = "<group>"; };
-		C435F8CC1F9439DD00A46D0D /* TaskSettingVCBackup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskSettingVCBackup.swift; sourceTree = "<group>"; };
 		C4385BCD1F8DF47C00A4E1F5 /* Presentr.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Presentr.xcodeproj; path = "Presentr-master/Presentr.xcodeproj"; sourceTree = "<group>"; };
-		C4385BDE1F8DFE4400A4E1F5 /* NewTaskVCBackup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewTaskVCBackup.swift; sourceTree = "<group>"; };
 		C4385BE61F8EEB0900A4E1F5 /* SkyFloatingLabelTextField.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SkyFloatingLabelTextField.xcodeproj; path = SkyFloatingLabelTextField/SkyFloatingLabelTextField/SkyFloatingLabelTextField.xcodeproj; sourceTree = "<group>"; };
 		C43A50451F39641400BEAA97 /* RepeatingTasks-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RepeatingTasks-Bridging-Header.h"; sourceTree = "<group>"; };
 		C43A509C1F3BFB0600BEAA97 /* Singleton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Singleton.swift; sourceTree = "<group>"; };
-		C43A50BF1F3E67E700BEAA97 /* Holding FIle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Holding FIle.swift"; sourceTree = "<group>"; };
 		C44C220C1F59467200BC9833 /* ProgressViewSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressViewSettingsViewController.swift; sourceTree = "<group>"; };
 		C4540F371F4E704C00B2D1F3 /* TimePicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimePicker.swift; sourceTree = "<group>"; };
 		C45664AE1F57F3290040387E /* ResetTimeSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResetTimeSettingsViewController.swift; sourceTree = "<group>"; };
 		C461B8531FA06E3D0014B33D /* NotificationCenter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NotificationCenter.framework; path = System/Library/Frameworks/NotificationCenter.framework; sourceTree = SDKROOT; };
 		C461B8711FA1937F0014B33D /* Task.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
 		C461B8731FA2C4200014B33D /* DataHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataHandler.swift; sourceTree = "<group>"; };
+		C461B8751FA323A80014B33D /* TaskChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskChecker.swift; sourceTree = "<group>"; };
 		C464443B1F6B8EB900D4EC8E /* GoogleMobileAds.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = GoogleMobileAds.framework; sourceTree = "<group>"; };
 		C46DD20F1F667AC0005FF68A /* TaskStatsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskStatsViewController.swift; sourceTree = "<group>"; };
-		C472856F1F60C43B00AE7C01 /* StatsView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StatsView.xib; sourceTree = "<group>"; };
 		C49C8D0D1EF35F91007F1069 /* NewTasksViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewTasksViewController.swift; sourceTree = "<group>"; };
 		C4A28F4E1F34583400B9D79A /* AppData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppData.swift; sourceTree = "<group>"; };
 		C4D64E011F383AA600844404 /* TaskDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskDetailViewController.swift; sourceTree = "<group>"; };
@@ -307,7 +269,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				C46444411F6B8F5600D4EC8E /* GoogleMobileAds.framework in Frameworks */,
-				C417DE1F1F5279A4004A649C /* Static.framework in Frameworks */,
 				C4100B501F8F53850067B7A8 /* KDCircularProgress.framework in Frameworks */,
 				C417DE171F52799C004A649C /* Chameleon.framework in Frameworks */,
 				C4385BF91F8EEB1D00A4E1F5 /* SkyFloatingLabelTextField.framework in Frameworks */,
@@ -361,31 +322,31 @@
 				C4385BCD1F8DF47C00A4E1F5 /* Presentr.xcodeproj */,
 				C417DDEA1F5276E6004A649C /* Chameleon.xcodeproj */,
 				C417DE021F527703004A649C /* Charts.xcodeproj */,
-				C417DE0B1F527729004A649C /* Static.xcodeproj */,
 				C4100B411F8F536A0067B7A8 /* KDCircularProgress.xcodeproj */,
 				C464443B1F6B8EB900D4EC8E /* GoogleMobileAds.framework */,
+				C403E31E1EF034E5001EE78D /* Assets.xcassets */,
 				C43A50451F39641400BEAA97 /* RepeatingTasks-Bridging-Header.h */,
 				C403E3141EF034E5001EE78D /* AppDelegate.swift */,
 				C403E3161EF034E5001EE78D /* ViewController.swift */,
+				C461B8751FA323A80014B33D /* TaskChecker.swift */,
 				C43A509C1F3BFB0600BEAA97 /* Singleton.swift */,
 				C4D64E011F383AA600844404 /* TaskDetailViewController.swift */,
 				C46DD20F1F667AC0005FF68A /* TaskStatsViewController.swift */,
 				C4257AE71F4A97B200AA03B5 /* TaskSettingsViewController.swift */,
 				C49C8D0D1EF35F91007F1069 /* NewTasksViewController.swift */,
 				C4540F371F4E704C00B2D1F3 /* TimePicker.swift */,
-				C435F8C21F94390E00A46D0D /* Backup and Chaff */,
 				C461B8711FA1937F0014B33D /* Task.swift */,
 				C461B8731FA2C4200014B33D /* DataHandler.swift */,
 				C4A28F4E1F34583400B9D79A /* AppData.swift */,
+				C42568F21F8D9CF500FED7FB /* SettingsVCs */,
 				C403E3181EF034E5001EE78D /* Main.storyboard */,
 				C4100B5A1F9071560067B7A8 /* TaskCollectionViewCell.swift */,
 				C4100B5B1F9071560067B7A8 /* TaskCollectionViewCell.xib */,
 				C4100B5F1F9071D60067B7A8 /* TaskCircleProgressCollectionViewCell.xib */,
-				C403E31E1EF034E5001EE78D /* Assets.xcassets */,
 				C403E3201EF034E5001EE78D /* LaunchScreen.storyboard */,
 				C403E3231EF034E5001EE78D /* Info.plist */,
+				C435F8C21F94390E00A46D0D /* Backup and Chaff */,
 				C403E31B1EF034E5001EE78D /* RepeatingTasks.xcdatamodeld */,
-				C42568F21F8D9CF500FED7FB /* SettingsVCs */,
 			);
 			path = RepeatingTasks;
 			sourceTree = "<group>";
@@ -436,16 +397,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		C417DE0C1F527729004A649C /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				C417DE121F527729004A649C /* Static.framework */,
-				C417DE141F527729004A649C /* StaticTests.xctest */,
-				C417DE161F527729004A649C /* Example.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		C42568F21F8D9CF500FED7FB /* SettingsVCs */ = {
 			isa = PBXGroup;
 			children = (
@@ -461,15 +412,11 @@
 			isa = PBXGroup;
 			children = (
 				C40AABE11F2B07270061BFE3 /* TaskData.swift */,
-				C43A50BF1F3E67E700BEAA97 /* Holding FIle.swift */,
-				C472856F1F60C43B00AE7C01 /* StatsView.xib */,
 				C4100B581F906F2D0067B7A8 /* RepeatingTaskCircleProgressCollectionCell.xib */,
 				C4100B561F9047D80067B7A8 /* RepeatingTaskCollectionCell.xib */,
 				C4100B5E1F9071D60067B7A8 /* TaskCircleProgressCollectionViewCell.swift */,
 				C403E3451EF139ED001EE78D /* RepeatingTasksCollectionCell.swift */,
 				C4100B541F8F53CD0067B7A8 /* RepeatingTasksCircleProgressCollectionCell.swift */,
-				C435F8CC1F9439DD00A46D0D /* TaskSettingVCBackup.swift */,
-				C4385BDE1F8DFE4400A4E1F5 /* NewTaskVCBackup.swift */,
 			);
 			path = "Backup and Chaff";
 			sourceTree = "<group>";
@@ -519,7 +466,6 @@
 			dependencies = (
 				C417DE1A1F52799C004A649C /* PBXTargetDependency */,
 				C417DE1E1F5279A0004A649C /* PBXTargetDependency */,
-				C417DE221F5279A4004A649C /* PBXTargetDependency */,
 				C4385BD91F8DF48E00A4E1F5 /* PBXTargetDependency */,
 				C4385BFC1F8EEB1D00A4E1F5 /* PBXTargetDependency */,
 				C4100B531F8F53850067B7A8 /* PBXTargetDependency */,
@@ -627,10 +573,6 @@
 					ProductGroup = C4385BE71F8EEB0900A4E1F5 /* Products */;
 					ProjectRef = C4385BE61F8EEB0900A4E1F5 /* SkyFloatingLabelTextField.xcodeproj */;
 				},
-				{
-					ProductGroup = C417DE0C1F527729004A649C /* Products */;
-					ProjectRef = C417DE0B1F527729004A649C /* Static.xcodeproj */;
-				},
 			);
 			projectRoot = "";
 			targets = (
@@ -691,27 +633,6 @@
 			remoteRef = C417DE091F527703004A649C /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		C417DE121F527729004A649C /* Static.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = Static.framework;
-			remoteRef = C417DE111F527729004A649C /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		C417DE141F527729004A649C /* StaticTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = StaticTests.xctest;
-			remoteRef = C417DE131F527729004A649C /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		C417DE161F527729004A649C /* Example.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = Example.app;
-			remoteRef = C417DE151F527729004A649C /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		C4385BD31F8DF47D00A4E1F5 /* Presentr.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
@@ -755,7 +676,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				C4100B571F9047D80067B7A8 /* RepeatingTaskCollectionCell.xib in Resources */,
-				C47285701F60C43B00AE7C01 /* StatsView.xib in Resources */,
 				C4100B611F9071D60067B7A8 /* TaskCircleProgressCollectionViewCell.xib in Resources */,
 				C403E3221EF034E5001EE78D /* LaunchScreen.storyboard in Resources */,
 				C4100B591F906F2D0067B7A8 /* RepeatingTaskCircleProgressCollectionCell.xib in Resources */,
@@ -786,7 +706,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C435F8CD1F9439DD00A46D0D /* TaskSettingVCBackup.swift in Sources */,
 				C45664AF1F57F3290040387E /* ResetTimeSettingsViewController.swift in Sources */,
 				C46DD2101F667AC0005FF68A /* TaskStatsViewController.swift in Sources */,
 				C4540F381F4E704C00B2D1F3 /* TimePicker.swift in Sources */,
@@ -797,7 +716,6 @@
 				C43A509D1F3BFB0600BEAA97 /* Singleton.swift in Sources */,
 				C49C8D0E1EF35F91007F1069 /* NewTasksViewController.swift in Sources */,
 				C403E31D1EF034E5001EE78D /* RepeatingTasks.xcdatamodeld in Sources */,
-				C43A50C01F3E67E700BEAA97 /* Holding FIle.swift in Sources */,
 				C403E3461EF139ED001EE78D /* RepeatingTasksCollectionCell.swift in Sources */,
 				C403E3151EF034E5001EE78D /* AppDelegate.swift in Sources */,
 				C417DE261F53B860004A649C /* AppSettingsViewController.swift in Sources */,
@@ -806,8 +724,8 @@
 				C4100B5C1F9071560067B7A8 /* TaskCollectionViewCell.swift in Sources */,
 				C4D64E021F383AA600844404 /* TaskDetailViewController.swift in Sources */,
 				C4257AE81F4A97B200AA03B5 /* TaskSettingsViewController.swift in Sources */,
+				C461B8761FA323A80014B33D /* TaskChecker.swift in Sources */,
 				C4A28F4F1F34583400B9D79A /* AppData.swift in Sources */,
-				C4385BDF1F8DFE4400A4E1F5 /* NewTaskVCBackup.swift in Sources */,
 				C4100B551F8F53CD0067B7A8 /* RepeatingTasksCircleProgressCollectionCell.swift in Sources */,
 				C417DE281F53CE6C004A649C /* ColorSettingsViewController.swift in Sources */,
 			);
@@ -856,11 +774,6 @@
 			isa = PBXTargetDependency;
 			name = Charts;
 			targetProxy = C417DE1D1F5279A0004A649C /* PBXContainerItemProxy */;
-		};
-		C417DE221F5279A4004A649C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "Static-iOS";
-			targetProxy = C417DE211F5279A4004A649C /* PBXContainerItemProxy */;
 		};
 		C4385BD91F8DF48E00A4E1F5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
